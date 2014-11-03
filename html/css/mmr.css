@@ -1,0 +1,155 @@
+body {
+	font-family: 'Open Sans', sans-serif;
+	font-size: 15px;
+}
+h1 {
+	font-weight: bold;
+	color: white;
+}
+h2 {
+	font-size: 52px;
+	font-weight: lighter; 
+}
+h3 {
+	font-size: 24px;
+	font-weight: lighter;
+	color: #ff5100;
+	margin: 15px 0;
+}
+h4 {
+	color: white;
+}
+h5 {
+	margin: 0;
+	font-weight: bolder;
+	line-height: inherit;
+}
+ul {
+	list-style-type: none;
+	padding: 10px;
+}
+ body, a, a:hover, a:focus, .form-control {
+	color: #2f3030;
+}
+a:hover {
+	text-decoration: none;
+}
+div.col-banner {
+	padding: 0;
+}
+.btn, .form-control {
+	border-radius: 0;
+	font-size: 17px;
+	margin: 10px;
+	padding: 8px;
+	display: block;
+}
+.form-control {
+	height: auto;
+	width: 90%;
+}
+.form-inline .btn {
+	display: inline-block;
+}
+.modal-dialog {
+	width: auto;
+	max-width: 700px;
+}
+.modal-header {
+	border: none;
+	padding: 10px;
+}
+.modal-content {
+	border-radius: 0;
+}
+.highlight, a.highlight:hover, a.highlight:focus {
+	color: #2ba42b;
+}
+div.col-head {
+	padding: 10px;
+	line-height: 1.6;
+}
+.btn-mmr, .btn-mmr:hover, .btn-mmr:focus {
+	color: white;
+	font-weight: bolder;
+	background-color: #2ba42b;
+	background: linear-gradient(#31bd31, #2ba42b, #31bd31);
+}
+
+div.tiles {
+	padding: 20px 0;
+}
+div.col-tile {
+	margin: 10px;
+	padding: 0;
+	border: 1px solid #e6e6e6;
+	min-width: 19%;
+	min-height: 360px;
+	overflow: hidden;
+}
+div.tile-text {
+	margin: 10px;
+	font-size: 15px;
+}
+div.tile-text .form-control, div.tile-text .btn {
+	font-size: 14px;
+}
+div.col-box {
+	border: 1px solid #e6e6e6;
+	height: 100%;
+	padding: 15px;
+}
+div.footer {
+	color: white;
+	font-size: 14px;
+	background-color: #303030;
+	line-height: 2;
+}
+div.col-foot {
+	padding: 30px 0;
+}
+div.big-icon, div.small-icon {
+	color: white;
+	background-color: #ff7800;
+	background: linear-gradient(#ff7800, #ff5200);
+	margin: 10px auto 0 auto;
+}
+div.big-icon {
+	font-size: 60px;
+	width: 100px;
+	height: 100px;
+	border-radius: 50px;
+}
+div.big-icon span {
+	line-height: 1.6;
+}
+div.small-icon {
+	position: absolute;
+	margin: 10px;
+	font-size: 23px;
+	width: 40px;
+	height: 40px;
+	border-radius: 20px;
+}
+div.small-icon span {
+	line-height: 1.75;
+	margin-left: 8px;
+}
+.datetime {
+	font-weight: bold;
+	font-size: 13px;
+	margin-bottom: 0;
+}
+.big-text {
+	font-size: 17px;
+	padding: 0 10px 15px 10px;
+}
+.thumbnail .fa-gear {
+	text-align: center;
+	color: white;
+	position: absolute;
+	font-size: 52px;
+	margin-top: 40px;
+	margin-left: 63px;
+	visibility: hidden;
+}
