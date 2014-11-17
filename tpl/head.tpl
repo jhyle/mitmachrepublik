@@ -32,8 +32,8 @@
 								<button name="login" type="submit" class="btn btn-mmr" style="width: 90%">Anmelden</button>
 							</div>
 							<div class="col-sm-5">
-								<div class="big-text">Ich bin neu hier und suche Mitmacher für meine nichtkommerziellen Veranstaltungen.</div>						
-								<button name="register" type="button" data-dismiss="modal" data-toggle="modal" data-target="#register" class="btn btn-mmr" style="margin-top: 43px; width: 90%">Kostenlos registrieren</button>
+								<div class="big-text">Ich bin neu hier und suche Mitmacher für meine nichtkommerziellen und gemeinschaftlichen Veranstaltungen.</div>						
+								<button name="register" type="button" data-dismiss="modal" data-toggle="modal" data-target="#register" class="btn btn-mmr" style="margin-top: 18px; width: 90%">Kostenlos registrieren</button>
 							</div>
 						</div>
 					</form>
@@ -58,7 +58,7 @@
 								<input name="pwd2" type="password" id="register-Pwd2" class="form-control" placeholder="Kennwort wiederholen"></span>
 							</div>
 							<div class="col-sm-4">
-								<a href="#" id="register-dropzone" class="thumbnail" style="margin: 10px">
+								<a id="register-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
 									<span id="register-spinner" class="fa fa-gear"> </span>
 									<img src="/images/thumbnail.gif" alt="Bild" id="register-thumbnail" class="img-responsive">
 								</a>
@@ -89,14 +89,39 @@
 						<hr>
 						<div class="form-group">
 							<div class="col-sm-4">
-								<button type="button" class="btn" data-dismiss="modal" style="width: 90%">Abbrechen</button>
+								<button type="button" class="btn btn-default" data-dismiss="modal" style="width: 90%">Abbrechen</button>
 							</div>
 							<div class="col-sm-1">&nbsp;</div>
 							<div class="col-sm-7">
-								<button type="submit" class="btn btn-mmr" style="width: 90%">Registrieren</button>
+								<button id="register-submit" type="submit" class="btn btn-mmr" data-loading-text="Registrieren" style="width: 90%">Registrieren</button>
 							</div>
 						</div>
 					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal" id="registered" tabindex="-4" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Schließen</span></button>
+				</div>
+				<div class="modal-body">
+					<div class="big-text">
+						Danke für Deine Registrierung. Zur Überprüfung Deiner E-Mail-Adresse haben wir Dir eine E-Mail mit einem Aktivierungslink zugesendet.
+						Von Dir eingegebene Veranstaltungen werden erst nach der Aktivierung Deiner Anmeldung sichtbar.
+					</div>
+					<div class="form-group">
+						<div class="col-sm-4">
+							<a href="/" class="btn btn-default" style="width: 90%">Schließen</a>
+						</div>
+						<div class="col-sm-1">&nbsp;</div>
+						<div class="col-sm-7">
+							<a href="/veranstalter/verwaltung/veranstaltung" class="btn btn-mmr" style="width: 90%">Veranstaltung eintragen</a>
+						</div>
+					</div>
+					<div class="clearfix"></div>
 				</div>
 			</div>
 		</div>

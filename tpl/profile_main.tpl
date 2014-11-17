@@ -1,6 +1,7 @@
 <div class="row tiles">
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 	<div class="col-sm-3 col-box">
+		{{template "organizer.tpl" .}}
 	</div>
 	<div class="col-sm-7">
 		<form role="form" id="profile-upload" class="form-horizontal" action="/upload" method="POST">
@@ -9,7 +10,7 @@
 					<span><input name="name" type="text" id="profile-Name" class="form-control" placeholder="Deine Organisation" value="{{.Addr.Name}}"></span>
 				</div>
 				<div class="col-sm-4">
-					<a href="#" id="profile-dropzone" class="thumbnail" style="margin: 10px">
+					<a id="profile-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
 						<span id="profile-spinner" class="fa fa-gear"> </span>
 						<img src="{{if .Image}}/bild/{{.Image}}?height=200&width=200{{else}}/images/thumbnail.gif{{end}}" alt="Bild" id="profile-thumbnail" class="img-responsive">
 					</a>
@@ -40,7 +41,7 @@
 			<hr>
 			<div class="form-group">
 				<div class="col-sm-4">
-					<a href="/veranstalter/verwaltung" class="btn" style="width: 90%">Abbrechen</a>
+					<a href="/veranstalter/verwaltung" class="btn btn-default" style="width: 90%">Abbrechen</a>
 				</div>
 				<div class="col-sm-1">&nbsp;</div>
 				<div class="col-sm-7">

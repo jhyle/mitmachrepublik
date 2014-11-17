@@ -1,4 +1,4 @@
 {{template "head.tpl"}}
-{{template "admin_banner.tpl" .}}
+{{template "banner_small.tpl" .Addr.Name}}
 {{template "admin_main.tpl" .}}
 {{template "foot.tpl"}}

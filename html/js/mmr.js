@@ -125,16 +125,21 @@ $(function() {
 		e.preventDefault();
 		if (!validateProfileForm("register")) return;
 		var data = gatherProfileForm("register");
-		
+		$("#register-submit").button('loading');
+
 		$.ajax({cache: false, url : "/register", type: "POST", dataType : "json", data : JSON.stringify(data),
+			success: function(sessionid) {
+				$("#register").modal("hide");
+				$.cookie("SESSIONID", sessionid, {path: '/'});
+				$("#registered").modal("show");
+			},
 			error : function(result) {
-				if (result.status == 201) {
-					$("#register").modal("hide");
-				} else if (result.status == 409) {
+				if (result.status == 409) {
 					alert("Die E-Mail-Adresse ist schon registriert. Bitte wähle eine andere.");
 				} else {
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
+				$("#register-submit").button('reset');
 			}
 		});
 	});

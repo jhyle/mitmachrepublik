@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/pilu/traffic"
-	"html/template"
 	"io/ioutil"
 	"labix.org/v2/mgo/bson"
 	"net/http"
@@ -13,21 +12,28 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"fmt"
 )
 
 type (
 	WebServer struct {
-		host      string
-		port      int
-		tplDir    string
-		imgServer string
-		database  Database
+		host         string
+		port         int
+		tpls         *Templates
+		imgServer    string
+		database     Database
+		emailAccount *EmailAccount
 	}
 
 	emailAndPwd struct {
 		Email string
 		Pwd   string
 	}
+)
+
+const (
+	register_subject = "Bestätige Deine Registrierung"
+	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der MitmachRepublik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://dev.mitmachrepublik.de/approve/%s\r\n\r\nDas Team der MitmachRepublik"
 )
 
 func NewWebServer(host string, port int, tplDir, imgServer, mongoUrl, dbName string) (*WebServer, error) {
@@ -37,7 +43,13 @@ func NewWebServer(host string, port int, tplDir, imgServer, mongoUrl, dbName str
 		return nil, err
 	}
 
-	return &WebServer{host, port, tplDir, imgServer, database}, nil
+	tpls, err := NewTemplates(tplDir + string(os.PathSeparator) + "*.tpl")
+	if err != nil {
+		return nil, err
+	}
+
+	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", "MitmachRepublik <mitmachrepublik@gmail.com>"}
+	return &WebServer{host, port, tpls, imgServer, database, emailAccount}, nil
 }
 
 func readBinary(r *traffic.Request) ([]byte, error) {
@@ -64,34 +76,47 @@ func readSessionId(r *traffic.Request) (bson.ObjectId, error) {
 	return bson.ObjectIdHex(cookie.Value), nil
 }
 
-func execute(template *template.Template, w traffic.ResponseWriter, data interface{}) {
-
-	if template == nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		template.Execute(w, data)
-	}
-}
-
-func (web *WebServer) show(w traffic.ResponseWriter, view string, data interface{}) {
-
-	templates, err := template.ParseGlob(web.tplDir + string(os.PathSeparator) + "*.tpl")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.WriteText(err.Error())
-	} else {
-		execute(templates.Lookup(view+".tpl"), w, data)
-	}
-}
-
 func (web *WebServer) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	web.show(w, "start", nil)
+	err := web.tpls.Execute("start.tpl", w, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (web *WebServer) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	var err error = nil
+	
+	if !bson.IsObjectIdHex(r.Param("id")) {
+		err = errors.New("Failed to read id.")
+	} else {
+		var user User
+		userId := bson.ObjectIdHex(r.Param("id"))
+
+		err = web.database.Table("user").LoadById(userId, &user)
+		if err == nil {
+			user.Approved = true
+			_, err = web.database.Table("user").UpsertById(userId, &user)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	err = web.tpls.Execute("approve.tpl", w, err == nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func (web *WebServer) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	web.show(w, "events", nil)
+	err := web.tpls.Execute("events.tpl", w, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func (web *WebServer) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
@@ -101,14 +126,17 @@ func (web *WebServer) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	user, err := web.database.LoadUserBySessionId(sessionId)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	
-	web.show(w, "admin", user)
+
+	err = web.tpls.Execute("admin.tpl", w, user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func (web *WebServer) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
@@ -118,14 +146,17 @@ func (web *WebServer) profilePage(w traffic.ResponseWriter, r *traffic.Request) 
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	user, err := web.database.LoadUserBySessionId(sessionId)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	
-	web.show(w, "profile", user)
+
+	err = web.tpls.Execute("profile.tpl", w, user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func isEmpty(s string) bool {
@@ -172,7 +203,7 @@ func (web *WebServer) uploadHandler(w traffic.ResponseWriter, r *traffic.Request
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	
+
 	if resp.StatusCode == http.StatusOK {
 		w.WriteJSON(filename)
 	} else {
@@ -225,9 +256,29 @@ func (web *WebServer) registerHandler(w traffic.ResponseWriter, r *traffic.Reque
 	_, err = web.database.Table("user").UpsertById(user.GetId(), user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusCreated)
+		return
 	}
+	
+	tpl, err := web.tpls.Find("email.tpl")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	
+	err = SendEmail(web.emailAccount, tpl, user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, user.Id.Hex()))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	id, err := web.database.CreateSession(user.GetId())
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.WriteJSON(id)
 }
 
 func (web *WebServer) profileHandler(w traffic.ResponseWriter, r *traffic.Request) {
@@ -237,7 +288,7 @@ func (web *WebServer) profileHandler(w traffic.ResponseWriter, r *traffic.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	data, err := readUser(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -257,7 +308,7 @@ func (web *WebServer) profileHandler(w traffic.ResponseWriter, r *traffic.Reques
 	user.Addr.Street = data.Addr.Street
 	user.Addr.Pcode = data.Addr.Pcode
 	user.Addr.City = data.Addr.City
-	
+
 	_, err = web.database.Table("user").UpsertById(user.GetId(), user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -310,6 +361,7 @@ func (web *WebServer) Start() {
 	router := traffic.New()
 
 	router.Get("/", web.startPage)
+	router.Get("/approve/:id", web.approvePage)
 	router.Get("/veranstalter/verwaltung", web.adminPage)
 	router.Get("/veranstalter/verwaltung/profil", web.profilePage)
 	router.Get("/veranstaltungen/:place/:radius/:category", web.eventsPage)
