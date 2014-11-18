@@ -243,6 +243,21 @@ $(function() {
 			}
 		});
 	});
+	
+	$("#delete-profile").click(function(e) {
+		e.preventDefault();
+		if (confirm("Dein Profil und Deine Veranstaltungen werden unwiederbringlich gelöscht.")) {
+			$.ajax({cache: false, url : "/unregister", type: "POST",
+				success: function(sessionid) {
+					$.removeCookie("SESSIONID", {path: '/'});
+					window.location.href = "/";
+				},
+				error : function(result) {
+					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+				}
+			});
+		}
+	});
 
 	if ($.cookie("SESSIONID")) {
 		$("#head-events").html("<span class='fa fa-caret-right'></span> Meine Veranstaltungen");

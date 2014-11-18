@@ -336,6 +336,23 @@ func (web *WebServer) passwordHandler(w traffic.ResponseWriter, r *traffic.Reque
 	}
 }
 
+func (web *WebServer) unregisterHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	user, err := web.checkSession(&Request{r})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = web.database.Table("user").DeleteById(user.GetId())
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	web.logoutHandler(w, r)
+}
+
 func (web *WebServer) loginHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 	form, err := (&Request{r}).ReadEmailAndPwd()
@@ -392,6 +409,7 @@ func (web *WebServer) Start() {
 	router.Post("/register", web.registerHandler)
 	router.Post("/password", web.passwordHandler)
 	router.Post("/profile", web.profileHandler)
+	router.Post("/unregister", web.unregisterHandler)
 	router.Post("/login", web.loginHandler)
 	router.Post("/logout", web.logoutHandler)
 
