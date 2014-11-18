@@ -20,6 +20,12 @@ function initProfileForm(id)
 	$("#" + id + "-Pcode").popover({content: "Bitte gib eine vollständige Postleitzahl ein.", trigger: "manual", placement: "auto top"});	
 }
 
+function initEmailAndPwdForm(id)
+{
+	$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Pwd2").popover({content: "Kennwort und Kennwortwiederholung stimmen nicht überein.", trigger: "manual", placement: "auto right"});
+}
+
 function validate(ok, id) {
 
 	if (!ok) {
@@ -48,6 +54,17 @@ function validateProfileForm(id)
 	}
 	ok &= validate($("#" + id +"-Web").val().trim().length == 0 || WebPattern.test($("#" + id +"-Web").val()), "#" + id +"-Web");
 	ok &= validate($("#" + id +"-Pcode").val().trim().length == 0 || PcodePattern.test($("#" + id +"-Pcode").val()), "#" + id +"-Pcode");
+	return ok;
+}
+
+function validateEmailAndPwdForm(id)
+{
+	ok = validate(EmailPattern.test($("#" + id +"-Email").val()), "#" + id +"-Email");
+	if ($("#" + id +"-Pwd").val().trim().length > 0) {
+		ok &= validate($("#" + id +"-Pwd").val() == $("#" + id +"-Pwd2").val(), "#" + id +"-Pwd2");
+	} else {
+		validate(true, "#" + id +"-Pwd2");
+	}
 	return ok;
 }
 
@@ -129,6 +146,7 @@ $(function() {
 
 		$.ajax({cache: false, url : "/register", type: "POST", dataType : "json", data : JSON.stringify(data),
 			success: function(sessionid) {
+				$("#register-submit").button('reset');
 				$("#register").modal("hide");
 				$.cookie("SESSIONID", sessionid, {path: '/'});
 				$("#registered").modal("show");
@@ -180,6 +198,27 @@ $(function() {
 				if (result.status == 200) {
 					window.location.href = "/veranstalter/verwaltung";
 				} else {
+					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+				}
+			}
+		});
+	});
+	
+	initEmailAndPwdForm("password");
+
+	$("#password").submit(function(e) {
+		
+		e.preventDefault();
+		if (!validateEmailAndPwdForm("password")) return;
+		$("#password-submit").button('loading');
+		var data = {"Email": $("#password-Email").val(), "Pwd": $("#password-Pwd").val()};
+		
+		$.ajax({cache: false, url : "/password", type: "POST", dataType : "json", data : JSON.stringify(data),
+			error : function(result) {
+				if (result.status == 200) {
+					window.location.href = "/veranstalter/verwaltung";
+				} else {
+					$("#password-submit").button('reset');
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
 			}

@@ -93,7 +93,7 @@
 							</div>
 							<div class="col-sm-1">&nbsp;</div>
 							<div class="col-sm-7">
-								<button id="register-submit" type="submit" class="btn btn-mmr" data-loading-text="Registrieren" style="width: 90%">Registrieren</button>
+								<button id="register-submit" type="submit" class="btn btn-mmr" data-loading-text="Registrieren.." style="width: 90%">Registrieren</button>
 							</div>
 						</div>
 					</form>

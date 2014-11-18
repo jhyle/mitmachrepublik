@@ -4,6 +4,7 @@
 		{{template "organizer.tpl" .}}
 	</div>
 	<div class="col-sm-7">
+		<h3 style="margin-left: 10px">Profil bearbeiten</h3>
 		<form role="form" id="profile-upload" class="form-horizontal" action="/upload" method="POST">
 			<div class="form-group">
 				<div class="col-sm-7">

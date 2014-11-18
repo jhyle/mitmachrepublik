@@ -2,10 +2,8 @@ package mmr
 
 import (
 	"code.google.com/p/go-uuid/uuid"
-	"encoding/json"
 	"errors"
 	"github.com/pilu/traffic"
-	"io/ioutil"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"net/url"
@@ -34,6 +32,8 @@ type (
 const (
 	register_subject = "Bestätige Deine Registrierung"
 	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der MitmachRepublik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://dev.mitmachrepublik.de/approve/%s\r\n\r\nDas Team der MitmachRepublik"
+	password_subject = "Bestätige Deine neue E-Mail-Adresse"
+	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://dev.mitmachrepublik.de/approve/%s\r\n\r\nDas Team der MitmachRepublik"
 )
 
 func NewWebServer(host string, port int, tplDir, imgServer, mongoUrl, dbName string) (*WebServer, error) {
@@ -50,30 +50,6 @@ func NewWebServer(host string, port int, tplDir, imgServer, mongoUrl, dbName str
 
 	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", "MitmachRepublik <mitmachrepublik@gmail.com>"}
 	return &WebServer{host, port, tpls, imgServer, database, emailAccount}, nil
-}
-
-func readBinary(r *traffic.Request) ([]byte, error) {
-
-	return ioutil.ReadAll(r.Request.Body)
-}
-
-func readJson(r *traffic.Request, v interface{}) error {
-
-	buffer, err := readBinary(r)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(buffer, v)
-}
-
-func readSessionId(r *traffic.Request) (bson.ObjectId, error) {
-
-	cookie, err := r.Cookie("SESSIONID")
-	if err != nil || !bson.IsObjectIdHex(cookie.Value) {
-		return "", errors.New("Failed to read session id.")
-	}
-
-	return bson.ObjectIdHex(cookie.Value), nil
 }
 
 func (web *WebServer) startPage(w traffic.ResponseWriter, r *traffic.Request) {
@@ -119,17 +95,26 @@ func (web *WebServer) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 }
 
-func (web *WebServer) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
+func (web *WebServer) checkSession(r *Request) (*User, error) {
 
-	sessionId, err := readSessionId(r)
+	sessionId, err := r.ReadSessionId()
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return nil, err
 	}
 
 	user, err := web.database.LoadUserBySessionId(sessionId)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		return nil, err
+	}
+	
+	return user, nil
+}
+
+func (web *WebServer) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	user, err := web.checkSession((&Request{r}))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -141,19 +126,27 @@ func (web *WebServer) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (web *WebServer) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	sessionId, err := readSessionId(r)
+	user, err := web.checkSession((&Request{r}))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	user, err := web.database.LoadUserBySessionId(sessionId)
+	err = web.tpls.Execute("profile.tpl", w, user)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (web *WebServer) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	user, err := web.checkSession((&Request{r}))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err = web.tpls.Execute("profile.tpl", w, user)
+	err = web.tpls.Execute("password.tpl", w, user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -211,14 +204,6 @@ func (web *WebServer) uploadHandler(w traffic.ResponseWriter, r *traffic.Request
 	}
 }
 
-func readUser(r *traffic.Request) (*User, error) {
-
-	var data User
-	user := &data
-	err := readJson(r, user)
-	return user, err
-}
-
 func validateUser(db Database, user *User) error {
 
 	table := db.Table("user")
@@ -238,9 +223,19 @@ func validateUser(db Database, user *User) error {
 	return nil
 }
 
+func (web *WebServer) sendEmail(to, subject, body string) error {
+
+	tpl, err := web.tpls.Find("email.tpl")
+	if err != nil {
+		return err
+	}
+	
+	return SendEmail(web.emailAccount, tpl, to, subject, body)
+}
+
 func (web *WebServer) registerHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
-	user, err := readUser(r)
+	user, err := (&Request{r}).ReadUser()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -252,6 +247,12 @@ func (web *WebServer) registerHandler(w traffic.ResponseWriter, r *traffic.Reque
 		return
 	}
 
+	err = web.sendEmail(user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, user.Id.Hex()))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	
 	user.SetId(bson.NewObjectId())
 	_, err = web.database.Table("user").UpsertById(user.GetId(), user)
 	if err != nil {
@@ -259,18 +260,6 @@ func (web *WebServer) registerHandler(w traffic.ResponseWriter, r *traffic.Reque
 		return
 	}
 	
-	tpl, err := web.tpls.Find("email.tpl")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	
-	err = SendEmail(web.emailAccount, tpl, user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, user.Id.Hex()))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	id, err := web.database.CreateSession(user.GetId())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -283,21 +272,17 @@ func (web *WebServer) registerHandler(w traffic.ResponseWriter, r *traffic.Reque
 
 func (web *WebServer) profileHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
-	sessionId, err := readSessionId(r)
+	request:= &Request{r}
+	
+	user, err := web.checkSession(request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	data, err := readUser(r)
+	data, err := request.ReadUser()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	user, err := web.database.LoadUserBySessionId(sessionId)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -315,10 +300,45 @@ func (web *WebServer) profileHandler(w traffic.ResponseWriter, r *traffic.Reques
 	}
 }
 
+func (web *WebServer) passwordHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	request := &Request{r}
+	
+	user, err := web.checkSession(request)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	data, err := request.ReadEmailAndPwd()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if !isEmpty(data.Pwd) {
+		user.Pwd = data.Pwd
+	}
+	
+	if !isEmpty(data.Email) && data.Email != user.Email {
+		user.Email = data.Email
+		user.Approved = false
+		err := web.sendEmail(user.Email, password_subject, fmt.Sprintf(password_message, user.Addr.Name, user.Id.Hex()))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	_, err = web.database.Table("user").UpsertById(user.GetId(), user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
 func (web *WebServer) loginHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
-	var form emailAndPwd
-	err := readJson(r, &form)
+	form, err := (&Request{r}).ReadEmailAndPwd()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -342,7 +362,7 @@ func (web *WebServer) loginHandler(w traffic.ResponseWriter, r *traffic.Request)
 
 func (web *WebServer) logoutHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
-	sessionId, err := readSessionId(r)
+	sessionId, err := (&Request{r}).ReadSessionId()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -363,12 +383,14 @@ func (web *WebServer) Start() {
 	router.Get("/", web.startPage)
 	router.Get("/approve/:id", web.approvePage)
 	router.Get("/veranstalter/verwaltung", web.adminPage)
+	router.Get("/veranstalter/verwaltung/kennwort", web.passwordPage)
 	router.Get("/veranstalter/verwaltung/profil", web.profilePage)
 	router.Get("/veranstaltungen/:place/:radius/:category", web.eventsPage)
 
 	router.Post("/suche", web.searchHandler)
 	router.Post("/upload", web.uploadHandler)
 	router.Post("/register", web.registerHandler)
+	router.Post("/password", web.passwordHandler)
 	router.Post("/profile", web.profileHandler)
 	router.Post("/login", web.loginHandler)
 	router.Post("/logout", web.logoutHandler)
