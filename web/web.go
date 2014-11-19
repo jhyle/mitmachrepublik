@@ -3,6 +3,7 @@ package mmr
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"fmt"
 	"github.com/pilu/traffic"
 	"labix.org/v2/mgo/bson"
 	"net/http"
@@ -10,7 +11,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"fmt"
 )
 
 type (
@@ -63,7 +63,7 @@ func (web *WebServer) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 func (web *WebServer) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	var err error = nil
-	
+
 	if !bson.IsObjectIdHex(r.Param("id")) {
 		err = errors.New("Failed to read id.")
 	} else {
@@ -81,7 +81,7 @@ func (web *WebServer) approvePage(w traffic.ResponseWriter, r *traffic.Request) 
 		}
 	}
 
-	err = web.tpls.Execute("approve.tpl", w, err == nil)
+	err = web.tpls.Execute("approve.tpl", w, map[string]interface{}{"approved": err == nil})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -106,7 +106,7 @@ func (web *WebServer) checkSession(r *Request) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return user, nil
 }
 
@@ -118,7 +118,7 @@ func (web *WebServer) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		return
 	}
 
-	err = web.tpls.Execute("admin.tpl", w, user)
+	err = web.tpls.Execute("admin.tpl", w, map[string]interface{}{"user": user})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -132,7 +132,7 @@ func (web *WebServer) profilePage(w traffic.ResponseWriter, r *traffic.Request) 
 		return
 	}
 
-	err = web.tpls.Execute("profile.tpl", w, user)
+	err = web.tpls.Execute("profile.tpl", w, map[string]interface{}{"user": user})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -146,7 +146,21 @@ func (web *WebServer) passwordPage(w traffic.ResponseWriter, r *traffic.Request)
 		return
 	}
 
-	err = web.tpls.Execute("password.tpl", w, user)
+	err = web.tpls.Execute("password.tpl", w, map[string]interface{}{"user": user})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (web *WebServer) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	user, err := web.checkSession((&Request{r}))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = web.tpls.Execute("event.tpl", w, map[string]interface{}{"user": user, "categories": CategoryOrder, "categoryIds": CategoryMap})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -229,7 +243,7 @@ func (web *WebServer) sendEmail(to, subject, body string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return SendEmail(web.emailAccount, tpl, to, subject, body)
 }
 
@@ -252,14 +266,14 @@ func (web *WebServer) registerHandler(w traffic.ResponseWriter, r *traffic.Reque
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	
+
 	user.SetId(bson.NewObjectId())
 	_, err = web.database.Table("user").UpsertById(user.GetId(), user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	
+
 	id, err := web.database.CreateSession(user.GetId())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -272,8 +286,8 @@ func (web *WebServer) registerHandler(w traffic.ResponseWriter, r *traffic.Reque
 
 func (web *WebServer) profileHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
-	request:= &Request{r}
-	
+	request := &Request{r}
+
 	user, err := web.checkSession(request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -303,7 +317,7 @@ func (web *WebServer) profileHandler(w traffic.ResponseWriter, r *traffic.Reques
 func (web *WebServer) passwordHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 	request := &Request{r}
-	
+
 	user, err := web.checkSession(request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -319,7 +333,7 @@ func (web *WebServer) passwordHandler(w traffic.ResponseWriter, r *traffic.Reque
 	if !isEmpty(data.Pwd) {
 		user.Pwd = data.Pwd
 	}
-	
+
 	if !isEmpty(data.Email) && data.Email != user.Email {
 		user.Email = data.Email
 		user.Approved = false
@@ -351,6 +365,41 @@ func (web *WebServer) unregisterHandler(w traffic.ResponseWriter, r *traffic.Req
 	}
 
 	web.logoutHandler(w, r)
+}
+
+func (web *WebServer) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	request := &Request{r}
+
+	_, err := web.checkSession(request)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var data Event
+	event := &data
+	err = request.ReadJson(event)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	created := false
+	if !event.GetId().Valid() {
+		created = true
+		event.SetId(bson.NewObjectId())
+	}
+
+	_, err = web.database.Table("event").UpsertById(event.GetId(), event)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if created {
+		w.WriteHeader(http.StatusCreated)
+	}
 }
 
 func (web *WebServer) loginHandler(w traffic.ResponseWriter, r *traffic.Request) {
@@ -402,6 +451,7 @@ func (web *WebServer) Start() {
 	router.Get("/veranstalter/verwaltung", web.adminPage)
 	router.Get("/veranstalter/verwaltung/kennwort", web.passwordPage)
 	router.Get("/veranstalter/verwaltung/profil", web.profilePage)
+	router.Get("/veranstalter/verwaltung/veranstaltung", web.eventPage)
 	router.Get("/veranstaltungen/:place/:radius/:category", web.eventsPage)
 
 	router.Post("/suche", web.searchHandler)
@@ -410,6 +460,7 @@ func (web *WebServer) Start() {
 	router.Post("/password", web.passwordHandler)
 	router.Post("/profile", web.profileHandler)
 	router.Post("/unregister", web.unregisterHandler)
+	router.Post("/event", web.eventHandler)
 	router.Post("/login", web.loginHandler)
 	router.Post("/logout", web.logoutHandler)
 

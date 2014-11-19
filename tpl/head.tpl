@@ -7,7 +7,8 @@
 	<link href="/css/bootstrap.min.css" rel="stylesheet">
 	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-	<link href="/css/mmr.css" rel="stylesheet">
+	<link href="/css/mmr.css" rel="stylesheet" type="text/css">
+	<link href="/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css">
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 	<!--[if lt IE 9]>
@@ -27,8 +28,8 @@
 						<div class="form-group">
 							<div class="col-sm-7" style="border-right: 1px solid #ccc; padding-right: 0">
 								<div class="big-text">Ich bin bereits als Veranstalter registriert.</div>
-								<input name="Email" id="login-Email" type="text" class="form-control" placeholder="E-Mail-Adresse">
-								<input name="Pwd" id="login-Pwd" type="password" class="form-control" placeholder="Kennwort">
+								<input name="email" id="login-Email" type="email" class="form-control" placeholder="E-Mail-Adresse">
+								<input name="password" id="login-Pwd" type="password" class="form-control" placeholder="Kennwort">
 								<button name="login" type="submit" class="btn btn-mmr" style="width: 90%">Anmelden</button>
 							</div>
 							<div class="col-sm-5">
@@ -53,7 +54,7 @@
 						<div class="form-group">
 							<div class="col-sm-7">
 								<span><input name="name" type="text" id="register-Name" class="form-control" placeholder="Deine Organisation"></span>
-								<span><input name="email" type="text" id="register-Email" class="form-control" placeholder="E-Mail-Adresse"></span>
+								<span><input name="email" type="email" id="register-Email" class="form-control" placeholder="E-Mail-Adresse"></span>
 								<span><input name="pwd" type="password" id="register-Pwd" class="form-control" placeholder="Kennwort">
 								<input name="pwd2" type="password" id="register-Pwd2" class="form-control" placeholder="Kennwort wiederholen"></span>
 							</div>
@@ -71,7 +72,7 @@
 						<div class="form-group">
 							<div class="col-sm-12">
 								<textarea name="description" id="register-Descr" class="form-control" placeholder="Beschreibung"></textarea>
-								<span><input name="web" type="text" id="register-Web" class="form-control" placeholder="Webseite"></span>
+								<span><input name="website" type="text" id="register-Web" class="form-control" placeholder="Webseite"></span>
 							</div>
 						</div>
 						<hr>
@@ -80,7 +81,7 @@
 								<input name="street" type="text" id="register-Street" class="form-control" placeholder="Straße">
 							</div>
 							<div class="col-sm-3">
-								<input name="postcode" type="text" id="register-Pcode" class="form-control" placeholder="Postleitzahl">
+								<input name="pcode" type="text" id="register-Pcode" class="form-control" placeholder="Postleitzahl">
 							</div>
 							<div class="col-sm-3">
 								<input name="city" type="text" id="register-City" class="form-control" placeholder="Ort">

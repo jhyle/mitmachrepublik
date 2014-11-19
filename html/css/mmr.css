@@ -28,6 +28,14 @@ ul {
 	list-style-type: none;
 	padding: 10px;
 }
+label {
+	font-weight: normal;
+	margin-bottom: 10px;
+	cursor: pointer;
+}
+.radio-inline + .radio-inline, .checkbox-inline + .checkbox-inline {
+	margin-left: 0;
+}
  body, a, a:hover, a:focus, .form-control {
 	color: #2f3030;
 }

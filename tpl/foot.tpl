@@ -54,5 +54,7 @@
 	<script src="/js/jquery.fileupload.js"></script>
 	<script src="/js/jquery.cookie-1.4.1.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/bootstrap-datetimepicker.min.js"></script>
+	<script src="/js/locales/bootstrap-datetimepicker.de.js"></script>
 	<script src="/js/mmr.js"></script>
 </body> </html>

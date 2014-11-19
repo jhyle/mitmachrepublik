@@ -1,4 +1,5 @@
 var PcodePattern = /^[0-9]{5}$/;
+var DateTimePattern = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/;
 var EmailPattern = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 var WebPattern = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/;
 
@@ -24,6 +25,20 @@ function initEmailAndPwdForm(id)
 {
 	$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Pwd2").popover({content: "Kennwort und Kennwortwiederholung stimmen nicht überein.", trigger: "manual", placement: "auto right"});
+}
+
+function initEventForm(id)
+{
+	$("#" + id + "-dropzone").click(function() {
+		$(this).parent().find("input").click();
+	});
+
+	$("#" + id + "-Title").popover({content: "Bitte gib der Veranstaltung einen Titel.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Start").popover({content: "Bitte gib den Veranstaltungsbeginn an.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-End").popover({content: "Bitte gib ein gültiges Ende an.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Category").popover({content: "Bitte wähle mindestens eine Kategorie aus.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (URL) ein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Pcode").popover({content: "Bitte gib eine vollständige Postleitzahl ein.", trigger: "manual", placement: "auto top"});	
 }
 
 function validate(ok, id) {
@@ -68,6 +83,16 @@ function validateEmailAndPwdForm(id)
 	return ok;
 }
 
+function validateEventForm(id)
+{
+	var ok = validate($("#" + id + "-Title").val().trim().length > 0, "#" + id +"-Title");
+	ok &= validate(DateTimePattern.test($("#" + id + "-Start").val()), "#" + id + "-Start");
+	ok &= validate($("#" + id +"-End").val().trim().length == 0 || DateTimePattern.test($("#" + id + "-End").val()), "#" + id + "-End");
+	ok &= validate($("#" + id +"-Web").val().trim().length == 0 || WebPattern.test($("#" + id +"-Web").val()), "#" + id +"-Web");
+	ok &= validate($("#" + id +"-Pcode").val().trim().length == 0 || PcodePattern.test($("#" + id +"-Pcode").val()), "#" + id +"-Pcode");
+	return ok;
+}
+
 function gatherProfileForm(id)
 {
 	var data = {};
@@ -83,6 +108,37 @@ function gatherProfileForm(id)
 		if ($("#" + id + "-" + addr_fields[i]).length) {
 			data["Addr"][addr_fields[i]] = $("#" + id + "-" + addr_fields[i]).val();
 		}
+	}
+	return data;
+}
+
+function gatherEventForm(id)
+{
+	var data = {};
+	var event_fields = ["Title", "Start", "End", "Image", "Descr", "Web"];
+	for (var i = 0, len = event_fields.length; i < len; i++) {
+		if ($("#" + id + "-" + event_fields[i]).length) {
+			data[event_fields[i]] = $("#" + id + "-" + event_fields[i]).val();
+		}
+	}
+	
+	DateTimePattern.exec(data["Start"]);
+	data["Start"] = new Date(RegExp.$2 + " " + RegExp.$1 + ", " + RegExp.$3 + " " + RegExp.$4 + ":" + RegExp.$5 + ":00");
+	DateTimePattern.exec(data["End"]);
+	data["End"] = new Date(RegExp.$2 + " " + RegExp.$1 + ", " + RegExp.$3 + " " + RegExp.$4 + ":" + RegExp.$5 + ":00");
+
+	data["Addr"] = {}
+	var addr_fields = ["Name", "Street", "Pcode", "City"];
+	for (var i = 0, len = addr_fields.length; i < len; i++) {
+		if ($("#" + id + "-" + addr_fields[i]).length) {
+			data["Addr"][addr_fields[i]] = $("#" + id + "-" + addr_fields[i]).val();
+		}
+	}
+	
+	data["Categories"] = 0;	
+	categories = $("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get();
+	for (i = 0; i < categories.length; i++) {
+		data["Categories"] += parseInt(categories[i]);
 	}
 	return data;
 }
@@ -112,6 +168,7 @@ function removeErrorMessage(id)
 }
 
 $(function() {
+
 	initProfileForm("register");
 
 	$("#register-upload").fileupload({
@@ -225,6 +282,48 @@ $(function() {
 		});
 	});
 	
+	initEventForm("event");
+	
+	$("#event-upload").fileupload({
+		
+		dataType: "json",
+		dropZone: $("#event-dropzone"),
+		
+		add: function (e, data) {
+			activateSpinner("event");
+			data.submit();
+		},
+		
+		done: function(e, data) {
+			deactivateSpinner("event");
+			removeErrorMessage("event-thumbnail");
+			$("#event-thumbnail").attr("src", "/bild/" + data.result + "?height=200&width=200");
+			$("#event-Image").attr("value", data.result);
+		},
+		
+		fail: function(e, data) {
+			deactivateSpinner("event");
+			setErrorMessage("event-thumbnail", "Beim Hochladen des Bildes ist ein Fehler aufgetreten.");
+		}
+	});
+	
+	$("#event-upload").submit(function(e) {
+		
+		e.preventDefault();
+		if (!validateEventForm("event")) return;
+		var data = gatherEventForm("event");
+		
+		$.ajax({cache: false, url : "/event", type: "POST", dataType : "json", data : JSON.stringify(data),
+			error : function(result) {
+				if (result.status == 200 || result.status == 201) {
+					window.location.href = "/veranstalter/verwaltung";
+				} else {
+					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+				}
+			}
+		});
+	});
+
 	$("#login-form").submit(function(e) {
 		e.preventDefault();
 		var data = {"Email": $("#login-Email").val(), "Pwd": $("#login-Pwd").val()};
@@ -259,6 +358,13 @@ $(function() {
 		}
 	});
 
+	$(".form-datetime").datetimepicker({
+		format: "dd.mm.yyyy hh:ii",
+		autoclose: true,
+		language: "de",
+		pickerPosition: "bottom-right"
+	});
+	
 	if ($.cookie("SESSIONID")) {
 		$("#head-events").html("<span class='fa fa-caret-right'></span> Meine Veranstaltungen");
 		$("#head-events").attr("data-toggle", "");

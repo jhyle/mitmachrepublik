@@ -87,7 +87,7 @@ func (templates *Templates) Find(name string) (*template.Template, error) {
 	return tpl, nil
 }
 
-func (templates *Templates) Execute(name string, wr io.Writer, data interface{}) error {
+func (templates *Templates) Execute(name string, wr io.Writer, data map[string]interface{}) error {
 
 	tpl, err := templates.Find(name)
 	if err != nil {

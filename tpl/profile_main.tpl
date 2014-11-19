@@ -24,7 +24,7 @@
 			<div class="form-group">
 				<div class="col-sm-12">
 					<textarea name="description" id="profile-Descr" class="form-control" placeholder="Beschreibung">{{.Descr}}</textarea>
-					<span><input name="web" type="text" id="profile-Web" class="form-control" placeholder="Webseite" value="{{.Web}}"></span>
+					<span><input name="website" type="text" id="profile-Web" class="form-control" placeholder="Webseite" value="{{.Web}}"></span>
 				</div>
 			</div>
 			<hr>
@@ -33,7 +33,7 @@
 					<input name="street" type="text" id="profile-Street" class="form-control" placeholder="Straße" value="{{.Addr.Street}}">
 				</div>
 				<div class="col-sm-3">
-					<input name="postcode" type="text" id="profile-Pcode" class="form-control" placeholder="Postleitzahl" value="{{.Addr.Pcode}}">
+					<input name="pcode" type="text" id="profile-Pcode" class="form-control" placeholder="Postleitzahl" value="{{.Addr.Pcode}}">
 				</div>
 				<div class="col-sm-3">
 					<input name="city" type="text" id="profile-City" class="form-control" placeholder="Ort" value="{{.Addr.City}}">
