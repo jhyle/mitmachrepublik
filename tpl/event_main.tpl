@@ -4,13 +4,14 @@
 		{{template "organizer.tpl" .user}}
 	</div>
 	<div class="col-sm-7">
-		<h3 style="margin-left: 10px">Veranstaltung eintragen</h3>
+		<h3 style="margin-left: 10px">Veranstaltung {{ if .event.Id }}bearbeiten{{ else }}eintragen{{ end }}</h3>
 		<form role="form" id="event-upload" class="form-horizontal" action="/upload" method="POST">
+			<input type="hidden" id="event-Id" value="{{.event.Id.Hex}}">
 			<div class="form-group">
 				<div class="col-sm-7">
 					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Was willst Du machen?" value="{{.event.Title}}"></span>
-					<span><input name="start" type="datetime-local" id="event-Start" class="form-control form-datetime" placeholder="Fängt an" value="{{.event.Start}}"></span>
-					<span><input name="end" type="datetime-local" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{.event.End}}"></span>
+					<span><input name="start" type="datetime-local" id="event-Start" class="form-control form-datetime" placeholder="Fängt an" value="{{dateFormat .event.Start}}"></span>
+					<span><input name="end" type="datetime-local" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{dateFormat .event.End}}"></span>
 				</div>
 				<div class="col-sm-4">
 					<a id="event-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
@@ -27,7 +28,12 @@
 				<div class="col-sm-12" style="margin-left: 10px">
 					<span id="event-Category" class="help-block">Wähle eine oder mehrere Kategorien aus:</span>
 				{{ range .categories }}
-					<label class="checkbox-inline"><input type="checkbox" name="event-Category" value="{{index $.categoryIds .}}"> {{.}} &nbsp;&nbsp;</label>
+					{{ $id := index $.categoryIds . }}
+					<label class="checkbox-inline"><input type="checkbox" name="event-Category" value="{{$id}}"
+					{{ range $.event.Categories }}
+						{{ if eq . $id }}checked{{ end }}
+					{{ end }}
+					> {{.}} &nbsp;&nbsp;</label>					
 				{{ end }}
 				</div>
 			</div>

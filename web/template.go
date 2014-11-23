@@ -2,6 +2,7 @@ package mmr
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"os"
@@ -20,6 +21,15 @@ type (
 	}
 )
 
+func dateFormat(t time.Time) string {
+
+	if t.IsZero() {
+		return ""
+	} else {
+		return fmt.Sprintf("%02d.%02d.%04d %02d:%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
+	}
+}
+
 func NewTemplates(pattern string) (*Templates, error) {
 
 	files, err := filepath.Glob(pattern)
@@ -36,7 +46,7 @@ func NewTemplates(pattern string) (*Templates, error) {
 		modTimes[i] = fileInfo.ModTime()
 	}
 
-	tpls, err := template.ParseFiles(files...)
+	tpls, err := template.New("/").Funcs(map[string]interface{}{"dateFormat": dateFormat}).ParseFiles(files...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +59,7 @@ func (templates *Templates) reloadIfChanged() error {
 	var err error = nil
 	var fileInfo os.FileInfo
 	var newTemplates *Templates
-	
+
 	templates.Lock()
 
 	for i, file := range templates.files {
@@ -78,12 +88,12 @@ func (templates *Templates) Find(name string) (*template.Template, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	tpl := templates.tpls.Lookup(name)
 	if tpl == nil {
 		return nil, errors.New("Could not find template " + name + ".")
 	}
-	
+
 	return tpl, nil
 }
 

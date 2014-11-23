@@ -90,6 +90,7 @@ function validateEventForm(id)
 	ok &= validate($("#" + id +"-End").val().trim().length == 0 || DateTimePattern.test($("#" + id + "-End").val()), "#" + id + "-End");
 	ok &= validate($("#" + id +"-Web").val().trim().length == 0 || WebPattern.test($("#" + id +"-Web").val()), "#" + id +"-Web");
 	ok &= validate($("#" + id +"-Pcode").val().trim().length == 0 || PcodePattern.test($("#" + id +"-Pcode").val()), "#" + id +"-Pcode");
+	ok &= validate($("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Category");
 	return ok;
 }
 
@@ -115,7 +116,7 @@ function gatherProfileForm(id)
 function gatherEventForm(id)
 {
 	var data = {};
-	var event_fields = ["Title", "Start", "End", "Image", "Descr", "Web"];
+	var event_fields = ["Id", "Title", "Start", "End", "Image", "Descr", "Web"];
 	for (var i = 0, len = event_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + event_fields[i]).length) {
 			data[event_fields[i]] = $("#" + id + "-" + event_fields[i]).val();
@@ -135,10 +136,10 @@ function gatherEventForm(id)
 		}
 	}
 	
-	data["Categories"] = 0;	
+	data["Categories"] = new Array();
 	categories = $("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get();
 	for (i = 0; i < categories.length; i++) {
-		data["Categories"] += parseInt(categories[i]);
+		data["Categories"][i] = parseInt(categories[i]);
 	}
 	return data;
 }
@@ -352,6 +353,20 @@ $(function() {
 					window.location.href = "/";
 				},
 				error : function(result) {
+					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+				}
+			});
+		}
+	});
+	
+	$("a[name=delete-event]").click(function(e) {
+		e.preventDefault();
+		if (confirm("Die Veranstaltung wird unwiederbringlich gelöscht.")) {
+			$.ajax({cache: false, url : "/event/" + $(this).data("target"), type: "DELETE",
+				success: function() {
+					window.location.href = window.location.href;
+				},
+				error : function() {
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
 			});

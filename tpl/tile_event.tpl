@@ -1,7 +1,7 @@
 <div class="col-sm-2 col-tile">
 	<a href="#">
 		<div class="small-icon"><span class="fa fa-futbol-o"></span></div>
-		<img class="img-responsive" src="images/dummy.jpg" />
+		<img class="img-responsive" src="/images/dummy.jpg">
 		<div class="tile-text">
 			<h3>Volleyballtunier</h3>
 			<p class="datetime">18.10.2014 13.30 Uhr</p>

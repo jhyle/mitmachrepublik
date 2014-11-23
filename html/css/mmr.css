@@ -11,10 +11,10 @@ h2 {
 	font-weight: lighter; 
 }
 h3 {
-	font-size: 24px;
+	font-size: 23px;
 	font-weight: lighter;
 	color: #ff5100;
-	margin: 15px 0;
+	margin: 10px 0;
 }
 h4 {
 	color: white;
@@ -79,9 +79,9 @@ div.col-head {
 }
 .btn-mmr, .btn-mmr:hover, .btn-mmr:focus {
 	color: white;
-	font-weight: bolder;
+	font-size: 19px;
 	background-color: #2ba42b;
-	background: linear-gradient(#31bd31, #2ba42b, #31bd31);
+	background: linear-gradient(#31bd31, #2ba42b);
 }
 
 div.tiles {
@@ -95,6 +95,11 @@ div.col-tile {
 	min-height: 360px;
 	overflow: hidden;
 }
+div.row-tile {
+	border: 1px solid #e6e6e6;
+	margin-bottom: 15px;
+	overflow: hidden;
+}
 div.tile-text {
 	margin: 10px;
 	font-size: 15px;
@@ -104,7 +109,6 @@ div.tile-text .form-control, div.tile-text .btn {
 }
 div.col-box {
 	border: 1px solid #e6e6e6;
-	height: 100%;
 	padding: 15px;
 }
 div.footer {
@@ -116,7 +120,7 @@ div.footer {
 div.col-foot {
 	padding: 30px 0;
 }
-div.big-icon, div.small-icon {
+div.big-icon, div.small-icon, p.place-icon {
 	color: white;
 	background-color: #ff7800;
 	background: linear-gradient(#ff7800, #ff5200);
@@ -143,10 +147,26 @@ div.small-icon span {
 	line-height: 1.75;
 	margin-left: 8px;
 }
+p.place-icon {
+	font-size: 21px;
+	width: 32px;
+	height: 32px;
+	border-radius: 16px;
+	margin-top: 5px;
+}
+p.place-icon span {
+	margin-left: 10px;
+}
 .datetime {
 	font-weight: bold;
 	font-size: 13px;
 	margin-bottom: 0;
+}
+.place {
+	font-size: 13px;
+	color: #7a7d7d;
+	width: 40%;
+	padding-left: 10px;
 }
 .big-text {
 	font-size: 17px;

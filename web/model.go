@@ -36,15 +36,16 @@ type (
 	}
 
 	Event struct {
-		Id         bson.ObjectId `bson:"_id" json:",omitempty"`
-		Title      string
-		Image      string
-		Descr      string
-		Web        string
-		Categories int64
-		Start      time.Time
-		End        time.Time
-		Addr       Address
+		Id          bson.ObjectId `bson:"_id" json:",omitempty"`
+		OrganizerId bson.ObjectId `json:",omitempty"`
+		Title       string
+		Image       string
+		Descr       string
+		Web         string
+		Categories  []int
+		Start       time.Time
+		End         time.Time
+		Addr        Address
 	}
 
 	SearchResult interface {
@@ -58,23 +59,23 @@ type (
 
 var (
 	CategoryMap map[string]int = map[string]int{
-		"Kinder & Familie": 1 << 0,
-		"Jugendliche":      1 << 1,
-		"Studenten":        1 << 2,
-		"Berufstätige":     1 << 3,
-		"Eltern":           1 << 4,
-		"Senioren":         1 << 5,
-		"Leute treffen":    1 << 6,
-		"Sport":            1 << 7,
-		"Gärtnern":         1 << 8,
-		"Kultur":           1 << 9,
-		"Bildung":          1 << 10,
-		"Religion":         1 << 11,
-		"Umwelt":           1 << 12,
-		"Tierschutz":       1 << 13,
-		"Demonstrationen":  1 << 14,
-		"Soziales":         1 << 15,
-		"Ehrenamt":         1 << 16,
+		"Kinder & Familie": 1,
+		"Jugendliche":      2,
+		"Studenten":        3,
+		"Berufstätige":     4,
+		"Eltern":           5,
+		"Senioren":         6,
+		"Leute treffen":    7,
+		"Sport":            8,
+		"Gärtnern":         8,
+		"Kultur":           9,
+		"Bildung":          10,
+		"Religion":         11,
+		"Umwelt":           12,
+		"Tierschutz":       13,
+		"Demonstrationen":  14,
+		"Soziales":         15,
+		"Ehrenamt":         16,
 	}
 
 	CategoryOrder []string = []string{

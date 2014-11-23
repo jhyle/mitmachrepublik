@@ -81,7 +81,7 @@ func (web *WebServer) approvePage(w traffic.ResponseWriter, r *traffic.Request) 
 		}
 	}
 
-	err = web.tpls.Execute("approve.tpl", w, map[string]interface{}{"approved": err == nil})
+	err = web.tpls.Execute("approve.tpl", w, bson.M{"approved": err == nil})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -118,7 +118,10 @@ func (web *WebServer) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		return
 	}
 
-	err = web.tpls.Execute("admin.tpl", w, map[string]interface{}{"user": user})
+	var events []Event
+	web.database.Table("event").Find(bson.M{"organizerid": user.Id}, &events)
+
+	err = web.tpls.Execute("admin.tpl", w, bson.M{"user": user, "events": events})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -132,7 +135,7 @@ func (web *WebServer) profilePage(w traffic.ResponseWriter, r *traffic.Request) 
 		return
 	}
 
-	err = web.tpls.Execute("profile.tpl", w, map[string]interface{}{"user": user})
+	err = web.tpls.Execute("profile.tpl", w, bson.M{"user": user})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -146,7 +149,7 @@ func (web *WebServer) passwordPage(w traffic.ResponseWriter, r *traffic.Request)
 		return
 	}
 
-	err = web.tpls.Execute("password.tpl", w, map[string]interface{}{"user": user})
+	err = web.tpls.Execute("password.tpl", w, bson.M{"user": user})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -160,8 +163,25 @@ func (web *WebServer) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		return
 	}
 
-	err = web.tpls.Execute("event.tpl", w, map[string]interface{}{"user": user, "categories": CategoryOrder, "categoryIds": CategoryMap})
+	var data Event
+	event := &data
+	if bson.IsObjectIdHex(r.Param("id")) {
+
+		err = web.database.Table("event").LoadById(bson.ObjectIdHex(r.Param("id")), event)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		if event.OrganizerId != user.Id {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+
+	err = web.tpls.Execute("event.tpl", w, bson.M{"user": user, "event": event, "categories": CategoryOrder, "categoryIds": CategoryMap})
 	if err != nil {
+		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -268,13 +288,13 @@ func (web *WebServer) registerHandler(w traffic.ResponseWriter, r *traffic.Reque
 	}
 
 	user.SetId(bson.NewObjectId())
-	_, err = web.database.Table("user").UpsertById(user.GetId(), user)
+	_, err = web.database.Table("user").UpsertById(user.Id, user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	id, err := web.database.CreateSession(user.GetId())
+	id, err := web.database.CreateSession(user.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -308,7 +328,7 @@ func (web *WebServer) profileHandler(w traffic.ResponseWriter, r *traffic.Reques
 	user.Addr.Pcode = data.Addr.Pcode
 	user.Addr.City = data.Addr.City
 
-	_, err = web.database.Table("user").UpsertById(user.GetId(), user)
+	_, err = web.database.Table("user").UpsertById(user.Id, user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -344,7 +364,7 @@ func (web *WebServer) passwordHandler(w traffic.ResponseWriter, r *traffic.Reque
 		}
 	}
 
-	_, err = web.database.Table("user").UpsertById(user.GetId(), user)
+	_, err = web.database.Table("user").UpsertById(user.Id, user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -358,7 +378,7 @@ func (web *WebServer) unregisterHandler(w traffic.ResponseWriter, r *traffic.Req
 		return
 	}
 
-	err = web.database.Table("user").DeleteById(user.GetId())
+	err = web.database.Table("user").DeleteById(user.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -371,7 +391,7 @@ func (web *WebServer) eventHandler(w traffic.ResponseWriter, r *traffic.Request)
 
 	request := &Request{r}
 
-	_, err := web.checkSession(request)
+	user, err := web.checkSession(request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -386,12 +406,21 @@ func (web *WebServer) eventHandler(w traffic.ResponseWriter, r *traffic.Request)
 	}
 
 	created := false
-	if !event.GetId().Valid() {
+	if event.Id.Valid() {
+		var oldData Event
+		oldEvent := &oldData
+		web.database.Table("event").LoadById(event.Id, oldEvent)
+		if oldEvent.OrganizerId != user.Id {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	} else {
 		created = true
 		event.SetId(bson.NewObjectId())
 	}
+	event.OrganizerId = user.Id
 
-	_, err = web.database.Table("event").UpsertById(event.GetId(), event)
+	_, err = web.database.Table("event").UpsertById(event.Id, event)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -416,7 +445,7 @@ func (web *WebServer) loginHandler(w traffic.ResponseWriter, r *traffic.Request)
 		return
 	}
 
-	id, err := web.database.CreateSession(user.GetId())
+	id, err := web.database.CreateSession(user.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -440,6 +469,33 @@ func (web *WebServer) logoutHandler(w traffic.ResponseWriter, r *traffic.Request
 	}
 }
 
+func (web *WebServer) deleteEventHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	user, err := web.checkSession(&Request{r})
+	if err != nil || !bson.IsObjectIdHex(r.Param("id")) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var data Event
+	event := &data
+	err = web.database.Table("event").LoadById(bson.ObjectIdHex(r.Param("id")), event)
+	if err != nil {
+		return /* http.StatusOK */
+	}
+
+	if event.OrganizerId != user.Id {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = web.database.Table("event").DeleteById(event.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
 func (web *WebServer) Start() {
 
 	traffic.SetHost(web.host)
@@ -452,6 +508,7 @@ func (web *WebServer) Start() {
 	router.Get("/veranstalter/verwaltung/kennwort", web.passwordPage)
 	router.Get("/veranstalter/verwaltung/profil", web.profilePage)
 	router.Get("/veranstalter/verwaltung/veranstaltung", web.eventPage)
+	router.Get("/veranstalter/verwaltung/veranstaltung/:id", web.eventPage)
 	router.Get("/veranstaltungen/:place/:radius/:category", web.eventsPage)
 
 	router.Post("/suche", web.searchHandler)
@@ -463,6 +520,8 @@ func (web *WebServer) Start() {
 	router.Post("/event", web.eventHandler)
 	router.Post("/login", web.loginHandler)
 	router.Post("/logout", web.logoutHandler)
+
+	router.Delete("/event/:id", web.deleteEventHandler)
 
 	router.Run()
 }
