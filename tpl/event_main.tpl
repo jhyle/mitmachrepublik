@@ -3,10 +3,10 @@
 	<div class="col-sm-3 col-box">
 		{{template "organizer.tpl" .user}}
 	</div>
-	<div class="col-sm-7">
+	<div class="col-sm-7" style="padding-top: 15px">
 		<h3 style="margin-left: 10px">Veranstaltung {{ if .event.Id }}bearbeiten{{ else }}eintragen{{ end }}</h3>
 		<form role="form" id="event-upload" class="form-horizontal" action="/upload" method="POST">
-			<input type="hidden" id="event-Id" value="{{.event.Id.Hex}}">
+			{{if .event.Id }}<input type="hidden" id="event-Id" value="{{.event.Id.Hex}}">{{ end }}
 			<div class="form-group">
 				<div class="col-sm-7">
 					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Was willst Du machen?" value="{{.event.Title}}"></span>

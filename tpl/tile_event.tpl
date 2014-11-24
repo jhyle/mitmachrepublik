@@ -4,7 +4,7 @@
 		<img class="img-responsive" src="/images/dummy.jpg">
 		<div class="tile-text">
 			<h3>Volleyballtunier</h3>
-			<p class="datetime">18.10.2014 13.30 Uhr</p>
+			<p class="datetime">18.10.2014 13.30</p>
 			<p>Blindtext Blindtext Blindtext Blindtext Blindtext Blindtext Blindtext Blindtext Blindtext</p>
 			<p class="highlight"><span class="fa fa-caret-right"></span> Veranstaltung ansehen</p>
 		</div>

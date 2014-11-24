@@ -25,6 +25,7 @@ type (
 		Search(interface{}, string, int, int, SearchResult) error
 		UpsertById(bson.ObjectId, Item) (bson.ObjectId, error)
 		DeleteById(bson.ObjectId) error
+		Delete(interface{}) error
 	}
 
 	mongoDb struct {
@@ -155,6 +156,13 @@ func (table *mongoTable) UpsertById(id bson.ObjectId, item Item) (bson.ObjectId,
 		return id, nil
 	}
 }
+
+func (table *mongoTable) Delete(query interface{}) error {
+
+	_, err := table.collection.RemoveAll(query)
+	return err
+}
+
 
 func (table *mongoTable) DeleteById(id bson.ObjectId) error {
 

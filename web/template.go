@@ -26,7 +26,7 @@ func dateFormat(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	} else {
-		return fmt.Sprintf("%02d.%02d.%04d %02d:%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
+		return fmt.Sprintf("%02d.%02d.%04d %02d.%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
 	}
 }
 

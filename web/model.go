@@ -44,7 +44,7 @@ type (
 		Web         string
 		Categories  []int
 		Start       time.Time
-		End         time.Time
+		End         time.Time `json:",omitempty"`
 		Addr        Address
 	}
 
@@ -67,15 +67,15 @@ var (
 		"Senioren":         6,
 		"Leute treffen":    7,
 		"Sport":            8,
-		"Gärtnern":         8,
-		"Kultur":           9,
-		"Bildung":          10,
-		"Religion":         11,
-		"Umwelt":           12,
-		"Tierschutz":       13,
-		"Demonstrationen":  14,
-		"Soziales":         15,
-		"Ehrenamt":         16,
+		"Gärtnern":         9,
+		"Kultur":           10,
+		"Bildung":          11,
+		"Religion":         12,
+		"Umwelt":           13,
+		"Tierschutz":       14,
+		"Demonstrationen":  15,
+		"Soziales":         16,
+		"Ehrenamt":         17,
 	}
 
 	CategoryOrder []string = []string{
@@ -110,6 +110,11 @@ func (user *User) SetId(id bson.ObjectId) {
 func (user *User) IsAdmin() bool {
 
 	return user.Email == "admin@mitmachrepublik.de"
+}
+
+func (addr Address) IsEmpty() bool {
+
+	return isEmpty(addr.City) && isEmpty(addr.Name) && isEmpty(addr.Pcode) && isEmpty(addr.Street)
 }
 
 func (event *Event) GetId() bson.ObjectId {

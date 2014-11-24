@@ -30,9 +30,9 @@ type (
 )
 
 const (
-	register_subject = "Bestätige Deine Registrierung"
+	register_subject = "Deine Registrierung bei mitmachrepublik.de"
 	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der MitmachRepublik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://dev.mitmachrepublik.de/approve/%s\r\n\r\nDas Team der MitmachRepublik"
-	password_subject = "Bestätige Deine neue E-Mail-Adresse"
+	password_subject = "Deine neue E-Mail-Adresse bei mitmachrepublik.de"
 	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://dev.mitmachrepublik.de/approve/%s\r\n\r\nDas Team der MitmachRepublik"
 )
 
@@ -281,14 +281,14 @@ func (web *WebServer) registerHandler(w traffic.ResponseWriter, r *traffic.Reque
 		return
 	}
 
-	err = web.sendEmail(user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, user.Id.Hex()))
+	user.Id = bson.NewObjectId()
+	_, err = web.database.Table("user").UpsertById(user.Id, user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	user.SetId(bson.NewObjectId())
-	_, err = web.database.Table("user").UpsertById(user.Id, user)
+	err = web.sendEmail(user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, user.Id.Hex()))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -378,6 +378,12 @@ func (web *WebServer) unregisterHandler(w traffic.ResponseWriter, r *traffic.Req
 		return
 	}
 
+	err = web.database.Table("event").Delete(bson.M{"organizerid": user.Id})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	err = web.database.Table("user").DeleteById(user.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -416,7 +422,7 @@ func (web *WebServer) eventHandler(w traffic.ResponseWriter, r *traffic.Request)
 		}
 	} else {
 		created = true
-		event.SetId(bson.NewObjectId())
+		event.Id = bson.NewObjectId()
 	}
 	event.OrganizerId = user.Id
 
