@@ -8,7 +8,7 @@
 		<p><a href="#" id="delete-profile" class="btn btn-mmr" style="width: 90%">Profil löschen</a></p>
 	</div>
 	<div class="col-sm-7">
-		<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung" class="btn btn-mmr">Veranstaltung eintragen</a></p>
+		<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung" class="btn btn-mmr" style="margin-right: 0">Veranstaltung eintragen</a></p>
 		<p class="clearfix"></p>
 		{{ $n := len .events }}
 		{{ if eq $n 0 }}

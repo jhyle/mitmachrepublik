@@ -18,10 +18,11 @@ type (
 	}
 
 	Table interface {
+		EnsureIndices(...string) error
 		LoadById(bson.ObjectId, Item) error
 		CountById(bson.ObjectId) (int, error)
 		CheckForId(bson.ObjectId) error
-		Find(interface{}, interface{}) error
+		Find(interface{}, interface{}, ...string) error
 		Search(interface{}, string, int, int, SearchResult) error
 		UpsertById(bson.ObjectId, Item) (bson.ObjectId, error)
 		DeleteById(bson.ObjectId) error
@@ -100,6 +101,11 @@ func (db *mongoDb) LoadUserBySessionId(sessionId bson.ObjectId) (*User, error) {
 	return &user, nil
 }
 
+func (table *mongoTable) EnsureIndices(keys ...string) error {
+
+	return table.collection.EnsureIndexKey(keys...)
+}
+
 func (table *mongoTable) LoadById(id bson.ObjectId, item Item) error {
 
 	return table.collection.FindId(id).One(item)
@@ -124,9 +130,9 @@ func (table *mongoTable) CheckForId(id bson.ObjectId) error {
 	}
 }
 
-func (table *mongoTable) Find(query interface{}, result interface{}) error {
+func (table *mongoTable) Find(query interface{}, result interface{}, orderBy ...string) error {
 
-	return table.collection.Find(query).All(result)
+	return table.collection.Find(query).Sort(orderBy...).All(result)
 }
 
 func (table *mongoTable) Search(query interface{}, sort string, skip int, limit int, result SearchResult) error {

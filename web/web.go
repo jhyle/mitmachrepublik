@@ -56,6 +56,16 @@ func NewWebServer(host string, port int, tplDir, imgServer, mongoUrl, dbName str
 	if err != nil {
 		return nil, err
 	}
+	
+	err = database.Table("user").EnsureIndices("email")
+	if err != nil {
+		return nil, err
+	}
+
+	err = database.Table("event").EnsureIndices("organizerid", "start")	
+	if err != nil {
+		return nil, err
+	}
 
 	tpls, err := NewTemplates(tplDir + string(os.PathSeparator) + "*.tpl")
 	if err != nil {
@@ -159,7 +169,7 @@ func (web *WebServer) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		var events []Event
-		err = web.database.Table("event").Find(bson.M{"organizerid": user.Id}, &events)
+		err = web.database.Table("event").Find(bson.M{"organizerid": user.Id}, &events, "-start")
 		if err != nil {
 			return &webResult{Status: http.StatusInternalServerError, Error: err}
 		}
