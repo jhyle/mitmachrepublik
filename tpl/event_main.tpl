@@ -33,7 +33,7 @@
 					{{ range $.event.Categories }}
 						{{ if eq . $id }}checked{{ end }}
 					{{ end }}
-					> {{.}} &nbsp;&nbsp;</label>					
+					> {{.}} &nbsp;&nbsp;</label>
 				{{ end }}
 				</div>
 			</div>

@@ -176,6 +176,58 @@ function removeErrorMessage(id)
 	$("#" + id + "-message").text("");
 }
 
+function gatherSearchForm()
+{
+	var data = {};
+	place = $("input[name=place]").val().trim();
+	if (place.length == 0) place = "Berlin";
+	data["place"] = place;
+	
+	var category = "";
+	if ($("select[name=category]").length) {
+		category = $("select[name=category]").val();
+	} else {
+		categories = $("input[name=category]:checked").map(function () {return this.value;}).get();
+		for (i = 0; i < categories.length; i++) {
+			if (i > 0) category += ",";
+			category += categories[i];
+		}
+	}
+	if (category == "") category = "0";
+	data["category"] = category;
+	
+	var date = "";
+	dates = $("input[name=date]:checked").map(function () {return this.value;}).get();
+	for (i = 0; i < dates.length; i++) {
+		if (i > 0) date += ",";
+		date += dates[i];
+	}
+	if (date == "") date = "0";
+	data["date"] = date;
+
+	return data;
+}
+
+function updateEventCount()
+{
+	data = gatherSearchForm();
+	$.ajax({cache: false, url : "/eventcount/" + data["place"] + "/" + data["date"] + "/" + data["category"], type: "GET", dataType: "json",
+		success: function(data) {
+			$("button[value=events]").html(data + (data != 1 ? " Veranstaltungen" : " Veranstaltung"));
+		}
+	});
+}
+
+function updateOrganizerCount()
+{
+	data = gatherSearchForm();
+	$.ajax({cache: false, url : "/organizercount/" + data["place"] + "/" + data["category"], type: "GET", dataType: "json",
+		success: function(data) {
+			$("button[value=organizers]").html(data + " Veranstalter");
+		}
+	});
+}
+
 $(function() {
 
 	initProfileForm("register");
@@ -379,6 +431,32 @@ $(function() {
 				}
 			});
 		}
+	});
+
+	$("input[name=place]").typeahead({ source: function(query, process) {
+		$.ajax({cache: false, url : "/location/" + query, type: "GET", dataType: "json",
+			success: function(data) {
+				process(data);
+			}
+		});
+	}});
+	
+	$("input[name=place]").change(function() {
+		updateEventCount();
+		updateOrganizerCount();
+	});
+	
+	$("select[name=category]").change(function() {
+		updateEventCount();
+		updateOrganizerCount();
+	});
+	
+	$("input[name=category]").change(function(e) {
+		$("#events-form").submit();
+	});
+	
+	$("input[name=date]").change(function(e) {
+		$("#events-form").submit();
 	});
 
 	$(".form-datetime").datetimepicker({

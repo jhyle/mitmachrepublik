@@ -56,5 +56,6 @@
 	<script src="/js/bootstrap.min.js"></script>
 	<script src="/js/bootstrap-datetimepicker.min.js"></script>
 	<script src="/js/locales/bootstrap-datetimepicker.de.js"></script>
+	<script src="/js/bootstrap3-typeahead.min.js"></script>
 	<script src="/js/mmr.js"></script>
 </body> </html>

@@ -23,7 +23,9 @@ type (
 		CountById(bson.ObjectId) (int, error)
 		CheckForId(bson.ObjectId) error
 		Find(interface{}, interface{}, ...string) error
-		Search(interface{}, string, int, int, SearchResult) error
+		Search(interface{}, int, int, SearchResult, ...string) error
+		Distinct(interface{}, string, interface{}) error
+		Count(interface{}) (int, error)
 		UpsertById(bson.ObjectId, Item) (bson.ObjectId, error)
 		DeleteById(bson.ObjectId) error
 		Delete(interface{}) error
@@ -135,9 +137,19 @@ func (table *mongoTable) Find(query interface{}, result interface{}, orderBy ...
 	return table.collection.Find(query).Sort(orderBy...).All(result)
 }
 
-func (table *mongoTable) Search(query interface{}, sort string, skip int, limit int, result SearchResult) error {
+func (table *mongoTable) Distinct(query interface{}, field string, result interface{}) error {
 
-	find := table.collection.Find(query).Sort(sort)
+	return table.collection.Find(query).Distinct(field, result)
+}
+
+func (table *mongoTable) Count(query interface{}) (int, error) {
+
+	return table.collection.Find(query).Count()
+}
+
+func (table *mongoTable) Search(query interface{}, skip int, limit int, result SearchResult, orderBy ...string) error {
+
+	find := table.collection.Find(query).Sort(orderBy...)
 	count, err := find.Count()
 	if err != nil {
 		return err

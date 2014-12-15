@@ -12,10 +12,11 @@ type (
 	}
 
 	Address struct {
-		Name   string
-		Street string
-		Pcode  string
-		City   string
+		Name     string
+		Street   string
+		Pcode    string
+		District string `json:",omitempty"`
+		City     string
 	}
 
 	User struct {
@@ -55,10 +56,23 @@ type (
 		GetSize() int
 		GetItem(int) Item
 	}
+
+	EventSearchResult struct {
+		Count  int
+		Start  int
+		Events []Event
+	}
+
+	OrganizerSearchResult struct {
+		Count      int
+		Start      int
+		Organizers []User
+	}
 )
 
 var (
 	CategoryMap map[string]int = map[string]int{
+		"alle Kategorien":  0,
 		"Kinder & Familie": 1,
 		"Jugendliche":      2,
 		"Studenten":        3,
@@ -78,6 +92,26 @@ var (
 		"Ehrenamt":         17,
 	}
 
+	CategoryIdMap map[int]string = map[int]string{
+		0:  "alle Kategorien",
+		1:  "Kinder & Familie",
+		2:  "Jugendliche",
+		3:  "Studenten",
+		4:  "Berufstätige",
+		5:  "Eltern",
+		6:  "Senioren",
+		7:  "Leute treffen",
+		8:  "Sport",
+		9:  "Gärtnern",
+		10: "Kultur",
+		11: "Bildung",
+		12: "Religion",
+		13: "Umwelt",
+		14: "Tierschutz",
+		15: "Demonstrationen",
+		16: "Soziales",
+		17: "Ehrenamt",
+	}
 	CategoryOrder []string = []string{
 		"Kinder & Familie",
 		"Jugendliche",
@@ -96,6 +130,13 @@ var (
 		"Demonstrationen",
 		"Soziales",
 		"Ehrenamt",
+	}
+
+	DateIdMap map[int]string = map[int]string{
+		0: "aktuell",
+		1: "heute",
+		2: "morgen",
+		3: "wochenende",
 	}
 )
 
@@ -131,4 +172,44 @@ func (session *Session) GetId() bson.ObjectId {
 
 func (session *Session) SetId(id bson.ObjectId) {
 	session.Id = id
+}
+
+func (result *EventSearchResult) SetCount(count int) {
+	result.Count = count
+}
+
+func (result *EventSearchResult) SetStart(start int) {
+	result.Start = start
+}
+
+func (result *EventSearchResult) GetData() interface{} {
+	return &result.Events
+}
+
+func (result *EventSearchResult) GetSize() int {
+	return len(result.Events)
+}
+
+func (result *EventSearchResult) GetItem(i int) Item {
+	return &result.Events[i]
+}
+
+func (result *OrganizerSearchResult) SetCount(count int) {
+	result.Count = count
+}
+
+func (result *OrganizerSearchResult) SetStart(start int) {
+	result.Start = start
+}
+
+func (result *OrganizerSearchResult) GetData() interface{} {
+	return &result.Organizers
+}
+
+func (result *OrganizerSearchResult) GetSize() int {
+	return len(result.Organizers)
+}
+
+func (result *OrganizerSearchResult) GetItem(i int) Item {
+	return &result.Organizers[i]
 }

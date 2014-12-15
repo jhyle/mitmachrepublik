@@ -7,20 +7,23 @@ import (
 	"github.com/pilu/traffic"
 	"labix.org/v2/mgo/bson"
 	"net/http"
-	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type (
 	WebServer struct {
 		host         string
 		port         int
+		niceExpr     *regexp.Regexp
 		tpls         *Templates
 		imgServer    string
 		database     Database
 		emailAccount *EmailAccount
+		locations    *LocationTree
 	}
 
 	emailAndPwd struct {
@@ -52,17 +55,22 @@ var (
 
 func NewWebServer(host string, port int, tplDir, imgServer, mongoUrl, dbName string) (*WebServer, error) {
 
+	niceExpr, err := regexp.Compile("[^A-Za-z0-9]+")
+	if err != nil {
+		return nil, err
+	}
+
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	err = database.Table("user").EnsureIndices("email")
 	if err != nil {
 		return nil, err
 	}
 
-	err = database.Table("event").EnsureIndices("organizerid", "start")	
+	err = database.Table("event").EnsureIndices("organizerid", "start")
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +81,14 @@ func NewWebServer(host string, port int, tplDir, imgServer, mongoUrl, dbName str
 	}
 
 	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", "MitmachRepublik <mitmachrepublik@gmail.com>"}
-	return &WebServer{host, port, tpls, imgServer, database, emailAccount}, nil
+
+	var cities []string
+	err = database.Table("event").Distinct(bson.M{}, "addr.city", &cities)
+	if err != nil {
+		return nil, err
+	}
+
+	return &WebServer{host, port, niceExpr, tpls, imgServer, database, emailAccount, NewLocationTree(cities)}, nil
 }
 
 func (web *WebServer) view(tpl string, w traffic.ResponseWriter, data bson.M) *webResult {
@@ -101,10 +116,129 @@ func (web *WebServer) handle(w traffic.ResponseWriter, result *webResult) {
 	}
 }
 
+func str2Int(s []string) []int {
+
+	a := make([]int, 0, len(s))
+
+	for _, token := range s {
+		n, err := strconv.Atoi(token)
+		if err == nil {
+			a = append(a, n)
+		}
+	}
+
+	return a
+}
+
+func int2Str(i []int) []string {
+
+	a := make([]string, len(i))
+
+	for j, n := range i {
+		a[j] = strconv.Itoa(n)
+	}
+
+	return a
+}
+
+func timeSpans(dateNames []string) [][]time.Time {
+
+	timeSpans := make([][]time.Time, len(dateNames))
+
+	for i, date := range dateNames {
+		now := time.Now()
+		timespan := make([]time.Time, 2)
+
+		if date == "aktuell" {
+			timespan[0] = now
+			timespan[1] = now
+		} else if date == "heute" {
+			timespan[0] = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+			timespan[1] = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
+		} else if date == "morgen" {
+			now = now.AddDate(0, 0, 1)
+			timespan[0] = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+			timespan[1] = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
+		} else if date == "wochenende" {
+			for now.Weekday() != time.Saturday && now.Weekday() != time.Sunday {
+				now = now.AddDate(0, 0, 1)
+			}
+			timespan[0] = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+			for now.Weekday() != time.Sunday {
+				now = now.AddDate(0, 0, 1)
+			}
+			timespan[1] = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
+		}
+		timeSpans[i] = timespan
+	}
+
+	return timeSpans
+}
+
+func buildQuery(place string, dates [][]time.Time, categoryIds []int) bson.M {
+
+	query := make([]bson.M, 0, 3)
+
+	if len(place) > 0 {
+		postcodes := Postcodes(place)
+		placesQuery := make([]bson.M, len(postcodes) + 1)
+		for i, postcode := range postcodes {
+			placesQuery[i] = bson.M{"addr.pcode": postcode}
+		}
+		placesQuery[len(postcodes)] = bson.M{"addr.city": place}
+		query = append(query, bson.M{"$or": placesQuery})
+	}
+
+	if len(dates) > 0 {
+		datesQuery := make([]bson.M, len(dates))
+		for i, timespan := range dates {
+			rangeQuery := make(bson.M)
+			rangeQuery["$gte"] = timespan[0]
+			if timespan[1] != timespan[0] {
+				rangeQuery["$lt"] = timespan[1]
+			}
+			datesQuery[i] = bson.M{"start": rangeQuery}
+		}
+		query = append(query, bson.M{"$or": datesQuery})
+	}
+
+	if len(categoryIds) > 0 && categoryIds[0] != 0 {
+		categoriesQuery := make([]bson.M, len(categoryIds))
+		for i, categoryId := range categoryIds {
+			categoriesQuery[i] = bson.M{"categories": categoryId}
+		}
+		query = append(query, bson.M{"$or": categoriesQuery})
+	}
+
+	return bson.M{"$and": query}
+}
+
+func (web *WebServer) countEvents(place string, categoryIds []int, dateNames []string) (int, error) {
+
+	query := buildQuery(place, timeSpans(dateNames), categoryIds)
+	return web.database.Table("event").Count(query)
+}
+
+func (web *WebServer) countOrganizers() (int, error) {
+
+	return web.database.Table("user").Count(nil)
+}
+
 func (web *WebServer) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *webResult {
-		return web.view("start.tpl", w, nil)
+
+		eventCnt, err := web.countEvents("Berlin", []int{0}, []string{"aktuell"})
+		if err != nil {
+			return &webResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		organizerCnt, err := web.countOrganizers()
+		if err != nil {
+			return &webResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return web.view("start.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "categories": CategoryOrder, "categoryIds": CategoryMap})
 	}()
 
 	web.handle(w, result)
@@ -137,8 +271,35 @@ func (web *WebServer) approvePage(w traffic.ResponseWriter, r *traffic.Request) 
 
 func (web *WebServer) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
+	radius, err := strconv.Atoi(r.Param("radius"))
+	if err != nil {
+		radius = 0
+	}
+
+	place := r.Param("place")
+	dateNames := strings.Split(r.Param("dates"), ",")
+	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
+
 	result := func() *webResult {
-		return web.view("events.tpl", w, nil)
+
+		eventCnt, err := web.countEvents(place, categoryIds, dateNames)
+		if err != nil {
+			return &webResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		organizerCnt, err := web.countOrganizers()
+		if err != nil {
+			return &webResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		var result EventSearchResult
+		query := buildQuery(place, timeSpans(dateNames), categoryIds)
+		err = web.database.Table("event").Search(query, 0, 10, &result, "start")
+		if err != nil {
+			return &webResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return web.view("events.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "events": result.Events, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap})
 	}()
 
 	web.handle(w, result)
@@ -244,6 +405,11 @@ func isEmpty(s string) bool {
 	return len(strings.TrimSpace(s)) == 0
 }
 
+func (web *WebServer) niceUrl(s string) string {
+
+	return strings.ToLower(strings.Trim(web.niceExpr.ReplaceAllString(s, "-"), "-"))
+}
+
 func (web *WebServer) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 	path := r.PostFormValue("search")
@@ -253,9 +419,9 @@ func (web *WebServer) searchHandler(w traffic.ResponseWriter, r *traffic.Request
 		path = "/veranstaltungen/"
 	}
 
-	place := strings.ToLower(r.PostFormValue("place"))
+	place := strings.Trim(r.PostFormValue("place"), " ")
 	if isEmpty(place) {
-		place = "berlin"
+		place = "Berlin"
 	}
 
 	radius, err := strconv.Atoi(r.PostFormValue("radius"))
@@ -263,9 +429,26 @@ func (web *WebServer) searchHandler(w traffic.ResponseWriter, r *traffic.Request
 		radius = 0
 	}
 
-	category := r.PostFormValue("category")
+	categoryIds := str2Int(r.Form["category"])
+	if len(categoryIds) == 0 {
+		categoryIds = append(categoryIds, 0)
+	}
+	categoryNames := make([]string, len(categoryIds))
+	for i, id := range categoryIds {
+		categoryNames[i] = CategoryIdMap[id]
+	}
 
-	w.Header().Set("Location", path+url.QueryEscape(place)+"/"+strconv.Itoa(radius)+"/"+url.QueryEscape(category))
+	dateIds := str2Int(r.Form["date"])
+	if len(dateIds) == 0 {
+		dateIds = append(dateIds, 0)
+	}
+
+	dateNames := make([]string, len(dateIds))
+	for i, id := range dateIds {
+		dateNames[i] = DateIdMap[id]
+	}
+
+	w.Header().Set("Location", path+place+"/"+strings.Join(dateNames, ",")+"/"+strings.Join(int2Str(categoryIds), ",")+"/"+strconv.Itoa(radius)+"/"+strings.Join(categoryNames, ","))
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -507,6 +690,55 @@ func (web *WebServer) eventHandler(w traffic.ResponseWriter, r *traffic.Request)
 	web.handle(w, result)
 }
 
+func (web *WebServer) locationHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	result := func() *webResult {
+
+		locations := web.locations.Autocomplete(r.Param("location"))
+		return &webResult{Status: http.StatusOK, JSON: locations}
+	}()
+
+	web.handle(w, result)
+}
+
+func (web *WebServer) eventCountHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	result := func() *webResult {
+
+		categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
+		
+		dateIds := str2Int(strings.Split(r.Param("dateIds"), ","))
+		dates := make([]string, len(dateIds))
+		for i, dateId := range dateIds {
+			dates[i] = DateIdMap[dateId]
+		}
+
+		cnt, err := web.countEvents(r.Param("place"), categoryIds, dates)
+		if err != nil {
+			return &webResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return &webResult{Status: http.StatusOK, JSON: cnt}
+	}()
+
+	web.handle(w, result)
+}
+
+func (web *WebServer) organizerCountHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	result := func() *webResult {
+
+		cnt, err := web.countOrganizers()
+		if err != nil {
+			return &webResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return &webResult{Status: http.StatusOK, JSON: cnt}
+	}()
+
+	web.handle(w, result)
+}
+
 func (web *WebServer) loginHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *webResult {
@@ -596,7 +828,7 @@ func (web *WebServer) Start() {
 	router.Get("/veranstalter/verwaltung/profil", web.profilePage)
 	router.Get("/veranstalter/verwaltung/veranstaltung", web.eventPage)
 	router.Get("/veranstalter/verwaltung/veranstaltung/:id", web.eventPage)
-	router.Get("/veranstaltungen/:place/:radius/:category", web.eventsPage)
+	router.Get("/veranstaltungen/:place/:dates/:categoryIds/:radius/:categories", web.eventsPage)
 
 	router.Post("/suche", web.searchHandler)
 	router.Post("/upload", web.uploadHandler)
@@ -605,6 +837,9 @@ func (web *WebServer) Start() {
 	router.Post("/profile", web.profileHandler)
 	router.Post("/unregister", web.unregisterHandler)
 	router.Post("/event", web.eventHandler)
+	router.Get("/location/:location", web.locationHandler)
+	router.Get("/eventcount/:place/:dateIds/:categoryIds", web.eventCountHandler)
+	router.Get("/organizercount/:place/:categoryIds", web.organizerCountHandler)
 	router.Post("/login", web.loginHandler)
 	router.Post("/logout", web.logoutHandler)
 
