@@ -12,6 +12,7 @@ type (
 		Table(string) Table
 		CreateSession(bson.ObjectId) (bson.ObjectId, error)
 		RemoveSession(bson.ObjectId) error
+		RemoveOldSessions(time.Duration) error
 		LoadUserBySessionId(bson.ObjectId) (*User, error)
 		LoadUserByEmailAndPassword(string, string) (*User, error)
 		Disconnect()
@@ -58,6 +59,12 @@ func (db *mongoDb) CreateSession(userId bson.ObjectId) (bson.ObjectId, error) {
 	return db.Table("session").UpsertById(session.GetId(), &session)
 }
 
+func (db *mongoDb) RemoveOldSessions(olderThan time.Duration) error {
+
+	date := time.Now().Add(-olderThan)
+	return db.Table("session").Delete(bson.M{"contact": bson.M{"$lt": date}})
+}
+
 func (db *mongoDb) RemoveSession(sessionId bson.ObjectId) error {
 
 	return db.Table("session").DeleteById(sessionId)
@@ -96,6 +103,12 @@ func (db *mongoDb) LoadUserBySessionId(sessionId bson.ObjectId) (*User, error) {
 
 	var user User
 	err = db.Table("user").LoadById(session.UserId, &user)
+	if err != nil {
+		return nil, err
+	}
+
+	session.Contact = time.Now()
+	_, err = db.Table("session").UpsertById(sessionId, &session)
 	if err != nil {
 		return nil, err
 	}

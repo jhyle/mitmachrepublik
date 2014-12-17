@@ -16,14 +16,16 @@ import (
 
 type (
 	WebServer struct {
-		host         string
-		port         int
-		niceExpr     *regexp.Regexp
-		tpls         *Templates
-		imgServer    string
-		database     Database
-		emailAccount *EmailAccount
-		locations    *LocationTree
+		host             string
+		port             int
+		niceExpr         *regexp.Regexp
+		tpls             *Templates
+		imgServer        string
+		database         Database
+		emailAccount     *EmailAccount
+		locations        *LocationTree
+		sessionService   Service
+		unusedImgService Service
 	}
 
 	emailAndPwd struct {
@@ -88,7 +90,7 @@ func NewWebServer(host string, port int, tplDir, imgServer, mongoUrl, dbName str
 		return nil, err
 	}
 
-	return &WebServer{host, port, niceExpr, tpls, imgServer, database, emailAccount, NewLocationTree(cities)}, nil
+	return &WebServer{host, port, niceExpr, tpls, imgServer, database, emailAccount, NewLocationTree(cities), NewSessionService(60, database), NewUnusedImgService(3600, database, imgServer)}, nil
 }
 
 func (web *WebServer) view(tpl string, w traffic.ResponseWriter, data bson.M) *webResult {
@@ -181,7 +183,7 @@ func buildQuery(place string, dates [][]time.Time, categoryIds []int) bson.M {
 
 	if len(place) > 0 {
 		postcodes := Postcodes(place)
-		placesQuery := make([]bson.M, len(postcodes) + 1)
+		placesQuery := make([]bson.M, len(postcodes)+1)
 		for i, postcode := range postcodes {
 			placesQuery[i] = bson.M{"addr.pcode": postcode}
 		}
@@ -706,7 +708,7 @@ func (web *WebServer) eventCountHandler(w traffic.ResponseWriter, r *traffic.Req
 	result := func() *webResult {
 
 		categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
-		
+
 		dateIds := str2Int(strings.Split(r.Param("dateIds"), ","))
 		dates := make([]string, len(dateIds))
 		for i, dateId := range dateIds {
@@ -816,6 +818,9 @@ func (web *WebServer) deleteEventHandler(w traffic.ResponseWriter, r *traffic.Re
 }
 
 func (web *WebServer) Start() {
+
+	web.sessionService.Start()
+	web.unusedImgService.Start()
 
 	traffic.SetHost(web.host)
 	traffic.SetPort(web.port)
