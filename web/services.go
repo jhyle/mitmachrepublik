@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 	"strconv"
+	"math/rand"
+	"labix.org/v2/mgo/bson"
 )
 
 type (
@@ -25,6 +27,12 @@ type (
 	}
 
 	UnusedImgService struct {
+		BasicService
+		database  Database
+		imgServer string
+	}
+
+	SpawnEventsService struct {
 		BasicService
 		database  Database
 		imgServer string
@@ -62,15 +70,25 @@ func (service *UnusedImgService) Start() {
 	service.start(service.serve)
 }
 
-func (service *UnusedImgService) serve() {
+func listImages(imgServer string, age int) ([]string, error) {
 
-	resp, err := http.Get(service.imgServer + "/?age=" + strconv.Itoa(3600 * 24))
+	resp, err := http.Get(imgServer + "/?age=" + strconv.Itoa(age))
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	var images []string
 	err = json.NewDecoder(resp.Body).Decode(&images)
+	if err != nil {
+		return nil, err
+	}
+	
+	return images, nil
+}
+
+func (service *UnusedImgService) serve() {
+
+	images, err := listImages(service.imgServer, 3600 * 24)
 	if err != nil {
 		return
 	}
@@ -106,12 +124,58 @@ func (service *UnusedImgService) serve() {
 		if err != nil {
 			return
 		}
-
-		resp, err = http.DefaultClient.Do(req)
-		if err != nil {
-			return
-		}
+		http.DefaultClient.Do(req)
 	}
+}
+
+func NewSpawnEventsService(interval int, database Database, imgServer string) Service {
+
+	return &SpawnEventsService{BasicService{idle, interval, nil}, database, imgServer}
+}
+
+func (service *SpawnEventsService) Start() {
+
+	service.start(service.serve)
+}
+
+func (service *SpawnEventsService) serve() {
+
+	titles := []string{"Volleyballtunier", "Wir haben es satt!", "Chor Open Stage Open Air", "Kinderbastelgruppe", "Jüdische Kulturtage", "Fit, Fun, Family im FEZ"}
+	locations := []string{"Sportzentrum", "Brandenburger Tor", "Heiligengeistkirche", "Kindercafé", "Gemeindezentrum", "FEZ"}
+	
+	images, err := listImages(service.imgServer, 0)
+	if err != nil {
+		return
+	}
+	
+	organizer, err := service.database.LoadUserByEmailAndPassword("leonhard.holz@web.de", "julius21")
+	if err != nil {
+		return
+	}
+	
+	districts := make([]string, 0, len(postcodeMap))
+	for district := range postcodeMap {
+		districts = append(districts, district)
+	}
+	
+	var event Event
+	event.Id = bson.NewObjectId()
+	event.OrganizerId = organizer.Id
+	event.Title = titles[rand.Intn(len(titles))]
+	event.Image = images[rand.Intn(len(images))]
+	event.Descr = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+	event.Web = "http://www.facebook.com"
+	event.Start = time.Now().Add(time.Duration(rand.Intn(720)) * time.Hour)
+	event.Categories = make([]int, 0)
+	for i := 0; i < rand.Intn(len(CategoryOrder)); i++ {
+		event.Categories = append(event.Categories, CategoryMap[CategoryOrder[rand.Intn(len(CategoryOrder))]])
+	} 
+	event.Addr.Name = locations[rand.Intn(len(locations))]
+	event.Addr.Street = "Baker Street 221"
+	district := districts[rand.Intn(len(districts))]
+	event.Addr.Pcode = postcodeMap[district][rand.Intn(len(postcodeMap[district]))]
+	event.Addr.City = "Berlin"
+	service.database.Table("event").UpsertById(event.Id, &event)
 }
 
 func (service *BasicService) start(serve func()) {

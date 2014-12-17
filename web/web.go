@@ -16,16 +16,15 @@ import (
 
 type (
 	WebServer struct {
-		host             string
-		port             int
-		niceExpr         *regexp.Regexp
-		tpls             *Templates
-		imgServer        string
-		database         Database
-		emailAccount     *EmailAccount
-		locations        *LocationTree
-		sessionService   Service
-		unusedImgService Service
+		host         string
+		port         int
+		niceExpr     *regexp.Regexp
+		tpls         *Templates
+		imgServer    string
+		database     Database
+		emailAccount *EmailAccount
+		locations    *LocationTree
+		services     []Service
 	}
 
 	emailAndPwd struct {
@@ -90,7 +89,12 @@ func NewWebServer(host string, port int, tplDir, imgServer, mongoUrl, dbName str
 		return nil, err
 	}
 
-	return &WebServer{host, port, niceExpr, tpls, imgServer, database, emailAccount, NewLocationTree(cities), NewSessionService(60, database), NewUnusedImgService(3600, database, imgServer)}, nil
+	services := make([]Service, 0, 3)
+	services = append(services, NewSessionService(60, database))
+	services = append(services, NewUnusedImgService(3600, database, imgServer))
+	services = append(services, NewSpawnEventsService(3600, database, imgServer))
+
+	return &WebServer{host, port, niceExpr, tpls, imgServer, database, emailAccount, NewLocationTree(cities), services}, nil
 }
 
 func (web *WebServer) view(tpl string, w traffic.ResponseWriter, data bson.M) *webResult {
@@ -819,8 +823,9 @@ func (web *WebServer) deleteEventHandler(w traffic.ResponseWriter, r *traffic.Re
 
 func (web *WebServer) Start() {
 
-	web.sessionService.Start()
-	web.unusedImgService.Start()
+	for _, service := range web.services {
+		service.Start()
+	}
 
 	traffic.SetHost(web.host)
 	traffic.SetPort(web.port)

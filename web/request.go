@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/pilu/traffic"
-	"io/ioutil"
 	"labix.org/v2/mgo/bson"
 )
 
@@ -14,18 +13,9 @@ type (
 	}
 )
 
-func (r *Request) ReadBinary() ([]byte, error) {
-
-	return ioutil.ReadAll(r.Request.Body)
-}
-
 func (r *Request) ReadJson(v interface{}) error {
 
-	buffer, err := r.ReadBinary()
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(buffer, v)
+	return json.NewDecoder(r.Body).Decode(v)
 }
 
 func (r *Request) ReadEmailAndPwd() (*emailAndPwd, error) {

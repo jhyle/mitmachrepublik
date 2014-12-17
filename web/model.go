@@ -15,7 +15,6 @@ type (
 		Name     string
 		Street   string
 		Pcode    string
-		District string `json:",omitempty"`
 		City     string
 	}
 
@@ -112,6 +111,7 @@ var (
 		16: "Soziales",
 		17: "Ehrenamt",
 	}
+
 	CategoryOrder []string = []string{
 		"Kinder & Familie",
 		"Jugendliche",
