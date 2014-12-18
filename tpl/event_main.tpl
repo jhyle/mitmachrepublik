@@ -9,7 +9,7 @@
 			{{if .event.Id }}<input type="hidden" id="event-Id" value="{{.event.Id.Hex}}">{{ end }}
 			<div class="form-group">
 				<div class="col-sm-7">
-					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Was willst Du machen?" value="{{.event.Title}}"></span>
+					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Was willst Du machen?" value="{{.event.Title}}" maxlength="40"></span>
 					<span><input name="start" type="datetime-local" id="event-Start" class="form-control form-datetime" placeholder="Fängt an" value="{{dateFormat .event.Start}}"></span>
 					<span><input name="end" type="datetime-local" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{dateFormat .event.End}}"></span>
 				</div>
@@ -55,7 +55,7 @@
 					<input name="street" type="text" id="event-Street" class="form-control" placeholder="Straße" value="{{.event.Addr.Street}}">
 				</div>
 				<div class="col-sm-3">
-					<input name="pcode" type="text" id="event-Pcode" class="form-control" placeholder="Postleitzahl" value="{{.event.Addr.Pcode}}">
+					<input name="pcode" type="text" id="event-Pcode" class="form-control" placeholder="Postleitzahl" value="{{.event.Addr.Pcode}}" maxlength="5">
 				</div>
 				<div class="col-sm-3">
 					<input name="city" type="text" id="event-City" class="form-control" placeholder="Ort" value="{{.event.Addr.City}}">

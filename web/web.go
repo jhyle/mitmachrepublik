@@ -333,7 +333,19 @@ func (web *WebServer) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &webResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		return web.view("events.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "events": result.Events, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap})
+		organizerNames := make(map[bson.ObjectId]string)
+		for _, event := range result.Events {
+			if _, found := organizerNames[event.OrganizerId]; !found {
+				var user User
+				err = web.database.Table("user").LoadById(event.OrganizerId, &user)
+				if err != nil {
+					return &webResult{Status: http.StatusInternalServerError, Error: err}
+				}
+				organizerNames[event.OrganizerId] = user.Addr.Name
+			}
+		}
+
+		return web.view("events.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap})
 	}()
 
 	web.handle(w, result)

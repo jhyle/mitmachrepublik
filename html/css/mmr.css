@@ -78,7 +78,7 @@ div.col-banner h4 {
 }
 div.col-head {
 	padding: 10px;
-	line-height: 1.6;
+	line-height: 1.8;
 }
 .btn-mmr, .btn-mmr:hover, .btn-mmr:focus {
 	color: white;
@@ -115,6 +115,9 @@ div.tile-text {
 }
 div.tile-text .form-control, div.tile-text .btn {
 	font-size: 14px;
+}
+div.tile-text p {
+	margin-bottom: 3px;
 }
 div.col-box {
 	border: 1px solid #e6e6e6;
@@ -157,13 +160,13 @@ div.big-icon span {
 div.small-icon {
 	position: absolute;
 	margin: 10px;
-	font-size: 23px;
+	font-size: 24px;
 	width: 40px;
 	height: 40px;
 	border-radius: 20px;
 }
 div.small-icon span {
-	line-height: 1.75;
+	line-height: 1.7;
 	margin-left: 5px;
 }
 p.place-icon {
@@ -179,13 +182,11 @@ p.place-icon span {
 .datetime {
 	font-weight: bold;
 	font-size: 13px;
-	margin-bottom: 0;
 }
 .place {
 	font-size: 13px;
 	color: #7a7d7d;
-	width: 40%;
-	padding-left: 10px;
+	padding: 0 0 0 10px;
 }
 .big-text {
 	font-size: 17px;

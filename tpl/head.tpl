@@ -130,7 +130,7 @@
 	<div class="container">
 		<div class="row">
 		<div class="col-lg-1 hidden-md hidden-sm hidden-xs">&nbsp;</div>
-		<div class="col-md-3 col-sm-4"><a href="/" title="Startseite"><img src="/images/mitmachrepublik.gif" style="max-width:80%" alt="Mitmach-Republik"/></a></div>
+		<div class="col-md-3 col-sm-4 col-head"><a href="/" title="MitmachRepublik"><img src="/images/mitmachrepublik.gif" style="max-width:80%" alt="MitmachRepublik"/></a></div>
 		<div class="col-md-1 hidden-sm hidden-xs">&nbsp;</div>
 		<div class="col-lg-3 col-md-4 col-sm-5 col-head">Du bist Veranstalter?<br /><a id="head-events" href="#" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
 		<div class="col-md-1 hidden-sm hidden-xs">&nbsp;</div>
