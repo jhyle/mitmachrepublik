@@ -135,6 +135,7 @@ func NewSpawnEventsService(interval int, database Database, imgServer string) Se
 
 func (service *SpawnEventsService) Start() {
 
+	rand.Seed(time.Now().Unix())
 	service.start(service.serve)
 }
 

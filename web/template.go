@@ -1,6 +1,7 @@
 package mmr
 
 import (
+	"strings"
 	"errors"
 	"fmt"
 	"html/template"
@@ -30,6 +31,30 @@ func dateFormat(t time.Time) string {
 	}
 }
 
+func strClip(s string, n int) string {
+
+	runes := 0
+	clipped := s
+
+	for index, _ := range s {
+		if runes == n {
+			clipped = s[:index]
+			if strings.LastIndexAny(clipped, ".") != index {
+				clipped = clipped[:strings.LastIndexAny(clipped, " ,\t\r\n")] + "..."
+			}
+			break
+		}
+		runes++
+	}
+	
+	return clipped
+}
+
+func categoryIcon(categoryId int) string {
+
+	return CategoryIconMap[categoryId]
+}
+
 func NewTemplates(pattern string) (*Templates, error) {
 
 	files, err := filepath.Glob(pattern)
@@ -46,7 +71,7 @@ func NewTemplates(pattern string) (*Templates, error) {
 		modTimes[i] = fileInfo.ModTime()
 	}
 
-	tpls, err := template.New("/").Funcs(map[string]interface{}{"dateFormat": dateFormat}).ParseFiles(files...)
+	tpls, err := template.New("/").Funcs(map[string]interface{}{"dateFormat": dateFormat, "strClip": strClip, "categoryIcon": categoryIcon}).ParseFiles(files...)
 	if err != nil {
 		return nil, err
 	}

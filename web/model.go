@@ -105,11 +105,32 @@ var (
 		10: "Kultur",
 		11: "Bildung",
 		12: "Religion",
-		13: "Umwelt",
+		13: "Umweltschutz",
 		14: "Tierschutz",
 		15: "Demonstrationen",
 		16: "Soziales",
 		17: "Ehrenamt",
+	}
+
+	CategoryIconMap map[int]string = map[int]string{
+		0:  "calendar",
+		1:  "child",
+		2:  "child",
+		3:  "group",
+		4:  "group",
+		5:  "group",
+		6:  "group",
+		7:  "glass",
+		8:  "futbol-o",
+		9:  "leaf",
+		10: "institution",
+		11: "graduation-cap",
+		12: "group",
+		13: "globe",
+		14: "globe",
+		15: "globe",
+		16: "heart",
+		17: "heart",
 	}
 
 	CategoryOrder []string = []string{

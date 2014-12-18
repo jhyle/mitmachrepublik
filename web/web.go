@@ -232,9 +232,14 @@ func (web *WebServer) countOrganizers() (int, error) {
 
 func (web *WebServer) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
+	eventsPerRow := 4
+	place := "Berlin"
+	categoryIds := []int{0}
+	dateNames := []string{"aktuell"}
+
 	result := func() *webResult {
 
-		eventCnt, err := web.countEvents("Berlin", []int{0}, []string{"aktuell"})
+		eventCnt, err := web.countEvents(place, categoryIds, dateNames)
 		if err != nil {
 			return &webResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -244,7 +249,30 @@ func (web *WebServer) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &webResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		return web.view("start.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "categories": CategoryOrder, "categoryIds": CategoryMap})
+		var result EventSearchResult
+		err = web.database.Table("event").Search(buildQuery(place, timeSpans(dateNames), categoryIds), 0, eventsPerRow*2, &result, "start")
+		if err != nil {
+			return &webResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		events := make([][]Event, 0)
+		if result.Count > 0 {
+			events = make([][]Event, ((result.Count-1)/eventsPerRow)+1)
+			for i := range events {
+
+				rowSize := result.Count - i*eventsPerRow
+				if rowSize > eventsPerRow {
+					rowSize = eventsPerRow
+				}
+				events[i] = make([]Event, rowSize)
+
+				for j := 0; j < rowSize; j++ {
+					events[i][j] = result.Events[i*eventsPerRow+j]
+				}
+			}
+		}
+
+		return web.view("start.tpl", w, bson.M{"events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "categories": CategoryOrder, "categoryIds": CategoryMap})
 	}()
 
 	web.handle(w, result)
