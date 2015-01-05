@@ -1,9 +1,7 @@
 package mmr
 
 import (
-	"strings"
 	"errors"
-	"fmt"
 	"html/template"
 	"io"
 	"os"
@@ -19,43 +17,11 @@ type (
 		files    []string
 		modTimes []time.Time
 		tpls     *template.Template
+		funcs    map[string]interface{}
 	}
 )
 
-func dateFormat(t time.Time) string {
-
-	if t.IsZero() {
-		return ""
-	} else {
-		return fmt.Sprintf("%02d.%02d.%04d %02d.%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
-	}
-}
-
-func strClip(s string, n int) string {
-
-	runes := 0
-	clipped := s
-
-	for index, _ := range s {
-		if runes == n {
-			clipped = s[:index]
-			if strings.LastIndexAny(clipped, ".") != index {
-				clipped = clipped[:strings.LastIndexAny(clipped, " ,\t\r\n")] + "..."
-			}
-			break
-		}
-		runes++
-	}
-	
-	return clipped
-}
-
-func categoryIcon(categoryId int) string {
-
-	return CategoryIconMap[categoryId]
-}
-
-func NewTemplates(pattern string) (*Templates, error) {
+func NewTemplates(pattern string, funcs map[string]interface{}) (*Templates, error) {
 
 	files, err := filepath.Glob(pattern)
 	if err != nil {
@@ -71,12 +37,12 @@ func NewTemplates(pattern string) (*Templates, error) {
 		modTimes[i] = fileInfo.ModTime()
 	}
 
-	tpls, err := template.New("/").Funcs(map[string]interface{}{"dateFormat": dateFormat, "strClip": strClip, "categoryIcon": categoryIcon}).ParseFiles(files...)
+	tpls, err := template.New("/").Funcs(funcs).ParseFiles(files...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Templates{pattern: pattern, files: files, modTimes: modTimes, tpls: tpls}, nil
+	return &Templates{pattern: pattern, files: files, modTimes: modTimes, tpls: tpls, funcs: funcs}, nil
 }
 
 func (templates *Templates) reloadIfChanged() error {
@@ -93,7 +59,7 @@ func (templates *Templates) reloadIfChanged() error {
 			break
 		}
 		if fileInfo.ModTime() != templates.modTimes[i] {
-			newTemplates, err = NewTemplates(templates.pattern)
+			newTemplates, err = NewTemplates(templates.pattern, templates.funcs)
 			if err == nil {
 				templates.files = newTemplates.files
 				templates.modTimes = newTemplates.modTimes

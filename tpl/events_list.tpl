@@ -7,15 +7,15 @@
 {{range .events}}
 <div class="row-tile">
 	{{if .Image}}
-		<div class="small-icon"><span class="fa fa-{{with index .Categories 0}}{{categoryIcon .}}{{end}} fa-fw"></span></div>
-		<img class="img-responsive pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165">
+		<div class="small-icon"><span class="fa fa-{{if len .Categories}}{{with index .Categories 0}}{{categoryIcon .}}{{end}}{{end}} fa-fw"></span></div>
+		<img class="pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165">
 	{{end}}
 	<div class="tile-text" {{if .Image}}style="margin-left: 230px"{{end}}>
 		{{ if $.user }}
 			<p class="pull-right"><a href="#" name="delete-event" title="Löschen" data-target="{{.Id.Hex}}" class="close"><span class="fa fa-times"></span></a></p>
 		{{ end }}
 		<h3>{{.Title}}</h3>
-		<p class="datetime">{{dateFormat .Start}} - {{index $.organizerNames .OrganizerId}}</p>
+		<p class="datetime">{{dateFormat .Start}}{{if $.organizerNames}} - {{index $.organizerNames .OrganizerId}}{{end}}</p>
 		<p>{{strClip .Descr 100}}</p>
 		{{ if not .Addr.IsEmpty }}
 			<p class="place-icon pull-left"><span class="fa fa-map-marker"></span></p>

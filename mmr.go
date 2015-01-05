@@ -69,10 +69,10 @@ func main() {
     	os.Exit(1)
     }
 
-    webServer, err := mmr.NewWebServer(*hostFlag, *portFlag, *templateDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag)
+    app, err := mmr.NewMmrApp(*hostFlag, *portFlag, *templateDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag)
     if err != nil {
     	fmt.Println(err.Error())
     } else {
-		webServer.Start()
+		app.Start()
 	}
 }
