@@ -8,7 +8,7 @@
 	<div class="col-sm-10"><h1>{{if eq $len 1}}Eine Veranstaltung{{else}}{{$len}} Veranstaltungen{{end}} in Berlin</h1></div>
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 </div-->
-<div class="row tiles">
+<div id="events" class="row tiles">
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 	<div class="col-sm-3 col-box">
 		<h3>Filter</h3>

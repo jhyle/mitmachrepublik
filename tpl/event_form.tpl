@@ -64,7 +64,7 @@
 			<hr>
 			<div class="form-group">
 				<div class="col-sm-4">
-					<a href="/veranstalter/verwaltung" class="btn btn-default" style="width: 90%">Abbrechen</a>
+					<a href="/veranstalter/verwaltung/0" onClick="history.back();return false" class="btn btn-default" style="width: 90%">Abbrechen</a>
 				</div>
 				<div class="col-sm-1">&nbsp;</div>
 				<div class="col-sm-7">

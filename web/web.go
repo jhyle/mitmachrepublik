@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"errors"
 )
 
 type (
@@ -61,22 +62,31 @@ func NewMmrApp(host string, port int, tplDir, imgServer, mongoUrl, dbName string
 
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("init of MongoDB failed: " + err.Error())
 	}
 
 	err = database.Table("user").EnsureIndices("email")
 	if err != nil {
-		return nil, err
+		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
 	err = database.Table("event").EnsureIndices("organizerid", "start")
 	if err != nil {
-		return nil, err
+		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
-	tpls, err := NewTemplates(tplDir + string(os.PathSeparator) + "*.tpl", map[string]interface{}{"dateFormat": dateFormat, "strClip": strClip, "categoryIcon": categoryIcon})
+	funcs := map[string]interface{}{
+		"inc":			inc,
+		"dec":			dec,
+		"dateFormat":   dateFormat,
+		"strClip":      strClip,
+		"categoryIcon": categoryIcon,
+		"eventUrl":     eventUrl,
+	}
+	
+	tpls, err := NewTemplates(tplDir+string(os.PathSeparator)+"*.tpl", funcs)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("init of templates failed: " + err.Error())
 	}
 
 	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", "MitmachRepublik <mitmachrepublik@gmail.com>"}
@@ -84,7 +94,7 @@ func NewMmrApp(host string, port int, tplDir, imgServer, mongoUrl, dbName string
 	var cities []string
 	err = database.Table("event").Distinct(bson.M{}, "addr.city", &cities)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
 	services := make([]Service, 0, 3)
@@ -206,6 +216,12 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
+	pageSize := 5
+	page, err := strconv.Atoi(r.Param("page"))
+	if err != nil {
+		page = 0
+	}
+	
 	radius, err := strconv.Atoi(r.Param("radius"))
 	if err != nil {
 		radius = 0
@@ -229,7 +245,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		var result EventSearchResult
 		query := buildQuery(place, timeSpans(dateNames), categoryIds)
-		err = app.database.Table("event").Search(query, 0, 10, &result, "start")
+		err = app.database.Table("event").Search(query, page * pageSize, pageSize, &result, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -246,7 +262,17 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
-		return app.view("events.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap})
+		pageCount := result.Count / pageSize
+		if pageCount == 0 {
+			pageCount = 1;
+		}
+		pages := make([]int, pageCount)
+		for i := 0; i < pageCount; i++ {
+			pages[i] = i
+		}
+		maxPage := pageCount - 1;
+
+		return app.view("events.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap})
 	}()
 
 	app.handle(w, result)
@@ -278,6 +304,12 @@ func (app *MmrApp) checkSession(r *Request) (*User, error) {
 
 func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
+	pageSize := 5
+	page, err := strconv.Atoi(r.Param("page"))
+	if err != nil {
+		page = 0
+	}
+	
 	result := func() *appResult {
 
 		user, err := app.checkSession((&Request{r}))
@@ -285,13 +317,23 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultBadRequest
 		}
 
-		var events []Event
-		err = app.database.Table("event").Find(bson.M{"organizerid": user.Id}, &events, "-start")
+		var result EventSearchResult
+		err = app.database.Table("event").Search(bson.M{"organizerid": user.Id}, page * pageSize, pageSize, &result, "-start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		return app.view("admin.tpl", w, bson.M{"user": user, "events": events})
+		pageCount := result.Count / pageSize
+		if pageCount == 0 {
+			pageCount = 1;
+		}
+		pages := make([]int, pageCount)
+		for i := 0; i < pageCount; i++ {
+			pages[i] = i
+		}
+		maxPage := pageCount - 1;
+
+		return app.view("admin.tpl", w, bson.M{"user": user, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events})
 	}()
 
 	app.handle(w, result)
@@ -399,7 +441,7 @@ func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 		dateNames[i] = DateIdMap[id]
 	}
 
-	w.Header().Set("Location", path+place+"/"+strings.Join(dateNames, ",")+"/"+strings.Join(int2Str(categoryIds), ",")+"/"+strconv.Itoa(radius)+"/"+strings.Join(categoryNames, ","))
+	w.Header().Set("Location", path+place+"/"+strings.Join(dateNames, ",")+"/"+strings.Join(int2Str(categoryIds), ",")+"/"+strconv.Itoa(radius)+"/"+strings.Join(categoryNames, ",")+"/0")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -759,13 +801,14 @@ func (app *MmrApp) Start() {
 
 	router.Get("/", app.startPage)
 	router.Get("/approve/:id", app.approvePage)
-	router.Get("/veranstalter/verwaltung", app.adminPage)
 	router.Get("/veranstalter/verwaltung/kennwort", app.passwordPage)
 	router.Get("/veranstalter/verwaltung/profil", app.profilePage)
 	router.Get("/veranstalter/verwaltung/veranstaltung", app.editEventPage)
 	router.Get("/veranstalter/verwaltung/veranstaltung/:id", app.editEventPage)
-	router.Get("/veranstaltungen/:place/:dates/:categoryIds/:radius/:categories", app.eventsPage)
-	router.Get("/veranstaltung/:id", app.eventPage)
+	router.Get("/veranstalter/verwaltung/:page", app.adminPage)
+	router.Get("/veranstaltungen/:place/:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
+	router.Get("/veranstaltung//:date/:id/:title", app.eventPage)
+	router.Get("/veranstaltung/:categories/:date/:id/:title", app.eventPage)
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)

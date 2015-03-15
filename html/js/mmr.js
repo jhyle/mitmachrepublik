@@ -314,7 +314,7 @@ $(function() {
 		$.ajax({cache: false, url : "/profile", type: "POST", dataType : "json", data : JSON.stringify(data),
 			error : function(result) {
 				if (result.status == 200) {
-					window.location.href = "/veranstalter/verwaltung";
+					window.location.href = "/veranstalter/verwaltung/0";
 				} else {
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
@@ -334,7 +334,7 @@ $(function() {
 		$.ajax({cache: false, url : "/password", type: "POST", dataType : "json", data : JSON.stringify(data),
 			error : function(result) {
 				if (result.status == 200) {
-					window.location.href = "/veranstalter/verwaltung";
+					window.location.href = "/veranstalter/verwaltung/0";
 				} else {
 					$("#password-submit").button('reset');
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
@@ -377,7 +377,7 @@ $(function() {
 		$.ajax({cache: false, url : "/event", type: "POST", dataType : "json", data : JSON.stringify(data),
 			error : function(result) {
 				if (result.status == 200 || result.status == 201) {
-					window.location.href = "/veranstalter/verwaltung";
+					window.location.href = "/veranstalter/verwaltung/0";
 				} else {
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
@@ -392,7 +392,7 @@ $(function() {
 			success: function(sessionid) {
 				$("#login").modal("hide");
 				$.cookie("SESSIONID", sessionid, {path: '/'});
-				window.location.href = "/veranstalter/verwaltung";
+				window.location.href = "/veranstalter/verwaltung/0";
 			},
 			error : function(result) {
 				if (result.status == 404) {
@@ -424,7 +424,7 @@ $(function() {
 		if (confirm("Die Veranstaltung wird unwiederbringlich gelöscht.")) {
 			$.ajax({cache: false, url : "/event/" + $(this).data("target"), type: "DELETE",
 				success: function() {
-					window.location.href = window.location.href;
+					window.location.reload();
 				},
 				error : function() {
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
@@ -470,7 +470,7 @@ $(function() {
 		$("#head-events").html("<span class='fa fa-caret-right'></span> Meine Veranstaltungen");
 		$("#head-events").attr("data-toggle", "");
 		$("#head-events").attr("data-target", "");
-		$("#head-events").attr("href", "/veranstalter/verwaltung");
+		$("#head-events").attr("href", "/veranstalter/verwaltung/0");
 		$("#head-login").html("<span class='fa fa-user highlight'></span> Abmelden");
 		$("#head-login").attr("data-toggle", "");
 		$("#head-login").attr("data-target", "");

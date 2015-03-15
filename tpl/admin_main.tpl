@@ -1,4 +1,4 @@
-<div class="row tiles">
+<div id="events" class="row tiles">
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 	<div class="col-sm-3 col-box">
 		{{template "organizer.tpl" .user}}

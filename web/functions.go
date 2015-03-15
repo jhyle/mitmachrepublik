@@ -9,6 +9,14 @@ import (
 	"time"
 )
 
+func inc(i int) int {
+	return i + 1
+}
+
+func dec(i int) int {
+	return i - 1
+}
+
 func dateFormat(t time.Time) string {
 
 	if t.IsZero() {
@@ -40,6 +48,16 @@ func strClip(s string, n int) string {
 func categoryIcon(categoryId int) string {
 
 	return CategoryIconMap[categoryId]
+}
+
+func eventUrl(event *Event) string {
+
+	categoryNames := make([]string, len(event.Categories))
+	for i, id := range event.Categories {
+		categoryNames[i] = CategoryIdMap[id]
+	}
+
+	return strings.Join(categoryNames, ",") + "/" + dateFormat(event.Start) + "/" + event.Id.Hex() + "/" + event.Title
 }
 
 func str2Int(s []string) []int {
