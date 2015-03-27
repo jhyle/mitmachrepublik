@@ -15,7 +15,7 @@
 	    <li><span class="fa fa-facebook fa-fw"></span>Facebook</li>
 	    <li><span class="fa fa-twitter fa-fw" ></span>Twitter</li>
 	    <li><h5>Spenden</h5></li>
-	    <li><span class="fa fa-flattr fa-fw" ></span>Flattr</li>
+	    <li><img src="/images/flattr_icon.png" /> Flattr</li>
 	  </ul>
 	</div>
 	<div class="col-sm-2 col-foot">
