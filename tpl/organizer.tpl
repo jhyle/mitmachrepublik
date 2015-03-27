@@ -3,4 +3,4 @@
 {{template "banner_search.tpl" .}}
 {{template "organizer_main.tpl" .}}
 </form>
-{{template "foot.tpl"}}
+{{template "foot.tpl" .}}

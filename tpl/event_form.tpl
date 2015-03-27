@@ -28,7 +28,7 @@
 				<div class="col-sm-12" style="margin-left: 10px">
 					<span id="event-Category" class="help-block">Wähle eine oder mehrere Kategorien aus:</span>
 				{{ range .categories }}
-					{{ $id := index $.categoryIds . }}
+					{{ $id := index $.categoryMap . }}
 					<label class="checkbox-inline"><input type="checkbox" name="event-Category" value="{{$id}}"
 					{{ range $.event.Categories }}
 						{{ if eq . $id }}checked{{ end }}

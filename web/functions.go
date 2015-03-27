@@ -17,6 +17,11 @@ func dec(i int) int {
 	return i - 1
 }
 
+func cut(s string, field int) string {
+
+	return strings.Split(s, " ")[field]
+}
+
 var weekday map[int]string = map[int]string{
 	int(time.Monday):    "Montag",
 	int(time.Tuesday):   "Dienstag",
@@ -78,6 +83,31 @@ func categoryIcon(categoryId int) string {
 	return CategoryIconMap[categoryId]
 }
 
+func eventSearchUrl(place string, categoryIds []int, dateIds []int, radius int) string {
+
+	dateNames := make([]string, len(dateIds))
+	for i, id := range dateIds {
+		dateNames[i] = DateIdMap[id]
+	}
+
+	categoryNames := make([]string, len(categoryIds))
+	for i, id := range categoryIds {
+		categoryNames[i] = CategoryIdMap[id]
+	}
+
+	return place + "/" + strings.Join(dateNames, ",") + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + strings.Join(categoryNames, ",") + "/0"
+}
+
+func simpleEventSearchUrl(place string) string {
+
+	return eventSearchUrl(place, []int{0}, []int{0}, 0)
+}
+
+func categorySearchUrl(category int, place string) string {
+
+	return eventSearchUrl(place, []int{category}, []int{0}, 0)
+}
+
 func eventUrl(event *Event) string {
 
 	categoryNames := make([]string, len(event.Categories))
@@ -86,6 +116,20 @@ func eventUrl(event *Event) string {
 	}
 
 	return strings.Join(categoryNames, ",") + "/" + dateFormat(event.Start) + "/" + event.Id.Hex() + "/" + event.Title
+}
+
+func organizerSearchUrl(place string, categoryIds []int) string {
+
+	categoryNames := make([]string, len(categoryIds))
+	for i, id := range categoryIds {
+		categoryNames[i] = CategoryIdMap[id]
+	}
+	return place + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strings.Join(categoryNames, ",") + "/0"
+}
+
+func simpleOrganizerSearchUrl(place string) string {
+
+	return organizerSearchUrl(place, []int{0})
 }
 
 func organizerUrl(organizer User) string {

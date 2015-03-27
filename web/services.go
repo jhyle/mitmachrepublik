@@ -154,8 +154,8 @@ func (service *SpawnEventsService) serve() {
 		return
 	}
 	
-	districts := make([]string, 0, len(postcodeMap))
-	for district := range postcodeMap {
+	districts := make([]string, 0, len(PostcodeMap))
+	for district := range PostcodeMap {
 		districts = append(districts, district)
 	}
 	
@@ -174,7 +174,7 @@ func (service *SpawnEventsService) serve() {
 	event.Addr.Name = locations[rand.Intn(len(locations))]
 	event.Addr.Street = "Baker Street 221"
 	district := districts[rand.Intn(len(districts))]
-	event.Addr.Pcode = postcodeMap[district][rand.Intn(len(postcodeMap[district]))]
+	event.Addr.Pcode = PostcodeMap[district][rand.Intn(len(PostcodeMap[district]))]
 	event.Addr.City = "Berlin"
 	service.database.Table("event").UpsertById(event.Id, &event)
 }

@@ -5,7 +5,7 @@
 <div class="row tiles">
 	{{ $len := len .events }}
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
-	<div class="col-sm-10"><h1>{{if eq $len 1}}Eine Veranstaltung{{else}}{{$len}} Veranstaltungen{{end}} in {{.place}} gefunden</h1></div>
+	<div class="col-sm-10"><h1>{{if eq $len 1}}Eine Veranstaltung{{else}}{{if eq $len 0}}Keine{{else}}{{$len}}{{end}} Veranstaltungen{{end}} in {{.place}} gefunden</h1></div>
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 </div>
 <div id="events" class="row tiles">
@@ -46,4 +46,4 @@
 </div>
 
 </form>
-{{template "foot.tpl"}}
+{{template "foot.tpl" .}}

@@ -21,28 +21,29 @@
 	<div class="col-sm-2 col-foot">
 	  <ul>
 	    <li><h5>Was ist los in..</h5></li>
-	    <li>Friedrichshain</li>
-	    <li>Kreuzberg</li>
-	    <li>Mitte</li>
-	    <li>Charlottenburg</li>
+	    <li><a href="/veranstaltungen/{{eventSearchUrl "Berlin"}}">Berlin</a></li>
+	    {{range $district, $quarters := .districts}}
+	    	<li><a href="/veranstaltungen/{{eventSearchUrl $district}}">{{cut $district 1}}</a></li>
+	    {{end}}
 	  </ul>
 	</div>
 	<div class="col-sm-2 col-foot">
 	  <ul>
-	    <li><h5>Veranstalter</h5></li>
-	    <li>Friedrichshain</li>
-	    <li>Kreuzberg</li>
-	    <li>Mitte</li>
-	    <li>Charlottenburg</li>
+	    <li><h5>Veranstalter in..</h5></li>
+	    <li><a href="/veranstalter/{{organizerSearchUrl "Berlin"}}">Berlin</a></li>
+	    {{range $district, $quarters := .districts}}
+	    	<li><a href="/veranstalter/{{organizerSearchUrl $district}}">{{cut $district 1}}</a></li>
+	    {{end}}
 	  </ul>
 	</div>
 	<div class="col-sm-2 col-foot">
-	  <ul>
-	    <li><h5>Veranstaltungen</h5></li>
-	    <li>Kinder</li>
-	    <li>Sport</li>
-	    <li>Demos</li>
-	    <li>Natur</li>
+	  <ul style="margin-bottom: 0; padding-bottom: 0">
+	    <li><h5>Was gibt es in Kategorie..</h5></li>
+	    {{range $category, $id := .categoryMap}}
+	    	{{if $id}}
+	    		<li><a href="/veranstaltungen/{{categorySearchUrl $id "Berlin"}}">{{$category}}</a></li>
+	    	{{end}}
+	    {{end}}
 	  </ul>
 	</div>
         <div class="col-sm-1 hidden-xs">&nbsp;</div>

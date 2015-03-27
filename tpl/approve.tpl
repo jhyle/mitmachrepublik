@@ -7,4 +7,4 @@
 	</div>
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 </div>
-{{template "foot.tpl"}}
+{{template "foot.tpl" .}}

@@ -139,6 +139,9 @@ div.footer {
 	background-color: #303030;
 	line-height: 2;
 }
+div.footer a, div.footer a:hover, div.footer a:focus {
+	color: white;
+}
 div.col-foot {
 	padding: 30px 0;
 }

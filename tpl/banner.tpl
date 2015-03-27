@@ -9,7 +9,7 @@
 			<select name="category" class="form-control">
 				<option value="0">alle Kategorien</option>
 				{{ range .categories }}
-					{{ $id := index $.categoryIds . }}
+					{{ $id := index $.categoryMap . }}
 					<option value="{{$id}}">{{.}}</option>					
 				{{ end }}
 			</select>

@@ -12,7 +12,7 @@ type (
 )
 
 var (
-	districtMap map[string][]string = map[string][]string{
+	DistrictMap map[string][]string = map[string][]string{
 		"Berlin Charlottenburg-Wilmersdorf": []string{"Berlin Charlottenburg", "Berlin Charlottenburg-Nord", "Berlin Grunewald", "Berlin Halensee", "Berlin Schmargendorf", "Berlin Westend", "Berlin Wilmersdorf"},
 		"Berlin Friedrichshain-Kreuzberg":   []string{"Berlin Friedrichshain", "Berlin Kreuzberg"},
 		"Berlin Lichtenberg":                []string{"Berlin Alt-Hohenschönhausen", "Berlin Falkenberg", "Berlin Fennpfuhl", "Berlin Friedrichsfelde", "Berlin Karlshorst", "Berlin Lichtenberg", "Berlin Malchow", "Berlin Neu-Hohenschönhausen", "Berlin Rummelsburg", "Berlin Wartenberg"},
@@ -27,7 +27,7 @@ var (
 		"Berlin Treptow-Köpenick":           []string{"Berlin Adlershof", "Berlin Alt-Treptow", "Berlin Altglienicke", "Berlin Baumschulenweg", "Berlin Bohnsdorf", "Berlin Friedrichshagen", "Berlin Grünau", "Berlin Johannisthal", "Berlin Köpenick", "Berlin Müggelheim", "Berlin Niederschöneweide", "Berlin Oberschöneweide", "Berlin Plänterwald", "Berlin Rahnsdorf", "Berlin Schmöckwitz"},
 	}
 
-	postcodeMap map[string][]string = map[string][]string{
+	PostcodeMap map[string][]string = map[string][]string{
 		// Charlottenburg-Wilmersdorf
 		"Berlin Charlottenburg":      []string{"10553", "10585", "10587", "10589", "10623", "10625", "10627", "10629", "10707", "10709", "10711", "10719", "10787", "10789", "13627", "14050", "14055", "14057", "14059"},
 		"Berlin Charlottenburg-Nord": []string{"10589", "13353", "13627"},
@@ -146,15 +146,15 @@ func Postcodes(location string) []string {
 	districts := make([]string, 0)
 	districts = append(districts, location)
 	
-	if _, found := districtMap[location]; found {
-		for _, district := range districtMap[location] {
+	if _, found := DistrictMap[location]; found {
+		for _, district := range DistrictMap[location] {
 			districts = append(districts, district)
 		}
 	}
 	
 	for _, district := range districts {
-		if _, found := postcodeMap[district]; found {
-			for _, postcode := range postcodeMap[district] {
+		if _, found := PostcodeMap[district]; found {
+			for _, postcode := range PostcodeMap[district] {
 				postcodes[postcode] = postcode;
 			}
 		}
@@ -223,11 +223,11 @@ func NewLocationTree(locations []string) *LocationTree {
 		tree.add(location)
 	}
 
-	for district := range districtMap {
+	for district := range DistrictMap {
 		tree.add(district)
 	}
 
-	for citypart := range postcodeMap {
+	for citypart := range PostcodeMap {
 		tree.add(citypart)
 	}
 
