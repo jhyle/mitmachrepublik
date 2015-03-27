@@ -150,13 +150,12 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	eventsPerRow := 4
 	place := "Berlin"
-	categoryIds := []int{0}
 	dateNames := []string{"aktuell"}
 	title := "Willkommen in der Mitmach-Republik!"
 
 	result := func() *appResult {
 
-		eventCnt, err := app.countEvents(place, categoryIds, dateNames)
+		eventCnt, err := app.countEvents(place, nil, dateNames)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -167,7 +166,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		var result EventSearchResult
-		err = app.database.Table("event").Search(buildQuery(place, timeSpans(dateNames), categoryIds), 0, eventsPerRow*2, &result, "start")
+		err = app.database.Table("event").Search(buildQuery(place, timeSpans(dateNames), nil), 0, eventsPerRow*2, &result, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -290,7 +289,6 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	radius := 2
-	categories := []int{0}
 	dateNames := []string{"aktuell"}
 
 	result := func() *appResult {
@@ -313,7 +311,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		place := event.Addr.City
 
-		eventCnt, err := app.countEvents(place, categories, dateNames)
+		eventCnt, err := app.countEvents(place, nil, dateNames)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -331,6 +329,59 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 	app.handle(w, result)
 }
 
+func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	pageSize := 5
+	page, err := strconv.Atoi(r.Param("page"))
+	if err != nil {
+		page = 0
+	}
+
+	radius, err := strconv.Atoi(r.Param("radius"))
+	if err != nil {
+		radius = 0
+	}
+
+	place := r.Param("place")
+	dateNames := []string{"aktuell"}
+	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
+	title := "Veranstalter in " + place + " - Mitmach-Republik"
+
+	result := func() *appResult {
+
+		eventCnt, err := app.countEvents(place, categoryIds, dateNames)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		organizerCnt, err := app.countOrganizers(place)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		var result OrganizerSearchResult
+		query := buildQuery(place, nil, categoryIds)
+		err = app.database.Table("user").Search(query, page*pageSize, pageSize, &result, "addr.name")
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		pageCount := result.Count / pageSize
+		if pageCount == 0 {
+			pageCount = 1
+		}
+		pages := make([]int, pageCount)
+		for i := 0; i < pageCount; i++ {
+			pages[i] = i
+		}
+		maxPage := pageCount - 1
+
+		return app.view("organizers.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "organizers": result.Organizers, "place": place, "radius": radius, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap})
+	}()
+
+	app.handle(w, result)
+}
+
 func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	pageSize := 5
@@ -340,7 +391,6 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	radius := 2
-	categories := []int{0}
 	dateNames := []string{"aktuell"}
 
 	result := func() *appResult {
@@ -357,7 +407,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		place := organizer.Addr.City
 
-		eventCnt, err := app.countEvents(place, categories, dateNames)
+		eventCnt, err := app.countEvents(place, nil, dateNames)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -518,13 +568,6 @@ func (app *MmrApp) niceUrl(s string) string {
 
 func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
-	path := r.PostFormValue("search")
-	if path == "organizers" {
-		path = "/veranstalter/"
-	} else {
-		path = "/veranstaltungen/"
-	}
-
 	place := strings.Trim(r.PostFormValue("place"), " ")
 	if isEmpty(place) {
 		place = "Berlin"
@@ -554,7 +597,14 @@ func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 		dateNames[i] = DateIdMap[id]
 	}
 
-	w.Header().Set("Location", path+place+"/"+strings.Join(dateNames, ",")+"/"+strings.Join(int2Str(categoryIds), ",")+"/"+strconv.Itoa(radius)+"/"+strings.Join(categoryNames, ",")+"/0")
+	path := r.PostFormValue("search")
+	if path == "organizers" {
+		path = "/veranstalter/"+place+"/"+strings.Join(int2Str(categoryIds), ",")+"/"+strings.Join(categoryNames, ",")+"/0"
+	} else {
+		path = "/veranstaltungen/"+place+"/"+strings.Join(dateNames, ",")+"/"+strings.Join(int2Str(categoryIds), ",")+"/"+strconv.Itoa(radius)+"/"+strings.Join(categoryNames, ",")+"/0"
+	}
+
+	w.Header().Set("Location", path)
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -924,6 +974,7 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstaltung//:date/:id/:title", app.eventPage)
 	router.Get("/veranstaltung/:categories/:date/:id/:title", app.eventPage)
 	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
+	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)
