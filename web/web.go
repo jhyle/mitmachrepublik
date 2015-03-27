@@ -151,6 +151,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	place := "Berlin"
 	categoryIds := []int{0}
 	dateNames := []string{"aktuell"}
+	title := "Willkommen in der Mitmach-Republik!"
 
 	result := func() *appResult {
 
@@ -187,7 +188,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
-		return app.view("start.tpl", w, bson.M{"events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "categories": CategoryOrder, "categoryIds": CategoryMap})
+		return app.view("start.tpl", w, bson.M{"title": title, "events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "categories": CategoryOrder, "categoryIds": CategoryMap})
 	}()
 
 	app.handle(w, result)
@@ -195,6 +196,8 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 
+	title := "Registrierung bestätigen"
+	
 	result := func() *appResult {
 
 		var err error = nil
@@ -212,7 +215,7 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
-		return app.view("approve.tpl", w, bson.M{"approved": err == nil})
+		return app.view("approve.tpl", w, bson.M{"title": title, "approved": err == nil})
 	}()
 
 	app.handle(w, result)
@@ -234,6 +237,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	place := r.Param("place")
 	dateNames := strings.Split(r.Param("dates"), ",")
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
+	title := "Veranstaltungen in " + place + " - Mitmach-Republik"
 
 	result := func() *appResult {
 
@@ -276,7 +280,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		return app.view("events.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap})
+		return app.view("events.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap})
 	}()
 
 	app.handle(w, result)
@@ -316,7 +320,9 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		return app.view("event.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "radius": radius, "event": event, "organizer": organizer})
+		title := event.Title + " in " + event.Addr.City + " - Mitmach-Republik"
+
+		return app.view("event.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "radius": radius, "event": event, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -374,8 +380,9 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		maxPage := pageCount - 1
 
 		organizerNames := map[bson.ObjectId]string{organizer.Id: organizer.Addr.Name}
+		title:= organizer.Addr.Name + " aus " + organizer.Addr.City + " - Mitmach-Republik"
 		
-		return app.view("organizer.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "radius": radius, "organizer": organizer})
+		return app.view("organizer.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "radius": radius, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -403,6 +410,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 	if err != nil {
 		page = 0
 	}
+	title := "Verwaltung - Mitmach-Republik"
 
 	result := func() *appResult {
 
@@ -427,7 +435,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		return app.view("admin.tpl", w, bson.M{"user": user, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events})
+		return app.view("admin.tpl", w, bson.M{"title": title, "user": user, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events})
 	}()
 
 	app.handle(w, result)
@@ -435,6 +443,8 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
+	title := "Profil bearbeiten - Mitmach-Republik"
+
 	result := func() *appResult {
 
 		user, err := app.checkSession((&Request{r}))
@@ -442,7 +452,7 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultBadRequest
 		}
 
-		return app.view("profile.tpl", w, bson.M{"user": user, "categories": CategoryOrder, "categoryIds": CategoryMap})
+		return app.view("profile.tpl", w, bson.M{"title": title, "user": user, "categories": CategoryOrder, "categoryIds": CategoryMap})
 	}()
 
 	app.handle(w, result)
@@ -450,6 +460,8 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
+	title := "E-Mail-Adresse oder Kennwort ändern - Mitmach-Republik"
+
 	result := func() *appResult {
 
 		user, err := app.checkSession((&Request{r}))
@@ -457,13 +469,15 @@ func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultBadRequest
 		}
 
-		return app.view("password.tpl", w, bson.M{"user": user})
+		return app.view("password.tpl", w, bson.M{"title": title, "user": user})
 	}()
 
 	app.handle(w, result)
 }
 
 func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	title := "Veranstaltung bearbeiten - Mitmach-Republik"
 
 	result := func() *appResult {
 
@@ -486,7 +500,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
-		return app.view("event_edit.tpl", w, bson.M{"user": user, "event": event, "categories": CategoryOrder, "categoryIds": CategoryMap})
+		return app.view("event_edit.tpl", w, bson.M{"title": title, "user": user, "event": event, "categories": CategoryOrder, "categoryIds": CategoryMap})
 	}()
 
 	app.handle(w, result)
