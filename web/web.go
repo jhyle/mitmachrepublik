@@ -2,6 +2,7 @@ package mmr
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"errors"
 	"fmt"
 	"github.com/pilu/traffic"
 	"labix.org/v2/mgo/bson"
@@ -10,7 +11,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"errors"
 )
 
 type (
@@ -76,14 +76,16 @@ func NewMmrApp(host string, port int, tplDir, imgServer, mongoUrl, dbName string
 	}
 
 	funcs := map[string]interface{}{
-		"inc":			inc,
-		"dec":			dec,
-		"dateFormat":   dateFormat,
-		"strClip":      strClip,
-		"categoryIcon": categoryIcon,
-		"eventUrl":     eventUrl,
+		"inc":            inc,
+		"dec":            dec,
+		"dateFormat":     dateFormat,
+		"timeFormat":     timeFormat,
+		"datetimeFormat": datetimeFormat,
+		"strClip":        strClip,
+		"categoryIcon":   categoryIcon,
+		"eventUrl":       eventUrl,
 	}
-	
+
 	tpls, err := NewTemplates(tplDir+string(os.PathSeparator)+"*.tpl", funcs)
 	if err != nil {
 		return nil, errors.New("init of templates failed: " + err.Error())
@@ -221,7 +223,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	if err != nil {
 		page = 0
 	}
-	
+
 	radius, err := strconv.Atoi(r.Param("radius"))
 	if err != nil {
 		radius = 0
@@ -245,7 +247,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		var result EventSearchResult
 		query := buildQuery(place, timeSpans(dateNames), categoryIds)
-		err = app.database.Table("event").Search(query, page * pageSize, pageSize, &result, "start")
+		err = app.database.Table("event").Search(query, page*pageSize, pageSize, &result, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -264,13 +266,13 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		pageCount := result.Count / pageSize
 		if pageCount == 0 {
-			pageCount = 1;
+			pageCount = 1
 		}
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
 		}
-		maxPage := pageCount - 1;
+		maxPage := pageCount - 1
 
 		return app.view("events.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap})
 	}()
@@ -280,8 +282,38 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
+	radius := 2
+	dateNames := []string{"aktuell"}
+
 	result := func() *appResult {
-		return app.view("event.tpl", w, nil)
+
+		if !bson.IsObjectIdHex(r.Param("id")) {
+			return resultNotFound
+		}
+
+		var event Event
+		err := app.database.Table("event").LoadById(bson.ObjectIdHex(r.Param("id")), &event)
+		if err != nil {
+			return resultNotFound
+		}
+
+		var organizer User
+		err = app.database.Table("user").LoadById(event.OrganizerId, &organizer)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		eventCnt, err := app.countEvents(event.Addr.City, event.Categories, dateNames)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		organizerCnt, err := app.countOrganizers()
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return app.view("event.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "radius": radius, "event": event, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -309,7 +341,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 	if err != nil {
 		page = 0
 	}
-	
+
 	result := func() *appResult {
 
 		user, err := app.checkSession((&Request{r}))
@@ -318,20 +350,20 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		var result EventSearchResult
-		err = app.database.Table("event").Search(bson.M{"organizerid": user.Id}, page * pageSize, pageSize, &result, "-start")
+		err = app.database.Table("event").Search(bson.M{"organizerid": user.Id}, page*pageSize, pageSize, &result, "-start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
 		pageCount := result.Count / pageSize
 		if pageCount == 0 {
-			pageCount = 1;
+			pageCount = 1
 		}
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
 		}
-		maxPage := pageCount - 1;
+		maxPage := pageCount - 1
 
 		return app.view("admin.tpl", w, bson.M{"user": user, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events})
 	}()

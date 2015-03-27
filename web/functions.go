@@ -17,7 +17,35 @@ func dec(i int) int {
 	return i - 1
 }
 
+var weekday map[int]string = map[int]string{
+	int(time.Monday):    "Montag",
+	int(time.Tuesday):   "Dienstag",
+	int(time.Wednesday): "Mittwoch",
+	int(time.Thursday):  "Donnerstag",
+	int(time.Friday):    "Freitag",
+	int(time.Saturday):  "Samstag",
+	int(time.Sunday):    "Sonntag",
+}
+
 func dateFormat(t time.Time) string {
+
+	if t.IsZero() {
+		return ""
+	} else {
+		return fmt.Sprintf("%s, %02d.%02d.%04d", weekday[int(t.Weekday())], t.Day(), int(t.Month()), t.Year())
+	}
+}
+
+func timeFormat(t time.Time) string {
+
+	if t.IsZero() {
+		return ""
+	} else {
+		return fmt.Sprintf("%02d.%02d Uhr", t.Hour(), t.Minute())
+	}
+}
+
+func datetimeFormat(t time.Time) string {
 
 	if t.IsZero() {
 		return ""

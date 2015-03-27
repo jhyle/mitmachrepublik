@@ -142,7 +142,7 @@ div.footer {
 div.col-foot {
 	padding: 30px 0;
 }
-div.big-icon, div.small-icon, p.place-icon, div.cur-page {
+div.big-icon, div.small-icon, p.small-icon, div.cur-page {
 	color: white;
 	background-color: #ff7800;
 	background: linear-gradient(#ff7800, #ff5200);
@@ -169,24 +169,31 @@ div.small-icon span {
 	line-height: 1.7;
 	margin-left: 5px;
 }
-p.place-icon {
+p.small-icon {
 	font-size: 21px;
 	width: 32px;
 	height: 32px;
 	border-radius: 16px;
 	margin-top: 4px;
+	margin-right: 6px;
 }
-p.place-icon span {
+p.small-icon span.fa-map-marker {
 	margin-left: 10px;
 }
-.datetime {
+p.small-icon span.fa-calendar, p.small-icon span.fa-clock-o {
+	margin-left: 7px;
+}
+p.datetime {
 	font-weight: bold;
 	font-size: 13px;
 }
-.place {
+p.date, p.time {
+	font-weight: bold;
+	line-height: 2.4;
+}
+p.place {
 	font-size: 13px;
 	color: #7a7d7d;
-	padding: 0 0 0 10px;
 }
 .big-text {
 	font-size: 17px;
