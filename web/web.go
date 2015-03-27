@@ -565,6 +565,39 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 	app.handle(w, result)
 }
 
+func (app *MmrApp) impressumPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	title := "Impressum"
+
+	result := func() *appResult {
+		return app.view("impressum.tpl", w, bson.M{"title": title, "categoryMap": CategoryMap, "districts": DistrictMap})
+	}()
+
+	app.handle(w, result)
+}
+
+func (app *MmrApp) datenschutzPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	title := "Datenschutz"
+
+	result := func() *appResult {
+		return app.view("datenschutz.tpl", w, bson.M{"title": title, "categoryMap": CategoryMap, "districts": DistrictMap})
+	}()
+
+	app.handle(w, result)
+}
+
+func (app *MmrApp) agbsPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	title := "Allgemeine Geschäftsbedingungen"
+
+	result := func() *appResult {
+		return app.view("agbs.tpl", w, bson.M{"title": title, "categoryMap": CategoryMap, "districts": DistrictMap})
+	}()
+
+	app.handle(w, result)
+}
+
 func (app *MmrApp) niceUrl(s string) string {
 
 	return strings.ToLower(strings.Trim(app.niceExpr.ReplaceAllString(s, "-"), "-"))
@@ -959,7 +992,6 @@ func (app *MmrApp) Start() {
 	router := traffic.New()
 
 	router.Get("/", app.startPage)
-	router.Get("/approve/:id", app.approvePage)
 	router.Get("/veranstalter/verwaltung/kennwort", app.passwordPage)
 	router.Get("/veranstalter/verwaltung/profil", app.profilePage)
 	router.Get("/veranstalter/verwaltung/veranstaltung", app.editEventPage)
@@ -970,6 +1002,10 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstaltung/:categories/:date/:id/:title", app.eventPage)
 	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
+
+	router.Get("/impressum", app.impressumPage)
+	router.Get("/datenschutz", app.datenschutzPage)
+	router.Get("/agbs", app.agbsPage)
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)
@@ -984,6 +1020,7 @@ func (app *MmrApp) Start() {
 	router.Post("/login", app.loginHandler)
 	router.Post("/logout", app.logoutHandler)
 
+	router.Get("/approve/:id", app.approvePage)
 	router.Delete("/event/:id", app.deleteEventHandler)
 
 	router.Run()

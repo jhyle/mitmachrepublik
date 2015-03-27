@@ -4,9 +4,9 @@
 	  <ul>
 	    <li><h5>Rechtliches</h5></li>
 	    <li>Kontakt</li>
-	    <li>Impressum</li>
-	    <li>Datenschutz</li>
-	    <li>AGBs</li>
+	    <li><a href="/impressum">Impressum</a></li>
+	    <li><a href="/datenschutz">Datenschutz</a></li>
+	    <li><a href="/agbs">AGBs</a></li>
 	  </ul>
 	</div>
 	<div class="col-sm-2 col-foot">
