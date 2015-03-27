@@ -442,7 +442,7 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultBadRequest
 		}
 
-		return app.view("profile.tpl", w, bson.M{"user": user})
+		return app.view("profile.tpl", w, bson.M{"user": user, "categories": CategoryOrder, "categoryIds": CategoryMap})
 	}()
 
 	app.handle(w, result)
@@ -628,6 +628,7 @@ func (app *MmrApp) profileHandler(w traffic.ResponseWriter, r *traffic.Request) 
 
 		user.Addr.Name = data.Addr.Name
 		user.Image = data.Image
+		user.Categories = data.Categories
 		user.Descr = data.Descr
 		user.Web = data.Web
 		user.Addr.Street = data.Addr.Street

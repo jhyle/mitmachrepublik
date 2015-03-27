@@ -12,21 +12,22 @@ type (
 	}
 
 	Address struct {
-		Name     string
-		Street   string
-		Pcode    string
-		City     string
+		Name   string
+		Street string
+		Pcode  string
+		City   string
 	}
 
 	User struct {
-		Id       bson.ObjectId `bson:"_id" json:",omitempty"`
-		Email    string
-		Pwd      string
-		Image    string
-		Descr    string
-		Web      string
-		Addr     Address
-		Approved bool
+		Id         bson.ObjectId `bson:"_id" json:",omitempty"`
+		Email      string
+		Pwd        string
+		Image      string
+		Categories []int
+		Descr      string
+		Web        string
+		Addr       Address
+		Approved   bool
 	}
 
 	Session struct {

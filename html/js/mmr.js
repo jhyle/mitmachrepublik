@@ -110,6 +110,11 @@ function gatherProfileForm(id)
 			data["Addr"][addr_fields[i]] = $("#" + id + "-" + addr_fields[i]).val();
 		}
 	}
+	data["Categories"] = new Array();
+	categories = $("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get();
+	for (i = 0; i < categories.length; i++) {
+		data["Categories"][i] = parseInt(categories[i]);
+	}
 	return data;
 }
 
