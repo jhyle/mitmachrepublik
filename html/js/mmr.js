@@ -472,6 +472,7 @@ $(function() {
 	});
 	
 	if ($.cookie("SESSIONID")) {
+		$("#head-organizer").html("Du bist angemeldet.");
 		$("#head-events").html("<span class='fa fa-caret-right'></span> Meine Veranstaltungen");
 		$("#head-events").attr("data-toggle", "");
 		$("#head-events").attr("data-target", "");

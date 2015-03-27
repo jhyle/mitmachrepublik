@@ -132,7 +132,7 @@
 		<div class="col-lg-1 hidden-md hidden-sm hidden-xs">&nbsp;</div>
 		<div class="col-md-3 col-sm-4 col-head"><a href="/" title="MitmachRepublik"><img src="/images/mitmachrepublik.gif" style="max-width:80%" alt="MitmachRepublik"/></a></div>
 		<div class="col-md-1 hidden-sm hidden-xs">&nbsp;</div>
-		<div class="col-lg-3 col-md-4 col-sm-5 col-head">Du bist Veranstalter?<br /><a id="head-events" href="#" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
+		<div class="col-lg-3 col-md-4 col-sm-5 col-head"><span id="head-organizer">Du bist Veranstalter?</span><br /><a id="head-events" href="#" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
 		<div class="col-md-1 hidden-sm hidden-xs">&nbsp;</div>
 		<div class="col-md-2 col-sm-3 col-head"><a id="head-login" href="#" data-toggle="modal" data-target="#login"><span class="fa fa-user highlight"></span> Anmelden</a><br /><a href="#">Über uns</a> | <a href="#">Kontakt</a></div>
 		<div class="col-md-1 hidden-sm hidden-xs">&nbsp;</div>

@@ -38,7 +38,7 @@
 	</div>
 	<div class="col-sm-2 col-foot">
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
-	    <li><h5>Was gibt es in Kategorie..</h5></li>
+	    <li><h5>In Kategorie..</h5></li>
 	    {{range $category, $id := .categoryMap}}
 	    	{{if $id}}
 	    		<li><a href="/veranstaltungen/{{categorySearchUrl $id "Berlin"}}">{{$category}}</a></li>
