@@ -140,9 +140,10 @@ func (app *MmrApp) countEvents(place string, categoryIds []int, dateNames []stri
 	return app.database.Table("event").Count(query)
 }
 
-func (app *MmrApp) countOrganizers() (int, error) {
+func (app *MmrApp) countOrganizers(place string) (int, error) {
 
-	return app.database.Table("user").Count(nil)
+	query := buildQuery(place, nil, nil)
+	return app.database.Table("user").Count(query)
 }
 
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
@@ -160,7 +161,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers()
+		organizerCnt, err := app.countOrganizers(place)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -246,7 +247,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers()
+		organizerCnt, err := app.countOrganizers(place)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -310,19 +311,21 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		eventCnt, err := app.countEvents(event.Addr.City, categories, dateNames)
+		place := event.Addr.City
+
+		eventCnt, err := app.countEvents(place, categories, dateNames)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers()
+		organizerCnt, err := app.countOrganizers(place)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
 		title := event.Title + " in " + event.Addr.City + " - Mitmach-Republik"
 
-		return app.view("event.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "radius": radius, "event": event, "organizer": organizer})
+		return app.view("event.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -352,12 +355,14 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultNotFound
 		}
 
-		eventCnt, err := app.countEvents(organizer.Addr.City, categories, dateNames)
+		place := organizer.Addr.City
+
+		eventCnt, err := app.countEvents(place, categories, dateNames)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers()
+		organizerCnt, err := app.countOrganizers(place)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -382,7 +387,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		organizerNames := map[bson.ObjectId]string{organizer.Id: organizer.Addr.Name}
 		title:= organizer.Addr.Name + " aus " + organizer.Addr.City + " - Mitmach-Republik"
 		
-		return app.view("organizer.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "radius": radius, "organizer": organizer})
+		return app.view("organizer.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -811,7 +816,7 @@ func (app *MmrApp) organizerCountHandler(w traffic.ResponseWriter, r *traffic.Re
 
 	result := func() *appResult {
 
-		cnt, err := app.countOrganizers()
+		cnt, err := app.countOrganizers(r.Param("place"))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
