@@ -8,6 +8,7 @@ import (
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"os"
+	"time"
 	"regexp"
 	"strconv"
 	"strings"
@@ -84,6 +85,7 @@ func NewMmrApp(host string, port int, tplDir, imgServer, mongoUrl, dbName string
 		"strClip":        strClip,
 		"categoryIcon":   categoryIcon,
 		"eventUrl":       eventUrl,
+		"organizerUrl":   organizerUrl,
 	}
 
 	tpls, err := NewTemplates(tplDir+string(os.PathSeparator)+"*.tpl", funcs)
@@ -283,6 +285,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	radius := 2
+	categories := []int{0}
 	dateNames := []string{"aktuell"}
 
 	result := func() *appResult {
@@ -303,7 +306,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		eventCnt, err := app.countEvents(event.Addr.City, event.Categories, dateNames)
+		eventCnt, err := app.countEvents(event.Addr.City, categories, dateNames)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -314,6 +317,65 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		return app.view("event.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "radius": radius, "event": event, "organizer": organizer})
+	}()
+
+	app.handle(w, result)
+}
+
+func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	pageSize := 5
+	page, err := strconv.Atoi(r.Param("page"))
+	if err != nil {
+		page = 0
+	}
+
+	radius := 2
+	categories := []int{0}
+	dateNames := []string{"aktuell"}
+
+	result := func() *appResult {
+
+		if !bson.IsObjectIdHex(r.Param("id")) {
+			return resultNotFound
+		}
+
+		var organizer User
+		err := app.database.Table("user").LoadById(bson.ObjectIdHex(r.Param("id")), &organizer)
+		if err != nil {
+			return resultNotFound
+		}
+
+		eventCnt, err := app.countEvents(organizer.Addr.City, categories, dateNames)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		organizerCnt, err := app.countOrganizers()
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		var result EventSearchResult
+		query := bson.M{"$and": []bson.M{bson.M{"organizerid": organizer.Id}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
+		err = app.database.Table("event").Search(query, page*pageSize, pageSize, &result, "start")
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		pageCount := result.Count / pageSize
+		if pageCount == 0 {
+			pageCount = 1
+		}
+		pages := make([]int, pageCount)
+		for i := 0; i < pageCount; i++ {
+			pages[i] = i
+		}
+		maxPage := pageCount - 1
+
+		organizerNames := map[bson.ObjectId]string{organizer.Id: organizer.Addr.Name}
+		
+		return app.view("organizer.tpl", w, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "radius": radius, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -841,6 +903,7 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstaltungen/:place/:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
 	router.Get("/veranstaltung//:date/:id/:title", app.eventPage)
 	router.Get("/veranstaltung/:categories/:date/:id/:title", app.eventPage)
+	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)

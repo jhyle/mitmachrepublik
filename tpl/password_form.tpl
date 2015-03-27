@@ -1,7 +1,7 @@
 <div class="row tiles">
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 	<div class="col-sm-3 col-box">
-		{{template "organizer.tpl" .}}
+		{{template "organizer_box.tpl" .}}
 	</div>
 	<div class="col-sm-7">
 		<h3 style="margin-left: 10px">E-Mail-Adresse oder Kennwort ändern</h3>

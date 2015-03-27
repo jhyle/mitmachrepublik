@@ -1,12 +1,12 @@
 <div class="row tiles">
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
-	<div class="col-sm-10"><h1>{{.event.Title}}</h1></div>
+	<div class="col-sm-10"><h1>Veranstaltung {{.event.Title}}</h1></div>
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 </div>
 <div class="row tiles">
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 	<div class="col-sm-3 col-box">
-		{{template "organizer.tpl" .organizer}}
+		{{template "organizer_box.tpl" .organizer}}
 	</div>
 	{{with .event}}<div class="col-sm-7">
 		{{if .Image}}

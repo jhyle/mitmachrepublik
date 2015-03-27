@@ -1,7 +1,7 @@
 <div class="row tiles">
 	<div class="col-sm-1 hidden-xs">&nbsp;</div>
 	<div class="col-sm-3 col-box">
-		{{template "organizer.tpl" .user}}
+		{{template "organizer_box.tpl" .user}}
 	</div>
 	<div class="col-sm-7" style="padding-top: 15px">
 		<h3 style="margin-left: 10px">Veranstaltung {{ if .event.Id }}bearbeiten{{ else }}eintragen{{ end }}</h3>

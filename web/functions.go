@@ -88,6 +88,11 @@ func eventUrl(event *Event) string {
 	return strings.Join(categoryNames, ",") + "/" + dateFormat(event.Start) + "/" + event.Id.Hex() + "/" + event.Title
 }
 
+func organizerUrl(organizer User) string {
+
+	return organizer.Id.Hex() + "/" + organizer.Addr.Name + "/0"
+}
+
 func str2Int(s []string) []int {
 
 	a := make([]int, 0, len(s))
