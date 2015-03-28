@@ -1,16 +1,16 @@
 <div class="row tiles">
-	<div class="col-sm-1 hidden-xs">&nbsp;</div>
-	<div class="col-sm-3 col-box">
+	<div class="col-xs-1">&nbsp;</div>
+	<div class="col-xs-3 col-box">
 		{{template "organizer_box.tpl" .user}}
 	</div>
-	<div class="col-sm-7">
+	<div class="col-xs-7">
 		<h3 style="margin-left: 10px">Profil bearbeiten</h3>
 		<form role="form" id="profile-upload" class="form-horizontal" action="/upload" method="POST">
 			<div class="form-group">
-				<div class="col-sm-7">
+				<div class="col-xs-7">
 					<span><input name="name" type="text" id="profile-Name" class="form-control" placeholder="Deine Organisation" value="{{.user.Addr.Name}}"></span>
 				</div>
-				<div class="col-sm-4">
+				<div class="col-xs-4">
 					<a id="profile-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
 						<span id="profile-spinner" class="fa fa-gear"> </span>
 						<img src="{{if .user.Image}}/bild/{{.user.Image}}?height=200&width=200{{else}}/images/thumbnail.gif{{end}}" alt="Bild" id="profile-thumbnail" class="img-responsive">
@@ -22,7 +22,7 @@
 			</div>
 			<hr>
 			<div class="form-group">
-				<div class="col-sm-12" style="margin-left: 10px">
+				<div class="col-xs-12" style="margin-left: 10px">
 					<span id="event-Category" class="help-block">Wähle eine oder mehrere Kategorien aus:</span>
 				{{ range .categories }}
 					{{ $id := index $.categoryIds . }}
@@ -36,34 +36,34 @@
 			</div>
 			<hr>
 			<div class="form-group">
-				<div class="col-sm-12">
+				<div class="col-xs-12">
 					<textarea name="description" id="profile-Descr" class="form-control" placeholder="Beschreibung">{{.user.Descr}}</textarea>
 					<span><input name="website" type="text" id="profile-Web" class="form-control" placeholder="Webseite" value="{{.user.Web}}"></span>
 				</div>
 			</div>
 			<hr>
 			<div class="form-group">
-				<div class="col-sm-5">
+				<div class="col-xs-5">
 					<input name="street" type="text" id="profile-Street" class="form-control" placeholder="Straße" value="{{.user.Addr.Street}}">
 				</div>
-				<div class="col-sm-3">
+				<div class="col-xs-3">
 					<input name="pcode" type="text" id="profile-Pcode" class="form-control" placeholder="Postleitzahl" value="{{.user.Addr.Pcode}}">
 				</div>
-				<div class="col-sm-3">
+				<div class="col-xs-3">
 					<input name="city" type="text" id="profile-City" class="form-control" placeholder="Ort" value="{{.user.Addr.City}}">
 				</div>
 			</div>
 			<hr>
 			<div class="form-group">
-				<div class="col-sm-4">
+				<div class="col-xs-4">
 					<a href="/veranstalter/verwaltung/0" onClick="history.back(); return false" class="btn btn-default" style="width: 90%">Abbrechen</a>
 				</div>
-				<div class="col-sm-1">&nbsp;</div>
-				<div class="col-sm-7">
+				<div class="col-xs-1">&nbsp;</div>
+				<div class="col-xs-7">
 					<button type="submit" class="btn btn-mmr" style="width: 90%">Speichern</button>
 				</div>
 			</div>
 		</form>
 	</div>
-	<div class="col-sm-1 hidden-xs">&nbsp;</div>
+	<div class="col-xs-1">&nbsp;</div>
 </div>

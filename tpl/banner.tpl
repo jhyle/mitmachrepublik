@@ -1,9 +1,9 @@
-<div class="row hidden-xs">
-	<div class="col-sm-12 col-banner">
+<div class="row">
+	<div class="col-xs-12 col-banner">
 		<img src="/images/willkommen.jpg" class="img-responsive" />
 		<h1 class="text-center" style="position:absolute; top: 74%; width: 100%">Willkommen in der Mitmach-Republik!</h1>
 		<h2 class="text-center" style="position:absolute; top: 17%; width: 100%; background-color: rgba(255, 255, 255, 0.5)"><span style="color: #ff5200; ">Gemeinsam</span> <span style="color: #2f3030">aktiv werden.</span></h2>
-		<h4 class="text-center hidden-sm" style="padding-left: 5%; padding-right: 5%; position:absolute; top: 85%; width: 100%">Hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Suche nach Nachbarschaftstreffen, Sportvereinen, gemeinnützigen Initiativen, religiösen Gemeinden und anderen Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen.</h4>
+		<h4 class="text-center" style="padding-left: 5%; padding-right: 5%; position:absolute; top: 85%; width: 100%">Hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Suche nach Nachbarschaftstreffen, Sportvereinen, gemeinnützigen Initiativen, religiösen Gemeinden und anderen Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen.</h4>
 		<form role="form" action="/suche" method="POST" class="form-inline text-center" style="position: absolute; top: 40%; width: 100%">
 			<input name="place" type="text" class="form-control" placeholder="Berlin" data-provide="typeahead" autocomplete="off" autofocus/>
 			<select name="category" class="form-control">

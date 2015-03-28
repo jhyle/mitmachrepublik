@@ -59,7 +59,8 @@ div.col-banner h4 {
 	height: auto;
 	width: 90%;
 }
-.form-inline .btn {
+.form-inline .btn, .form-inline .form-control {
+	width: auto;
 	display: inline-block;
 }
 .modal-dialog {
@@ -72,6 +73,9 @@ div.col-banner h4 {
 }
 .modal-content {
 	border-radius: 0;
+}
+.container {
+	width: 1170px !important;
 }
 .highlight, a.highlight:hover, a.highlight:focus, div.col-box h5 {
 	color: #2ba42b;

@@ -1,4 +1,4 @@
-<div class="col-sm-2 col-tile text-center">
+<div class="col-xs-2 col-tile text-center">
 	<div class="big-icon"><span class="fa fa-envelope"></span></div>
 	<h3>Newsletter</h3>
 	<div class="tile-text">

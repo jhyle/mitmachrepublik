@@ -1,4 +1,4 @@
-<div class="col-sm-2 col-tile">
+<div class="col-xs-2 col-tile">
 	<a href="/veranstaltung/{{eventUrl .}}" style="display:block">
 		{{ if .Image }}
 			<div class="small-icon"><span class="fa fa-{{if len .Categories}}{{with index .Categories 0}}{{categoryIcon .}}{{end}}{{end}} fa-fw"></span></div>

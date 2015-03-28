@@ -5,13 +5,13 @@
 
 <div class="row tiles">
 	{{ $len := len .organizers }}
-	<div class="col-sm-1 hidden-xs">&nbsp;</div>
-	<div class="col-sm-10"><h1>{{if eq $len 0}}Keine{{else}}{{if eq $len 1}}Ein{{else}}{{$len}}{{end}}{{end}} Veranstalter in {{.place}} gefunden</h1></div>
-	<div class="col-sm-1 hidden-xs">&nbsp;</div>
+	<div class="col-xs-1">&nbsp;</div>
+	<div class="col-xs-10"><h1>{{if eq $len 0}}Keine{{else}}{{if eq $len 1}}Ein{{else}}{{$len}}{{end}}{{end}} Veranstalter in {{.place}} gefunden</h1></div>
+	<div class="col-xs-1">&nbsp;</div>
 </div>
 <div id="organizers" class="row tiles">
-	<div class="col-sm-1 hidden-xs">&nbsp;</div>
-	<div class="col-sm-3 col-box">
+	<div class="col-xs-1">&nbsp;</div>
+	<div class="col-xs-3 col-box">
 		<h3>Filter</h3>
 		<h5>Kategorien</h5>
 		<hr>
@@ -24,7 +24,7 @@
 			>  {{.}}</label>					
 		{{ end }}
 	</div>
-	<div class="col-sm-7">
+	<div class="col-xs-7">
 		{{template "organizers_list.tpl" .}}
 	</div>
 </div>

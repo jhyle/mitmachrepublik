@@ -4,13 +4,13 @@
 
 <div class="row tiles">
 	{{ $len := len .events }}
-	<div class="col-sm-1 hidden-xs">&nbsp;</div>
-	<div class="col-sm-10"><h1>{{if eq $len 1}}Eine Veranstaltung{{else}}{{if eq $len 0}}Keine{{else}}{{$len}}{{end}} Veranstaltungen{{end}} in {{.place}} gefunden</h1></div>
-	<div class="col-sm-1 hidden-xs">&nbsp;</div>
+	<div class="col-xs-1">&nbsp;</div>
+	<div class="col-xs-10"><h1>{{if eq $len 1}}Eine Veranstaltung{{else}}{{if eq $len 0}}Keine{{else}}{{$len}}{{end}} Veranstaltungen{{end}} in {{.place}} gefunden</h1></div>
+	<div class="col-xs-1">&nbsp;</div>
 </div>
 <div id="events" class="row tiles">
-	<div class="col-sm-1 hidden-xs">&nbsp;</div>
-	<div class="col-sm-3 col-box">
+	<div class="col-xs-1">&nbsp;</div>
+	<div class="col-xs-3 col-box">
 		<h3>Filter</h3>
 		<h5>Kategorien</h5>
 		<hr>
@@ -40,7 +40,7 @@
 		{{ end }}
 		>  Am Wochenende</label>
 	</div>
-	<div class="col-sm-7">
+	<div class="col-xs-7">
 		{{template "events_list.tpl" .}}
 	</div>
 </div>
