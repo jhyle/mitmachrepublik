@@ -8,7 +8,6 @@ import (
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -18,10 +17,10 @@ type (
 	MmrApp struct {
 		host         string
 		port         int
-		niceExpr     *regexp.Regexp
 		tpls         *Templates
 		imgServer    string
 		database     Database
+		ga_code      string
 		emailAccount *EmailAccount
 		locations    *LocationTree
 		services     []Service
@@ -44,6 +43,9 @@ const (
 	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der MitmachRepublik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://dev.mitmachrepublik.de/approve/%s\r\n\r\nDas Team der MitmachRepublik"
 	password_subject = "Deine neue E-Mail-Adresse bei mitmachrepublik.de"
 	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://dev.mitmachrepublik.de/approve/%s\r\n\r\nDas Team der MitmachRepublik"
+	ga_dev           = "UA-61290824-1"
+	ga_test          = "UA-61290824-2"
+	ga_www           = "UA-61290824-3"
 )
 
 var (
@@ -54,12 +56,7 @@ var (
 	resultConflict   = &appResult{Status: http.StatusConflict}
 )
 
-func NewMmrApp(host string, port int, tplDir, imgServer, mongoUrl, dbName string) (*MmrApp, error) {
-
-	niceExpr, err := regexp.Compile("[^A-Za-z0-9]+")
-	if err != nil {
-		return nil, err
-	}
+func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, dbName string) (*MmrApp, error) {
 
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
@@ -98,6 +95,13 @@ func NewMmrApp(host string, port int, tplDir, imgServer, mongoUrl, dbName string
 	}
 
 	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", "MitmachRepublik <mitmachrepublik@gmail.com>"}
+	
+	ga_code := ga_dev
+	if env == "www" {
+		ga_code = ga_www
+	} else if env == "test" {
+		ga_code = ga_test
+	}
 
 	var cities []string
 	err = database.Table("event").Distinct(bson.M{}, "addr.city", &cities)
@@ -108,13 +112,16 @@ func NewMmrApp(host string, port int, tplDir, imgServer, mongoUrl, dbName string
 	services := make([]Service, 0, 3)
 	services = append(services, NewSessionService(60, database))
 	services = append(services, NewUnusedImgService(3600, database, imgServer))
-	services = append(services, NewSpawnEventsService(3600, database, imgServer))
+	if env != "www" {
+		services = append(services, NewSpawnEventsService(3600, database, imgServer))
+	}
 
-	return &MmrApp{host, port, niceExpr, tpls, imgServer, database, emailAccount, NewLocationTree(cities), services}, nil
+	return &MmrApp{host, port, tpls, imgServer, database, ga_code, emailAccount, NewLocationTree(cities), services}, nil
 }
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, data bson.M) *appResult {
 
+	data["ga_code"] = app.ga_code;
 	err := app.tpls.Execute(tpl, w, data)
 	if err != nil {
 		return &appResult{Status: http.StatusInternalServerError, Error: err}
@@ -596,11 +603,6 @@ func (app *MmrApp) agbsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}()
 
 	app.handle(w, result)
-}
-
-func (app *MmrApp) niceUrl(s string) string {
-
-	return strings.ToLower(strings.Trim(app.niceExpr.ReplaceAllString(s, "-"), "-"))
 }
 
 func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {

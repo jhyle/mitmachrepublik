@@ -14,6 +14,7 @@ const(
 // The flag package provides a default help printer via -h switch
 var (
 	versionFlag *bool = flag.Bool("v", false, "print the version number")
+	envFlag *string = flag.String("env", "dev", "dev, test or www")
 	portFlag *int = flag.Int("p", 3000, "port to listen on")
 	hostFlag *string = flag.String("i", "127.0.0.1", "interface to listen on")
 	templateDirFlag *string = flag.String("templateDir", "", "path to templates")
@@ -37,6 +38,11 @@ func main() {
 
     if *versionFlag {
         fmt.Println("Version:", APP_VERSION)
+    }
+    
+    if *envFlag != "dev" &&  *envFlag != "test" && *envFlag != "www" {
+    	fmt.Println("Invalid environment specified!")
+    	os.Exit(1)
     }
     
     if *hostFlag == "" {
@@ -69,7 +75,7 @@ func main() {
     	os.Exit(1)
     }
 
-    app, err := mmr.NewMmrApp(*hostFlag, *portFlag, *templateDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag)
+    app, err := mmr.NewMmrApp(*envFlag, *hostFlag, *portFlag, *templateDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag)
     if err != nil {
     	fmt.Println(err.Error())
     } else {
