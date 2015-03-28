@@ -82,6 +82,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		"datetimeFormat":     datetimeFormat,
 		"strClip":            strClip,
 		"categoryIcon":       categoryIcon,
+		"categoryTitle":      categoryTitle,
 		"categorySearchUrl":  categorySearchUrl,
 		"eventUrl":           eventUrl,
 		"eventSearchUrl":     simpleEventSearchUrl,

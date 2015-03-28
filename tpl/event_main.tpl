@@ -10,15 +10,15 @@
 	</div>
 	{{with .event}}<div class="col-xs-7">
 		{{if .Image}}
-			<div class="small-icon pull-left"><span class="fa fa-{{if len .Categories}}{{with index .Categories 0}}{{categoryIcon .}}{{end}}{{end}} fa-fw"></span></div>
-			<img class="pull-left" style="margin-right: 10px; margin-bottom: 10px" src="/bild/{{.Image}}?width=340&height=255">
+			{{if len .Categories}}{{with index .Categories 0}}<div class="small-icon pull-left"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}}
+			<img class="pull-left" style="margin-right: 10px; margin-bottom: 10px" src="/bild/{{.Image}}?width=340&height=255" title="{{.Title}}">
 		{{end}}
-		<p class="small-icon pull-left"><span class="fa fa-calendar"></span></p>
+		<p class="small-icon pull-left"><span class="fa fa-calendar" title="Datum"></span></p>
 		<p class="date">{{dateFormat .Start}}</p>
-		<p class="small-icon pull-left"><span class="fa fa-clock-o"></span></p>
+		<p class="small-icon pull-left"><span class="fa fa-clock-o" title="Uhrzeit"></span></p>
 		<p class="date">{{timeFormat .Start}}</p>
 		{{ if not .Addr.IsEmpty }}
-			<p class="small-icon pull-left"><span class="fa fa-map-marker"></span></p>
+			<p class="small-icon pull-left"><span class="fa fa-map-marker" title="Ort"></span></p>
 			<p>{{ if .Addr.Name }}{{.Addr.Name}}<br />{{ end }}{{ if .Addr.Street }}{{.Addr.Street}}, {{ end }}{{ if .Addr.Pcode }}{{.Addr.Pcode}} {{ end }}{{.Addr.City}}</p>
 		{{ end }}
 		<div class="clearfix"></div>

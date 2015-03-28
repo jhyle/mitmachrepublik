@@ -8,14 +8,14 @@
 <div class="row-tile">
 	<a href="/veranstalter/{{organizerUrl .}}">
 	{{if .Image}}
-		<div class="small-icon"><span class="fa fa-{{if len .Categories}}{{with index .Categories 0}}{{categoryIcon .}}{{end}}{{end}} fa-fw"></span></div>
-		<img class="pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165">
+		{{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}}
+		<img class="pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" title="{{.Addr.Name}}">
 	{{end}}
 	<div class="tile-text" {{if .Image}}style="margin-left: 230px"{{end}}>
 		<h3>{{.Addr.Name}}</h3>
 		<p>{{strClip .Descr 100}}</p>
 		{{ if not .Addr.IsEmpty }}
-			<p class="small-icon pull-left"><span class="fa fa-map-marker"></span></p>
+			<p class="small-icon pull-left"><span class="fa fa-map-marker" title="Ort"></span></p>
 			<p class="pull-left place">{{ if .Addr.Name }}{{.Addr.Name}}<br />{{ end }}{{ if .Addr.Street }}{{.Addr.Street}}, {{ end }}{{ if .Addr.Pcode }}{{.Addr.Pcode}} {{ end }}{{.Addr.City}}</p>
 		{{ end }}
 	</div>

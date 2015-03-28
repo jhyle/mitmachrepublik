@@ -55,7 +55,7 @@ func datetimeFormat(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	} else {
-		return fmt.Sprintf("%02d.%02d.%04d %02d.%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
+		return fmt.Sprintf("%02d.%02d.%04d %02d.%02d Uhr", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
 	}
 }
 
@@ -81,6 +81,11 @@ func strClip(s string, n int) string {
 func categoryIcon(categoryId int) string {
 
 	return CategoryIconMap[categoryId]
+}
+
+func categoryTitle(categoryId int) string {
+
+	return CategoryIdMap[categoryId]
 }
 
 func eventSearchUrl(place string, categoryIds []int, dateIds []int, radius int) string {
