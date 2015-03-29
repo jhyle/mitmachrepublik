@@ -51,14 +51,5 @@
         <div class="col-xs-1">&nbsp;</div>
       </div>
     </div>
-	<script src="/js/jquery.min.js"></script>
-	<script src="/js/jquery.ui.widget.js"></script>
-	<script src="/js/jquery.iframe-transport.js"></script>
-	<script src="/js/jquery.fileupload.js"></script>
-	<script src="/js/jquery.cookie-1.4.1.min.js"></script>
-	<script src="/js/bootstrap.min.js"></script>
-	<script src="/js/bootstrap-datetimepicker.min.js"></script>
-	<script src="/js/locales/bootstrap-datetimepicker.de.js"></script>
-	<script src="/js/bootstrap3-typeahead.min.js"></script>
-	<script src="/js/mmr.js"></script>
+	<script src="/js/scripts-1.js"></script>
 </body> </html>

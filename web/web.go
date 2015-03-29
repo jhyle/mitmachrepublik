@@ -290,7 +290,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if results > 0 {
 			results = results - 1
 		}
-		pageCount := (result.Count / pageSize) + 1
+		pageCount := (results / pageSize) + 1
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
@@ -387,7 +387,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 		if results > 0 {
 			results = results - 1
 		}
-		pageCount := (result.Count / pageSize) + 1
+		pageCount := (results / pageSize) + 1
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
