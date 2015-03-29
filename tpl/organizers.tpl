@@ -4,9 +4,8 @@
 <input type="hidden" name="search" value="organizers" /> 
 
 <div class="row tiles">
-	{{ $len := len .organizers }}
 	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-10"><h1>{{if eq $len 0}}Keine{{else}}{{if eq $len 1}}Ein{{else}}{{$len}}{{end}}{{end}} Veranstalter in {{.place}} gefunden</h1></div>
+	<div class="col-xs-10"><h1>{{if eq .results 0}}Keine{{else}}{{if eq .results 1}}Ein{{else}}{{.results}}{{end}}{{end}} Veranstalter in {{.place}} gefunden</h1></div>
 	<div class="col-xs-1">&nbsp;</div>
 </div>
 <div id="organizers" class="row tiles">

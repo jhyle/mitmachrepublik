@@ -16,7 +16,13 @@
 		<p class="small-icon pull-left"><span class="fa fa-calendar" title="Datum"></span></p>
 		<p class="date">{{dateFormat .Start}}</p>
 		<p class="small-icon pull-left"><span class="fa fa-clock-o" title="Uhrzeit"></span></p>
-		<p class="date">{{timeFormat .Start}}</p>
+		<p class="date">{{timeFormat .Start}}{{if timeFormat .End}} bis{{if eq (dateFormat .Start) (dateFormat .End)}} {{timeFormat .End}}{{end}}{{end}} Uhr</p>
+		{{if dateFormat .End}}{{if ne (dateFormat .Start) (dateFormat .End)}}
+			<p class="small-icon pull-left"><span class="fa fa-calendar" title="Enddatum"></span></p>
+			<p class="date">{{dateFormat .End}}</p>
+			<p class="small-icon pull-left"><span class="fa fa-clock-o" title="Uhrzeit"></span></p>
+			<p class="date">{{timeFormat .End}} Uhr</p>
+		{{end}}{{end}}
 		{{ if not .Addr.IsEmpty }}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker" title="Ort"></span></p>
 			<p>{{ if .Addr.Name }}{{.Addr.Name}}<br />{{ end }}{{ if .Addr.Street }}{{.Addr.Street}}, {{ end }}{{ if .Addr.Pcode }}{{.Addr.Pcode}} {{ end }}{{.Addr.City}}</p>

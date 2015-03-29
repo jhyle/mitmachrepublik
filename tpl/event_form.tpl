@@ -10,8 +10,8 @@
 			<div class="form-group">
 				<div class="col-xs-7">
 					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Was willst Du machen?" value="{{.event.Title}}" maxlength="40"></span>
-					<span><input name="start" type="datetime-local" id="event-Start" class="form-control form-datetime" placeholder="Fängt an" value="{{dateFormat .event.Start}}"></span>
-					<span><input name="end" type="datetime-local" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{dateFormat .event.End}}"></span>
+					<span><input name="start" type="datetime-local" id="event-Start" class="form-control form-datetime" placeholder="Fängt an" value="{{datetimeFormat .event.Start}}"></span>
+					<span><input name="end" type="datetime-local" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{datetimeFormat .event.End}}"></span>
 				</div>
 				<div class="col-xs-4">
 					<a id="event-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">

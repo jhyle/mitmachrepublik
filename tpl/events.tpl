@@ -3,9 +3,8 @@
 {{template "banner_search.tpl" .}}
 
 <div class="row tiles">
-	{{ $len := len .events }}
 	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-10"><h1>{{if eq $len 1}}Eine Veranstaltung{{else}}{{if eq $len 0}}Keine{{else}}{{$len}}{{end}} Veranstaltungen{{end}} in {{.place}} gefunden</h1></div>
+	<div class="col-xs-10"><h1>{{if eq .results 1}}Eine Veranstaltung{{else}}{{if eq .results 0}}Keine{{else}}{{.results}}{{end}} Veranstaltungen{{end}} in {{.place}} gefunden</h1></div>
 	<div class="col-xs-1">&nbsp;</div>
 </div>
 <div id="events" class="row tiles">

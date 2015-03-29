@@ -84,6 +84,8 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		"categoryIcon":       categoryIcon,
 		"categoryTitle":      categoryTitle,
 		"categorySearchUrl":  categorySearchUrl,
+		"districtName":       districtName,
+		"citypartName":       citypartName,
 		"eventUrl":           eventUrl,
 		"eventSearchUrl":     simpleEventSearchUrl,
 		"organizerUrl":       organizerUrl,
@@ -282,17 +284,18 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
-		pageCount := result.Count / pageSize
-		if pageCount == 0 {
-			pageCount = 1
+		results := result.Count
+		if results > 0 {
+			results = results - 1
 		}
+		pageCount := (result.Count / pageSize) + 1
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
 		}
 		maxPage := pageCount - 1
 
-		return app.view("events.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap, "districts": DistrictMap})
+		return app.view("events.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap, "districts": DistrictMap})
 	}()
 
 	app.handle(w, result)
@@ -378,17 +381,18 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		pageCount := result.Count / pageSize
-		if pageCount == 0 {
-			pageCount = 1
+		results := result.Count
+		if results > 0 {
+			results = results - 1
 		}
+		pageCount := (result.Count / pageSize) + 1
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
 		}
 		maxPage := pageCount - 1
 
-		return app.view("organizers.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "organizers": result.Organizers, "place": place, "radius": radius, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap, "districts": DistrictMap})
+		return app.view("organizers.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "organizers": result.Organizers, "place": place, "radius": radius, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap, "districts": DistrictMap})
 	}()
 
 	app.handle(w, result)
@@ -848,6 +852,8 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
+		
+		app.locations.Add(event.Addr.City)
 
 		if created {
 			return resultCreated

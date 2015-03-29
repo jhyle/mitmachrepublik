@@ -6,7 +6,7 @@
 		{{ end }}
 		<div class="tile-text">
 			<h3>{{.Title}}</h3>
-			<p class="datetime">{{datetimeFormat .Start}}</p>
+			<p class="datetime">{{datetimeFormat .Start}} Uhr</p>
 			<p>{{strClip .Descr 80}}</p>
 			<p class="highlight"><span class="fa fa-caret-right"></span> Veranstaltung ansehen</p>
 		</div>

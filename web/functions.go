@@ -46,7 +46,7 @@ func timeFormat(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	} else {
-		return fmt.Sprintf("%02d.%02d Uhr", t.Hour(), t.Minute())
+		return fmt.Sprintf("%02d:%02d", t.Hour(), t.Minute())
 	}
 }
 
@@ -55,7 +55,7 @@ func datetimeFormat(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	} else {
-		return fmt.Sprintf("%02d.%02d.%04d %02d.%02d Uhr", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
+		return fmt.Sprintf("%02d.%02d.%04d %02d:%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
 	}
 }
 
@@ -86,6 +86,24 @@ func categoryIcon(categoryId int) string {
 func categoryTitle(categoryId int) string {
 
 	return CategoryIdMap[categoryId]
+}
+
+func districtName(addr Address) string {
+
+	district := pcode2district[addr.Pcode]
+	if isEmpty(district) {
+		district = addr.City
+	}
+	return district
+}
+
+func citypartName(addr Address) string {
+
+	citypart := cpart2district[addr.Pcode]
+	if isEmpty(citypart) {
+		citypart = addr.City
+	}
+	return citypart
 }
 
 func eventSearchUrl(place string, categoryIds []int, dateIds []int, radius int) string {

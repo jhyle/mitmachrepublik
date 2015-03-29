@@ -2,7 +2,7 @@
 	<div class="col-xs-12 col-banner">
 		<img src="/images/hintergrund.jpg" class="img-responsive" />
 		<div class="form-inline text-center" style="position: absolute; top: 33%; width: 100%">
-			<input name="place" type="text" class="form-control" placeholder="Berlin" style="width: 50%" data-provide="typeahead" autocomplete="off" autofocus value="{{.place}}" />
+			<input name="place" type="text" class="form-control" placeholder="{{.place}}" style="width: 50%" autocomplete="off" autofocus />
 			<!--select name="radius" class="form-control">
 				<option value="0" {{if eq .radius 0}}selected{{end}}>kein Umkreis</option>
 				<option value="2" {{if eq .radius 2}}selected{{end}}>2 km</option>

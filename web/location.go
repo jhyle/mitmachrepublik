@@ -137,6 +137,8 @@ var (
 		"Berlin Rahnsdorf":         []string{"12587", "12589"},
 		"Berlin Schmöckwitz":       []string{"12527"},
 	}
+
+	pcode2district, cpart2district map[string]string
 )
 
 func Postcodes(location string) []string {
@@ -204,7 +206,7 @@ func (tree *LocationTree) insert(word, s string) {
 	}
 }
 
-func (tree *LocationTree) add(s string) {
+func (tree *LocationTree) Add(s string) {
 
 	for _, token := range strings.Split(s, " ") {
 		for _, word := range strings.Split(token, "-") {
@@ -220,16 +222,30 @@ func NewLocationTree(locations []string) *LocationTree {
 	tree := &LocationTree{radix.New()}
 
 	for _, location := range locations {
-		tree.add(location)
+		tree.Add(location)
 	}
 
 	for district := range DistrictMap {
-		tree.add(district)
+		tree.Add(district)
 	}
 
 	for citypart := range PostcodeMap {
-		tree.add(citypart)
+		tree.Add(citypart)
 	}
 
 	return tree
+}
+
+func init() {
+
+	pcode2district = make(map[string]string)
+	cpart2district = make(map[string]string)
+	for district, cityparts := range DistrictMap {
+		for _, citypart := range cityparts {
+			for _, postcode := range PostcodeMap[citypart] {
+				pcode2district[postcode] = district;
+				cpart2district[postcode] = citypart;
+			}
+		}
+	}
 }

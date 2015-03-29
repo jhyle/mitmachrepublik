@@ -456,16 +456,22 @@ $(function() {
 		updateOrganizerCount();
 	});
 	
-	$("input[name=category]").change(function(e) {
+	$("#events-form").submit(function() {
+		if (!$("input[name=place]").val()) {
+			$("input[name=place]").val($("input[name=place]").attr("placeholder"))
+		}
+	});
+	
+	$("input[name=category]").change(function() {
 		$("#events-form").submit();
 	});
 	
-	$("input[name=date]").change(function(e) {
+	$("input[name=date]").change(function() {
 		$("#events-form").submit();
 	});
 
 	$(".form-datetime").datetimepicker({
-		format: "dd.mm.yyyy hh.ii",
+		format: "dd.mm.yyyy hh:ii",
 		autoclose: true,
 		language: "de",
 		pickerPosition: "bottom-right"

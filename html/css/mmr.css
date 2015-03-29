@@ -71,7 +71,7 @@ div.col-banner h4 {
 	border: none;
 	padding: 10px;
 }
-.modal-content {
+.modal-content, .dropdown-menu {
 	border-radius: 0;
 }
 .container {
