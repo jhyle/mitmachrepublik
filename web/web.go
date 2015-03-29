@@ -185,12 +185,12 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		events := make([][]Event, 0)
-		if result.Count > 0 {
-			events = make([][]Event, ((result.Count-1)/eventsPerRow)+1)
+		var events [][]Event
+		if len(result.Events) > 0 {
+			events = make([][]Event, ((len(result.Events)-1)/eventsPerRow)+1)
 			for i := range events {
 
-				rowSize := result.Count - i*eventsPerRow
+				rowSize := len(result.Events) - i*eventsPerRow
 				if rowSize > eventsPerRow {
 					rowSize = eventsPerRow
 				}
@@ -200,6 +200,8 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 					events[i][j] = result.Events[i*eventsPerRow+j]
 				}
 			}
+		} else {
+			events = make([][]Event, 0)
 		}
 
 		return app.view("start.tpl", w, bson.M{"title": title, "events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "categories": CategoryOrder, "categoryMap": CategoryMap, "districts": DistrictMap})
