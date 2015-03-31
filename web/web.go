@@ -49,11 +49,12 @@ const (
 )
 
 var (
-	resultOK         = &appResult{Status: http.StatusOK}
-	resultCreated    = &appResult{Status: http.StatusCreated}
-	resultBadRequest = &appResult{Status: http.StatusBadRequest}
-	resultNotFound   = &appResult{Status: http.StatusNotFound}
-	resultConflict   = &appResult{Status: http.StatusConflict}
+	resultOK           = &appResult{Status: http.StatusOK}
+	resultCreated      = &appResult{Status: http.StatusCreated}
+	resultUnauthorized = &appResult{Status: http.StatusUnauthorized}
+	resultBadRequest   = &appResult{Status: http.StatusBadRequest}
+	resultNotFound     = &appResult{Status: http.StatusNotFound}
+	resultConflict     = &appResult{Status: http.StatusConflict}
 )
 
 func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, dbName string) (*MmrApp, error) {
@@ -98,7 +99,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 	}
 
 	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", "MitmachRepublik <mitmachrepublik@gmail.com>"}
-	
+
 	ga_code := ga_dev
 	if env == "www" {
 		ga_code = ga_www
@@ -124,7 +125,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, data bson.M) *appResult {
 
-	data["ga_code"] = app.ga_code;
+	data["ga_code"] = app.ga_code
 	err := app.tpls.Execute(tpl, w, data)
 	if err != nil {
 		return &appResult{Status: http.StatusInternalServerError, Error: err}
@@ -140,7 +141,12 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 	}
 
 	if !w.Written() {
-		w.WriteHeader(result.Status)
+		if result == resultUnauthorized {
+			w.Header().Set("Location", "/#login")
+			w.WriteHeader(http.StatusFound)
+		} else {
+			w.WriteHeader(result.Status)
+		}
 	}
 
 	if result.JSON != nil && !w.BodyWritten() {
@@ -489,7 +495,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		user, err := app.checkSession((&Request{r}))
 		if err != nil {
-			return resultBadRequest
+			return resultUnauthorized
 		}
 
 		var result EventSearchResult
@@ -522,7 +528,7 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		user, err := app.checkSession((&Request{r}))
 		if err != nil {
-			return resultBadRequest
+			return resultUnauthorized
 		}
 
 		return app.view("profile.tpl", w, bson.M{"title": title, "user": user, "categories": CategoryOrder, "categoryIds": CategoryMap, "districts": DistrictMap})
@@ -539,7 +545,7 @@ func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		user, err := app.checkSession((&Request{r}))
 		if err != nil {
-			return resultBadRequest
+			return resultUnauthorized
 		}
 
 		return app.view("password.tpl", w, bson.M{"title": title, "user": user, "districts": DistrictMap, "categoryMap": CategoryMap})
@@ -556,7 +562,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		user, err := app.checkSession((&Request{r}))
 		if err != nil {
-			return resultBadRequest
+			return resultUnauthorized
 		}
 
 		var data Event
@@ -724,7 +730,7 @@ func (app *MmrApp) profileHandler(w traffic.ResponseWriter, r *traffic.Request) 
 
 		user, err := app.checkSession(request)
 		if err != nil {
-			return resultBadRequest
+			return resultUnauthorized
 		}
 
 		data, err := request.ReadUser()
@@ -760,7 +766,7 @@ func (app *MmrApp) passwordHandler(w traffic.ResponseWriter, r *traffic.Request)
 
 		user, err := app.checkSession(request)
 		if err != nil {
-			return resultBadRequest
+			return resultUnauthorized
 		}
 
 		data, err := request.ReadEmailAndPwd()
@@ -798,7 +804,7 @@ func (app *MmrApp) unregisterHandler(w traffic.ResponseWriter, r *traffic.Reques
 
 		user, err := app.checkSession(&Request{r})
 		if err != nil {
-			return resultBadRequest
+			return resultUnauthorized
 		}
 
 		err = app.database.Table("event").Delete(bson.M{"organizerid": user.Id})
@@ -826,7 +832,7 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 		user, err := app.checkSession(request)
 		if err != nil {
-			return resultBadRequest
+			return resultUnauthorized
 		}
 
 		var data Event
@@ -854,7 +860,7 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
-		
+
 		app.locations.Add(event.Addr.City)
 
 		if created {
@@ -966,7 +972,11 @@ func (app *MmrApp) deleteEventHandler(w traffic.ResponseWriter, r *traffic.Reque
 	result := func() *appResult {
 
 		user, err := app.checkSession(&Request{r})
-		if err != nil || !bson.IsObjectIdHex(r.Param("id")) {
+		if err != nil {
+			return resultUnauthorized
+		}
+
+		if !bson.IsObjectIdHex(r.Param("id")) {
 			return resultBadRequest
 		}
 

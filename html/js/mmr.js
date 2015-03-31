@@ -477,6 +477,12 @@ $(function() {
 		pickerPosition: "bottom-right"
 	});
 	
+	var hash = window.location.hash;
+	if (hash.substring(1) == "login") {
+		$.removeCookie("SESSIONID", {path: '/'});
+		$("#login").modal("show");
+	}
+
 	if ($.cookie("SESSIONID")) {
 		$("#head-organizer").html("Du bist angemeldet.");
 		$("#head-events").html("<span class='fa fa-caret-right'></span> Meine Veranstaltungen");
