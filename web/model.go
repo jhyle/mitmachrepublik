@@ -47,6 +47,7 @@ type (
 		Start       time.Time
 		End         time.Time `json:",omitempty"`
 		Addr        Address
+		Approved   bool
 	}
 
 	SearchResult interface {

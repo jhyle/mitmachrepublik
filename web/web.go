@@ -21,6 +21,7 @@ type (
 		imgServer    string
 		database     Database
 		ga_code      string
+		hostname     string
 		emailAccount *EmailAccount
 		locations    *LocationTree
 		services     []Service
@@ -40,9 +41,9 @@ type (
 
 const (
 	register_subject = "Deine Registrierung bei mitmachrepublik.de"
-	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der MitmachRepublik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://dev.mitmachrepublik.de/approve/%s\r\n\r\nDas Team der MitmachRepublik"
+	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der MitmachRepublik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der MitmachRepublik"
 	password_subject = "Deine neue E-Mail-Adresse bei mitmachrepublik.de"
-	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://dev.mitmachrepublik.de/approve/%s\r\n\r\nDas Team der MitmachRepublik"
+	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der MitmachRepublik"
 	ga_dev           = "UA-61290824-1"
 	ga_test          = "UA-61290824-2"
 	ga_www           = "UA-61290824-3"
@@ -64,7 +65,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		return nil, errors.New("init of MongoDB failed: " + err.Error())
 	}
 
-	err = database.Table("user").EnsureIndices("email", "categories", "addr.name", "addr.city", "addr.pcode")
+	err = database.Table("user").EnsureIndices("email", "approved", "categories", "addr.name", "addr.city", "addr.pcode")
 	if err != nil {
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
@@ -101,10 +102,13 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", "MitmachRepublik <mitmachrepublik@gmail.com>"}
 
 	ga_code := ga_dev
+	hostname := "dev.mitmachrepublik.de"
 	if env == "www" {
 		ga_code = ga_www
+		hostname = "www.mitmachrepublik.de"
 	} else if env == "test" {
 		ga_code = ga_test
+		hostname = "test.mitmachrepublik.de"
 	}
 
 	var cities []string
@@ -120,7 +124,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		services = append(services, NewSpawnEventsService(3600, database, imgServer))
 	}
 
-	return &MmrApp{host, port, tpls, imgServer, database, ga_code, emailAccount, NewLocationTree(cities), services}, nil
+	return &MmrApp{host, port, tpls, imgServer, database, ga_code, hostname, emailAccount, NewLocationTree(cities), services}, nil
 }
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, data bson.M) *appResult {
@@ -228,13 +232,26 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 			var user User
 			userId := bson.ObjectIdHex(r.Param("id"))
 
-			err = app.database.Table("user").LoadById(userId, &user)
-			if err == nil {
+			if err = app.database.Table("user").LoadById(userId, &user); err == nil {
+
 				user.Approved = true
-				if _, err = app.database.Table("user").UpsertById(userId, &user); err != nil {
+				if _, err = app.database.Table("user").UpsertById(user.Id, &user); err != nil {
 					return &appResult{Status: http.StatusInternalServerError, Error: err}
 				}
+
+				var events []Event
+				if err = app.database.Table("event").Find(bson.M{"organizerid": user.Id}, &events, "_id"); err == nil {
+					for _, event := range events {
+						event.Approved = true
+						_, err = app.database.Table("event").UpsertById(event.Id, &event)
+						if err != nil {
+							break
+						} 
+					}
+				}
 			}
+		} else {
+			err = errors.New("No organizer id given.")
 		}
 
 		return app.view("approve.tpl", w, bson.M{"title": title, "approved": err == nil, "districts": DistrictMap, "categoryMap": CategoryMap})
@@ -706,7 +723,7 @@ func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request)
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		err = app.sendEmail(user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, user.Id.Hex()))
+		err = app.sendEmail(user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, app.hostname, user.Id.Hex()))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -717,6 +734,29 @@ func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request)
 		}
 
 		return &appResult{Status: http.StatusCreated, JSON: id}
+	}()
+
+	app.handle(w, result)
+}
+
+func (app *MmrApp) sendCheckMailHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	
+	result := func() *appResult {
+
+		request := &Request{r}
+
+		user, err := app.checkSession(request)
+		if err != nil {
+			return resultUnauthorized
+		}
+
+		err = app.sendEmail(user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, app.hostname, user.Id.Hex()))
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return resultOK
 	}()
 
 	app.handle(w, result)
@@ -781,7 +821,7 @@ func (app *MmrApp) passwordHandler(w traffic.ResponseWriter, r *traffic.Request)
 		if !isEmpty(data.Email) && data.Email != user.Email {
 			user.Email = data.Email
 			user.Approved = false
-			err := app.sendEmail(user.Email, password_subject, fmt.Sprintf(password_message, user.Addr.Name, user.Id.Hex()))
+			err := app.sendEmail(user.Email, password_subject, fmt.Sprintf(password_message, app.hostname, user.Addr.Name, user.Id.Hex()))
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
@@ -855,6 +895,7 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 			event.Id = bson.NewObjectId()
 		}
 		event.OrganizerId = user.Id
+		event.Approved = user.Approved
 
 		_, err = app.database.Table("event").UpsertById(event.Id, event)
 		if err != nil {
@@ -1031,6 +1072,7 @@ func (app *MmrApp) Start() {
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)
 	router.Post("/register", app.registerHandler)
+	router.Post("/sendcheckmail", app.sendCheckMailHandler)
 	router.Post("/password", app.passwordHandler)
 	router.Post("/profile", app.profileHandler)
 	router.Post("/unregister", app.unregisterHandler)

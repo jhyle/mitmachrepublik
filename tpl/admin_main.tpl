@@ -10,6 +10,12 @@
 	<div class="col-xs-7">
 		<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung" class="btn btn-mmr" style="margin-right: 0">Veranstaltung eintragen</a></p>
 		<p class="clearfix"></p>
+		{{if not .user.Approved}}
+		<div class="row-tile">
+			<p class="big-text text-center" style="padding-top: 20px">Deine E-Mail-Adresse wurde noch nicht bestätigt,
+			daher werden Deine Veranstaltungen nicht veröffentlicht. <a href="#" id="send-double-opt-in" class="btn btn-mmr" data-loading-text="Senden..">Bestätigungs-E-Mail erneut versenden</a></p>
+		</div>
+		{{end}}
 		{{template "events_list.tpl" .}}
 	</div>
 	<div class="col-xs-1">&nbsp;</div>

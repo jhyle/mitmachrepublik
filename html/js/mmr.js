@@ -417,11 +417,26 @@ $(function() {
 					$.removeCookie("SESSIONID", {path: '/'});
 					window.location.href = "/";
 				},
-				error : function(result) {
+				error : function() {
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
 			});
 		}
+	});
+	
+	$("#send-double-opt-in").click(function(e) {
+		e.preventDefault();
+		$("#send-double-opt-in").button('loading');
+		$.ajax({cache: false, url : "/sendcheckmail", type: "POST",
+			success: function() {
+				$("#send-double-opt-in").button('reset');
+				alert("Die E-Mail wurde versendet. Bitte überprüfe Dein Postfach und klicke auf den Link in der Mail.")
+			},
+			error : function() {
+				$("#send-double-opt-in").button('reset');
+				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+			}
+		});
 	});
 	
 	$("a[name=delete-event]").click(function(e) {

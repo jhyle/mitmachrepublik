@@ -221,7 +221,9 @@ func timeSpans(dateNames []string) [][]time.Time {
 
 func buildQuery(place string, dates [][]time.Time, categoryIds []int) bson.M {
 
-	query := make([]bson.M, 0, 3)
+	query := make([]bson.M, 0, 4)
+
+	query = append(query, bson.M{"approved": true})
 
 	if len(place) > 0 {
 		postcodes := Postcodes(place)
@@ -254,11 +256,7 @@ func buildQuery(place string, dates [][]time.Time, categoryIds []int) bson.M {
 		query = append(query, bson.M{"$or": categoriesQuery})
 	}
 
-	if len(query) > 0 {
-		return bson.M{"$and": query}
-	} else {
-		return bson.M{}
-	}
+	return bson.M{"$and": query}
 }
 
 func isEmpty(s string) bool {
