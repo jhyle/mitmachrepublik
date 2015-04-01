@@ -254,7 +254,11 @@ func buildQuery(place string, dates [][]time.Time, categoryIds []int) bson.M {
 		query = append(query, bson.M{"$or": categoriesQuery})
 	}
 
-	return bson.M{"$and": query}
+	if len(query) > 0 {
+		return bson.M{"$and": query}
+	} else {
+		return bson.M{}
+	}
 }
 
 func isEmpty(s string) bool {
