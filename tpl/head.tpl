@@ -80,12 +80,25 @@
 						</div>
 						<hr>
 						<div class="form-group">
+							<div class="col-xs-12" style="margin-left: 10px">
+								<span id="event-Category" class="help-block">Wähle eine oder mehrere Kategorien aus:</span>
+							{{ range .categories }}
+								{{ $id := index $.categoryMap . }}
+								<label class="checkbox-inline"><input type="checkbox" name="register-Category" value="{{$id}}"> {{.}} &nbsp;&nbsp;</label>
+							{{ end }}
+							</div>
+						</div>
+						<hr>
+						<div class="form-group">
 							<div class="col-sm-12">
 								<textarea name="description" id="register-Descr" class="form-control" placeholder="Beschreibung"></textarea>
 								<span><input name="website" type="text" id="register-Web" class="form-control" placeholder="Webseite"></span>
 							</div>
 						</div>
 						<hr>
+						<p style="margin-left: 12px">
+							<span class="help-block">Gib eine Adresse an, um in der Veranstaltersuche gefunden zu werden.</span>
+						</p>
 						<div class="form-group">
 							<div class="col-sm-5">
 								<input name="street" type="text" id="register-Street" class="form-control" placeholder="Straße">
@@ -129,7 +142,7 @@
 						</div>
 						<div class="col-sm-1">&nbsp;</div>
 						<div class="col-sm-7">
-							<a href="/veranstalter/verwaltung/veranstaltung" class="btn btn-mmr" style="width: 90%">Veranstaltung eintragen</a>
+							<a href="/veranstalter/verwaltung/0" class="btn btn-mmr" style="width: 90%">Veranstaltung eintragen</a>
 						</div>
 					</div>
 					<div class="clearfix"></div>

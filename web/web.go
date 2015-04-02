@@ -129,7 +129,14 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, data bson.M) *appResult {
 
+	if data == nil {
+		data = bson.M{}
+	}
 	data["ga_code"] = app.ga_code
+	data["districts"] = DistrictMap
+	data["categories"] = CategoryOrder
+	data["categoryMap"] = CategoryMap
+	
 	err := app.tpls.Execute(tpl, w, data)
 	if err != nil {
 		return &appResult{Status: http.StatusInternalServerError, Error: err}
@@ -214,7 +221,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			events = make([][]Event, 0)
 		}
 
-		return app.view("start.tpl", w, bson.M{"title": title, "events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "categories": CategoryOrder, "categoryMap": CategoryMap, "districts": DistrictMap})
+		return app.view("start.tpl", w, bson.M{"title": title, "events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt})
 	}()
 
 	app.handle(w, result)
@@ -254,7 +261,7 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 			err = errors.New("No organizer id given.")
 		}
 
-		return app.view("approve.tpl", w, bson.M{"title": title, "approved": err == nil, "districts": DistrictMap, "categoryMap": CategoryMap})
+		return app.view("approve.tpl", w, bson.M{"title": title, "approved": err == nil})
 	}()
 
 	app.handle(w, result)
@@ -320,7 +327,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		return app.view("events.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap, "districts": DistrictMap})
+		return app.view("events.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds})
 	}()
 
 	app.handle(w, result)
@@ -363,7 +370,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		title := event.Title + " in " + event.Addr.City + " - Mitmach-Republik"
 
-		return app.view("event.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "organizer": organizer, "districts": DistrictMap, "categoryMap": CategoryMap})
+		return app.view("event.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -417,7 +424,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 		}
 		maxPage := pageCount - 1
 
-		return app.view("organizers.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "organizers": result.Organizers, "place": place, "radius": radius, "categoryIds": categoryIds, "categories": CategoryOrder, "categoryMap": CategoryMap, "districts": DistrictMap})
+		return app.view("organizers.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "organizers": result.Organizers, "place": place, "radius": radius, "categoryIds": categoryIds})
 	}()
 
 	app.handle(w, result)
@@ -478,7 +485,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		organizerNames := map[bson.ObjectId]string{organizer.Id: organizer.Addr.Name}
 		title := organizer.Addr.Name + " aus " + organizer.Addr.City + " - Mitmach-Republik"
 
-		return app.view("organizer.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer, "districts": DistrictMap, "categoryMap": CategoryMap})
+		return app.view("organizer.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -531,7 +538,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		return app.view("admin.tpl", w, bson.M{"title": title, "user": user, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "districts": DistrictMap, "categoryMap": CategoryMap})
+		return app.view("admin.tpl", w, bson.M{"title": title, "user": user, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events})
 	}()
 
 	app.handle(w, result)
@@ -548,7 +555,7 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultUnauthorized
 		}
 
-		return app.view("profile.tpl", w, bson.M{"title": title, "user": user, "categories": CategoryOrder, "categoryIds": CategoryMap, "districts": DistrictMap})
+		return app.view("profile.tpl", w, bson.M{"title": title, "user": user})
 	}()
 
 	app.handle(w, result)
@@ -565,7 +572,7 @@ func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultUnauthorized
 		}
 
-		return app.view("password.tpl", w, bson.M{"title": title, "user": user, "districts": DistrictMap, "categoryMap": CategoryMap})
+		return app.view("password.tpl", w, bson.M{"title": title, "user": user})
 	}()
 
 	app.handle(w, result)
@@ -596,7 +603,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
-		return app.view("event_edit.tpl", w, bson.M{"title": title, "user": user, "event": event, "categories": CategoryOrder, "categoryMap": CategoryMap, "districts": DistrictMap})
+		return app.view("event_edit.tpl", w, bson.M{"title": title, "user": user, "event": event})
 	}()
 
 	app.handle(w, result)
@@ -607,7 +614,7 @@ func (app *MmrApp) impressumPage(w traffic.ResponseWriter, r *traffic.Request) {
 	title := "Impressum"
 
 	result := func() *appResult {
-		return app.view("impressum.tpl", w, bson.M{"title": title, "categoryMap": CategoryMap, "districts": DistrictMap})
+		return app.view("impressum.tpl", w, bson.M{"title": title})
 	}()
 
 	app.handle(w, result)
@@ -618,7 +625,7 @@ func (app *MmrApp) datenschutzPage(w traffic.ResponseWriter, r *traffic.Request)
 	title := "Datenschutz"
 
 	result := func() *appResult {
-		return app.view("datenschutz.tpl", w, bson.M{"title": title, "categoryMap": CategoryMap, "districts": DistrictMap})
+		return app.view("datenschutz.tpl", w, bson.M{"title": title})
 	}()
 
 	app.handle(w, result)
@@ -629,7 +636,7 @@ func (app *MmrApp) agbsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	title := "Allgemeine Geschäftsbedingungen"
 
 	result := func() *appResult {
-		return app.view("agbs.tpl", w, bson.M{"title": title, "categoryMap": CategoryMap, "districts": DistrictMap})
+		return app.view("agbs.tpl", w, bson.M{"title": title})
 	}()
 
 	app.handle(w, result)

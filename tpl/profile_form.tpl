@@ -25,7 +25,7 @@
 				<div class="col-xs-12" style="margin-left: 10px">
 					<span id="event-Category" class="help-block">Wähle eine oder mehrere Kategorien aus:</span>
 				{{ range .categories }}
-					{{ $id := index $.categoryIds . }}
+					{{ $id := index $.categoryMap . }}
 					<label class="checkbox-inline"><input type="checkbox" name="profile-Category" value="{{$id}}"
 					{{ range $.user.Categories }}
 						{{ if eq . $id }}checked{{ end }}
@@ -42,6 +42,9 @@
 				</div>
 			</div>
 			<hr>
+			<p style="margin-left: 12px">
+				<span class="help-block">Gib eine Adresse an, um in der Veranstaltersuche gefunden zu werden.</span>
+			</p>
 			<div class="form-group">
 				<div class="col-xs-5">
 					<input name="street" type="text" id="profile-Street" class="form-control" placeholder="Straße" value="{{.user.Addr.Street}}">
