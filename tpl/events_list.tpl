@@ -21,7 +21,7 @@
 		<p class="datetime">{{datetimeFormat .Start}} Uhr {{if $.organizerNames}} - {{index $.organizerNames .OrganizerId}}{{end}}</p>
 		<p>{{strClip .Descr 100}}</p>
 		{{ if not .Addr.IsEmpty }}
-			<p class="small-icon pull-left"><span class="fa fa-map-marker" title="Ort"></span></p>
+			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
 			<p class="pull-left place">{{ if .Addr.Name }}{{.Addr.Name}}<br />{{ end }}{{ if .Addr.Street }}{{.Addr.Street}}, {{ end }}{{ if .Addr.Pcode }}{{.Addr.Pcode}} {{ end }}{{citypartName .Addr}}</p>
 		{{ end }}
 		{{ if $.user }}

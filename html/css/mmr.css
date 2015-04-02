@@ -181,14 +181,10 @@ p.small-icon {
 	width: 32px;
 	height: 32px;
 	border-radius: 16px;
-	margin-top: 4px;
-	margin-right: 6px;
+	margin: 4px 10px auto auto;
 }
-p.small-icon span.fa-map-marker {
-	margin-left: 10px;
-}
-p.small-icon span.fa-calendar, p.small-icon span.fa-clock-o {
-	margin-left: 7px;
+p.small-icon span {
+	margin-left: 2px;
 }
 p.datetime {
 	font-weight: bold;
