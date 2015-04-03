@@ -59,6 +59,15 @@ func datetimeFormat(t time.Time) string {
 	}
 }
 
+func iso8601Format(t time.Time) string {
+
+	if t.IsZero() {
+		return ""
+	} else {
+		return fmt.Sprintf("%04d-%02d-%02dT%02d:%02d", t.Year(), int(t.Month()), t.Day(), t.Hour(), t.Minute())
+	}
+}
+
 func strClip(s string, n int) string {
 
 	runes := 0
