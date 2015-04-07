@@ -30,8 +30,8 @@ type (
 	metaTags struct {
 		Title    string
 		FB_Title string
-		FB_Descr string
 		FB_Image string
+		FB_Descr string
 	}
 
 	emailAndPwd struct {

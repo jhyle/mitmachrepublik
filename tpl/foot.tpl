@@ -52,4 +52,7 @@
       </div>
     </div>
 	<script src="/js/scripts-1.js"></script>
+	<script src="https://apis.google.com/js/platform.js" async defer>
+  		{lang: 'de'}
+	</script>
 </body> </html>
