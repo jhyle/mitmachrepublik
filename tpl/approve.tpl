@@ -1,5 +1,5 @@
 {{template "head.tpl" .}}
-{{template "banner_small.tpl" .title}} 
+{{template "banner_small.tpl" .meta.FB_Title}} 
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>
 	<div class="col-xs-10">

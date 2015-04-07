@@ -27,6 +27,13 @@ type (
 		services     []Service
 	}
 
+	metaTags struct {
+		Title    string
+		FB_Title string
+		FB_Descr string
+		FB_Image string
+	}
+
 	emailAndPwd struct {
 		Email string
 		Pwd   string
@@ -128,16 +135,18 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 	return &MmrApp{host, port, tpls, imgServer, database, ga_code, hostname, emailAccount, NewLocationTree(cities), services}, nil
 }
 
-func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, data bson.M) *appResult {
+func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, data bson.M) *appResult {
 
 	if data == nil {
 		data = bson.M{}
 	}
+	data["meta"] = meta
 	data["ga_code"] = app.ga_code
+	data["hostname"] = app.hostname
 	data["districts"] = DistrictMap
 	data["categories"] = CategoryOrder
 	data["categoryMap"] = CategoryMap
-	
+
 	err := app.tpls.Execute(tpl, w, data)
 	if err != nil {
 		return &appResult{Status: http.StatusInternalServerError, Error: err}
@@ -183,7 +192,13 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	eventsPerRow := 4
 	place := "Berlin"
 	dateNames := []string{"aktuell"}
-	title := "Willkommen in der Mitmach-Republik!"
+
+	meta := metaTags{
+		"Willkommen in der Mitmach-Republik!",
+		"Gemeinsam aktiv werden.",
+		"http://" + app.hostname + "/images/mitmachrepublik.gif",
+		"Hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Suche nach Nachbarschaftstreffen, Sportvereinen, gemeinnützigen Initiativen, religiösen Gemeinden und anderen Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen.",
+	}
 
 	result := func() *appResult {
 
@@ -222,7 +237,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			events = make([][]*Event, 0)
 		}
 
-		return app.view("start.tpl", w, bson.M{"title": title, "events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt})
+		return app.view("start.tpl", w, &meta, bson.M{"events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt})
 	}()
 
 	app.handle(w, result)
@@ -230,7 +245,12 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	title := "Registrierung bestätigen"
+	meta := metaTags{
+		"Registrierung bestätigen - Mitmach-Republik",
+		"Registrierung bestätigen",
+		"http://" + app.hostname + "/images/mitmachrepublik.gif",
+		"",
+	}
 
 	result := func() *appResult {
 
@@ -254,7 +274,7 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 						_, err = app.database.Table("event").UpsertById(event.Id, &event)
 						if err != nil {
 							break
-						} 
+						}
 					}
 				}
 			}
@@ -262,7 +282,7 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 			err = errors.New("No organizer id given.")
 		}
 
-		return app.view("approve.tpl", w, bson.M{"title": title, "approved": err == nil})
+		return app.view("approve.tpl", w, &meta, bson.M{"approved": err == nil})
 	}()
 
 	app.handle(w, result)
@@ -284,7 +304,13 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	place := r.Param("place")
 	dateNames := strings.Split(r.Param("dates"), ",")
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
-	title := "Veranstaltungen in " + place + " - Mitmach-Republik"
+
+	meta := metaTags{
+		"Veranstaltungen in " + place + " - Mitmach-Republik",
+		"Veranstaltungen in " + place,
+		"http://" + app.hostname + "/images/mitmachrepublik.gif",
+		"",
+	}
 
 	result := func() *appResult {
 
@@ -328,7 +354,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		return app.view("events.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds})
+		return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds})
 	}()
 
 	app.handle(w, result)
@@ -369,9 +395,18 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		title := event.Title + " in " + event.Addr.City + " - Mitmach-Republik"
+		imageUrl := ""
+		if !isEmpty(event.Image) {
+			imageUrl = "http://" + app.hostname + "/bild/" + event.Image
+		}
+		meta := metaTags{
+			event.Title + " in " + event.Addr.City + " - Mitmach-Republik",
+			event.Title + " in " + event.Addr.City,
+			imageUrl,
+			event.Descr,
+		}
 
-		return app.view("event.tpl", w, bson.M{"hostname": app.hostname, "title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": &event, "organizer": &organizer})
+		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": &event, "organizer": &organizer})
 	}()
 
 	app.handle(w, result)
@@ -393,7 +428,13 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	place := r.Param("place")
 	dateNames := []string{"aktuell"}
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
-	title := "Veranstalter in " + place + " - Mitmach-Republik"
+
+	meta := metaTags{
+		"Veranstalter in " + place + " - Mitmach-Republik",
+		"Veranstalter in " + place,
+		"http://" + app.hostname + "/images/mitmachrepublik.gif",
+		"",
+	}
 
 	result := func() *appResult {
 
@@ -425,7 +466,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 		}
 		maxPage := pageCount - 1
 
-		return app.view("organizers.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "organizers": result.Organizers, "place": place, "radius": radius, "categoryIds": categoryIds})
+		return app.view("organizers.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "organizers": result.Organizers, "place": place, "radius": radius, "categoryIds": categoryIds})
 	}()
 
 	app.handle(w, result)
@@ -484,9 +525,19 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		maxPage := pageCount - 1
 
 		organizerNames := map[bson.ObjectId]string{organizer.Id: organizer.Addr.Name}
-		title := organizer.Addr.Name + " aus " + organizer.Addr.City + " - Mitmach-Republik"
 
-		return app.view("organizer.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
+		imageUrl := ""
+		if !isEmpty(organizer.Image) {
+			imageUrl = "http://" + app.hostname + "/bild/" + organizer.Image
+		}
+		meta := metaTags{
+			organizer.Addr.Name + " aus " + organizer.Addr.City + " - Mitmach-Republik",
+			organizer.Addr.Name + " aus " + organizer.Addr.City,
+			imageUrl,
+			organizer.Descr,
+		}
+
+		return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -514,7 +565,8 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 	if err != nil {
 		page = 0
 	}
-	title := "Verwaltung - Mitmach-Republik"
+
+	meta := metaTags{"Verwaltung - Mitmach-Republik", "", "", ""}
 
 	result := func() *appResult {
 
@@ -539,7 +591,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		return app.view("admin.tpl", w, bson.M{"title": title, "user": user, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events})
+		return app.view("admin.tpl", w, &meta, bson.M{"user": user, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events})
 	}()
 
 	app.handle(w, result)
@@ -547,7 +599,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	title := "Profil bearbeiten - Mitmach-Republik"
+	meta := metaTags{"Profil bearbeiten - Mitmach-Republik", "", "", ""}
 
 	result := func() *appResult {
 
@@ -556,7 +608,7 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultUnauthorized
 		}
 
-		return app.view("profile.tpl", w, bson.M{"title": title, "user": user})
+		return app.view("profile.tpl", w, &meta, bson.M{"user": user})
 	}()
 
 	app.handle(w, result)
@@ -564,7 +616,7 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	title := "E-Mail-Adresse oder Kennwort ändern - Mitmach-Republik"
+	meta := metaTags{"E-Mail-Adresse oder Kennwort ändern - Mitmach-Republik", "", "", ""}
 
 	result := func() *appResult {
 
@@ -573,7 +625,7 @@ func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultUnauthorized
 		}
 
-		return app.view("password.tpl", w, bson.M{"title": title, "user": user})
+		return app.view("password.tpl", w, &meta, bson.M{"user": user})
 	}()
 
 	app.handle(w, result)
@@ -581,7 +633,7 @@ func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	title := "Veranstaltung bearbeiten - Mitmach-Republik"
+	meta := metaTags{"Veranstaltung bearbeiten - Mitmach-Republik", "", "", ""}
 
 	result := func() *appResult {
 
@@ -604,7 +656,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
-		return app.view("event_edit.tpl", w, bson.M{"title": title, "user": user, "event": event})
+		return app.view("event_edit.tpl", w, &meta, bson.M{"user": user, "event": event})
 	}()
 
 	app.handle(w, result)
@@ -612,10 +664,10 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) impressumPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	title := "Impressum"
+	meta := metaTags{"Impressum - Mitmach-Republik", "", "", ""}
 
 	result := func() *appResult {
-		return app.view("impressum.tpl", w, bson.M{"title": title})
+		return app.view("impressum.tpl", w, &meta, nil)
 	}()
 
 	app.handle(w, result)
@@ -623,10 +675,10 @@ func (app *MmrApp) impressumPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) datenschutzPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	title := "Datenschutz"
+	meta := metaTags{"Datenschutz - Mitmach-Republik", "", "", ""}
 
 	result := func() *appResult {
-		return app.view("datenschutz.tpl", w, bson.M{"title": title})
+		return app.view("datenschutz.tpl", w, &meta, nil)
 	}()
 
 	app.handle(w, result)
@@ -634,10 +686,10 @@ func (app *MmrApp) datenschutzPage(w traffic.ResponseWriter, r *traffic.Request)
 
 func (app *MmrApp) agbsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	title := "Allgemeine Geschäftsbedingungen"
+	meta := metaTags{"Allgemeine Geschäftsbedingungen - Mitmach-Republik", "", "", ""}
 
 	result := func() *appResult {
-		return app.view("agbs.tpl", w, bson.M{"title": title})
+		return app.view("agbs.tpl", w, &meta, nil)
 	}()
 
 	app.handle(w, result)
@@ -749,7 +801,6 @@ func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request)
 
 func (app *MmrApp) sendCheckMailHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
-	
 	result := func() *appResult {
 
 		request := &Request{r}

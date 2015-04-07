@@ -3,7 +3,11 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=1170">
-	<title>{{.title}}</title>
+	<title>{{.meta.Title}}</title>
+	<meta name="og:title" content="{{.meta.FB_Title}}">
+	<meta name="og:site_name" content="Mitmach-Republik">
+	<meta name="og:image" content="{{.meta.FB_Image}}">
+	<meta name="og:description" content="{{.meta.FB_Descr}}">
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">
 	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
