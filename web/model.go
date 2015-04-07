@@ -61,13 +61,13 @@ type (
 	EventSearchResult struct {
 		Count  int
 		Start  int
-		Events []Event
+		Events []*Event
 	}
 
 	OrganizerSearchResult struct {
 		Count      int
 		Start      int
-		Organizers []User
+		Organizers []*User
 	}
 )
 
@@ -178,7 +178,7 @@ func (user *User) IsAdmin() bool {
 
 func (addr Address) IsEmpty() bool {
 
-	return isEmpty(addr.City) && isEmpty(addr.Name) && isEmpty(addr.Pcode) && isEmpty(addr.Street)
+	return isEmpty(addr.City) && isEmpty(addr.Pcode) && isEmpty(addr.Street)
 }
 
 func (event *Event) GetId() bson.ObjectId {
@@ -214,7 +214,7 @@ func (result *EventSearchResult) GetSize() int {
 }
 
 func (result *EventSearchResult) GetItem(i int) Item {
-	return &result.Events[i]
+	return result.Events[i]
 }
 
 func (result *OrganizerSearchResult) SetCount(count int) {
@@ -234,5 +234,5 @@ func (result *OrganizerSearchResult) GetSize() int {
 }
 
 func (result *OrganizerSearchResult) GetItem(i int) Item {
-	return &result.Organizers[i]
+	return result.Organizers[i]
 }

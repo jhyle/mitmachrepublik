@@ -203,23 +203,23 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		var events [][]Event
+		var events [][]*Event
 		if len(result.Events) > 0 {
-			events = make([][]Event, ((len(result.Events)-1)/eventsPerRow)+1)
+			events = make([][]*Event, ((len(result.Events)-1)/eventsPerRow)+1)
 			for i := range events {
 
 				rowSize := len(result.Events) - i*eventsPerRow
 				if rowSize > eventsPerRow {
 					rowSize = eventsPerRow
 				}
-				events[i] = make([]Event, rowSize)
+				events[i] = make([]*Event, rowSize)
 
 				for j := 0; j < rowSize; j++ {
 					events[i][j] = result.Events[i*eventsPerRow+j]
 				}
 			}
 		} else {
-			events = make([][]Event, 0)
+			events = make([][]*Event, 0)
 		}
 
 		return app.view("start.tpl", w, bson.M{"title": title, "events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt})
@@ -371,7 +371,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		title := event.Title + " in " + event.Addr.City + " - Mitmach-Republik"
 
-		return app.view("event.tpl", w, bson.M{"title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "organizer": organizer})
+		return app.view("event.tpl", w, bson.M{"hostname": app.hostname, "title": title, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": &event, "organizer": &organizer})
 	}()
 
 	app.handle(w, result)

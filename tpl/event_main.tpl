@@ -1,6 +1,6 @@
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-10"><h1 itemprop="name">Veranstaltung {{.event.Title}}</h1></div>
+	<div class="col-xs-10"><h1 itemprop="name">{{.event.Title}}</h1></div>
 	<div class="col-xs-1">&nbsp;</div>
 </div>
 <div class="row tiles">
@@ -17,6 +17,9 @@
 				<div><iframe width="300" height="225" src="http://maps.google.de/maps?hl=de&q={{.Addr.Street}}%20{{.Addr.Pcode}}%20{{.Addr.City}}&ie=UTF8&t=&z=14&iwloc=B&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe></div>
 			{{end}}
 		</div>
+		<p style="margin: 0">
+			<div class="fb-share-button" style="height: 30px" data-href="http://{{$.hostname}}/veranstaltung/{{eventUrl .}}" data-layout="button"></div>
+		</p>
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
 		<p class="date" itemprop="startDate" content="{{iso8601Format .Start}}">{{dateFormat .Start}}</p>
 		<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
