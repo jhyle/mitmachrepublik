@@ -1,6 +1,6 @@
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-10"><h1 itemprop="name">{{.event.Title}}</h1></div>
+	<div class="col-xs-10"><h1 itemprop="name">{{.meta.FB_Title}}</h1></div>
 	<div class="col-xs-1">&nbsp;</div>
 </div>
 <div class="row tiles">

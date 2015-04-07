@@ -383,7 +383,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		place := event.Addr.City
+		place := citypartName(event.Addr)
 
 		eventCnt, err := app.countEvents(place, nil, dateNames)
 		if err != nil {
@@ -400,8 +400,8 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			imageUrl = "http://" + app.hostname + "/bild/" + event.Image
 		}
 		meta := metaTags{
-			event.Title + " in " + event.Addr.City + " - Mitmach-Republik",
-			event.Title + " in " + event.Addr.City,
+			event.Title + " in " + place + " - Mitmach-Republik",
+			event.Title + " in " + place,
 			imageUrl,
 			event.Descr,
 		}
@@ -495,7 +495,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultNotFound
 		}
 
-		place := organizer.Addr.City
+		place := citypartName(organizer.Addr)
 
 		eventCnt, err := app.countEvents(place, nil, dateNames)
 		if err != nil {
@@ -531,8 +531,8 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			imageUrl = "http://" + app.hostname + "/bild/" + organizer.Image
 		}
 		meta := metaTags{
-			organizer.Addr.Name + " aus " + organizer.Addr.City + " - Mitmach-Republik",
-			organizer.Addr.Name + " aus " + organizer.Addr.City,
+			organizer.Addr.Name + " aus " + place + " - Mitmach-Republik",
+			organizer.Addr.Name + " aus " + place,
 			imageUrl,
 			organizer.Descr,
 		}
