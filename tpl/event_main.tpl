@@ -43,6 +43,7 @@
 		{{if .Web}}
 			<p><a href="{{.Web}}" class="btn btn-mmr" style="margin: 0" target="_blank">Zur Veranstaltungs-Webseite</a></p>
 		{{end}}
+		<div class="fb-comments" data-href="http://{{$.hostname}}/veranstaltung/{{eventUrl .}}" data-width="100%" data-numposts="5" data-order-by="time" data-colorscheme="light"></div>
 	</div>{{end}}
 	<div class="col-xs-1">&nbsp;</div>
 </div>
