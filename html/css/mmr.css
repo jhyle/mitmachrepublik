@@ -74,6 +74,9 @@ div.col-banner h4 {
 .modal-content, .dropdown-menu {
 	border-radius: 0;
 }
+.dropdown-menu li.active a, .dropdown-menu li.active a:hover, .dropdown-menu li.active a:focus {
+	background-color: #ff5200;
+}
 .container {
 	width: 1170px !important;
 }

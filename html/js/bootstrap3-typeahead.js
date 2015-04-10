@@ -402,7 +402,7 @@
 
     mouseleave: function (e) {
       this.mousedover = false;
-      if (!this.focused && this.shown) this.hide();
+//      if (!this.focused && this.shown) this.hide();
     }
 
   };
