@@ -81,7 +81,7 @@
 							<div class="col-sm-4">
 								<a id="register-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
 									<span id="register-spinner" class="fa fa-gear"> </span>
-									<img src="/images/thumbnail.gif" alt="Bild" id="register-thumbnail" class="img-responsive">
+									<img src="/images/thumbnail.png" alt="Bild" id="register-thumbnail" class="img-responsive">
 								</a>
 								<span id="register-thumbnail-message" class="help-block">Wähle ein Bild im Format jpg, jpeg, png oder gif aus.</span>
 								<input type="file" name="file" class="hide">
@@ -195,7 +195,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head"><a href="/" title="MitmachRepublik"><img src="/images/mitmachrepublik.gif" style="max-width:80%" alt="MitmachRepublik"/></a></div>
+			<div class="col-xs-3 col-head"><a href="/" title="MitmachRepublik"><img src="/images/mitmachrepublik.png" style="max-width:80%" alt="MitmachRepublik"/></a></div>
 			<div class="col-xs-1">&nbsp;</div>
 			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist Veranstalter?</span><br /><a id="head-events" href="#" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
 			<div class="col-xs-1">&nbsp;</div>

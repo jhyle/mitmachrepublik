@@ -16,7 +16,7 @@
 				<div class="col-xs-4">
 					<a id="event-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
 						<span id="event-spinner" class="fa fa-gear"> </span>
-						<img src="{{if .event.Image}}/bild/{{.event.Image}}?height=200&width=200{{else}}/images/thumbnail.gif{{end}}" alt="Bild" id="event-thumbnail" class="img-responsive">
+						<img src="{{if .event.Image}}/bild/{{.event.Image}}?height=200&width=200{{else}}/images/thumbnail.png{{end}}" alt="Bild" id="event-thumbnail" class="img-responsive">
 					</a>
 					<span id="event-thumbnail-message" class="help-block">Wähle ein Bild im Format jpg, jpeg, png oder gif aus.</span>
 					<input type="file" name="file" class="hide">
