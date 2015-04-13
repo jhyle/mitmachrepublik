@@ -20,6 +20,7 @@
 		<div style="height: 30px">
 			<div class="g-plus" style="float: left" data-action="share" data-annotation="none" data-href="http://{{$.hostname}}/veranstaltung/{{eventUrl .}}"></div>
 			<div class="fb-share-button" style="float: left; padding-right: 10px" data-href="http://{{$.hostname}}/veranstaltung/{{eventUrl .}}" data-layout="button"></div>
+			<div style="display: inline-block; float: right; line-height: 1"><a id="event-mail" class="highlight" href="#" data-toggle="modal" data-target="#mail"><span class="fa fa-envelope">&nbsp;E-Mail</span></a></div>
 		</div>
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
 		<p class="date" itemprop="startDate" content="{{iso8601Format .Start}}">{{dateFormat .Start}}</p>

@@ -101,7 +101,7 @@
 						<hr>
 						<div class="form-group">
 							<div class="col-sm-12">
-								<textarea name="description" id="register-Descr" class="form-control" placeholder="Beschreibung"></textarea>
+								<textarea name="description" id="register-Descr" class="form-control" placeholder="Beschreibung" rows="5"></textarea>
 								<span><input name="website" type="text" id="register-Web" class="form-control" placeholder="Webseite"></span>
 							</div>
 						</div>
@@ -156,6 +156,38 @@
 						</div>
 					</div>
 					<div class="clearfix"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal" id="mail" tabindex="-5" role="dialog" aria-labelledby="email-dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Schließen</span></button>
+				</div>
+				<div class="modal-body">
+					<div class="big-text">Sende die Veranstaltung per Mail an einen Freund.</div>
+					<form role="form" id="send-event" class="form-horizontal" action="/sendeventmail" method="POST">
+						<div class="form-group">
+							<div class="col-sm-12">
+								<input name="name" type="text" id="send-event-Name" class="form-control" placeholder="Name">
+								<span><input name="email" type="email" id="send-event-Email" class="form-control" placeholder="E-Mail-Adresse"></span>
+								<span><input name="subject" type="text" id="send-event-Subject" class="form-control" placeholder="Betreff"></span>
+								<textarea name="text" id="send-event-Text" class="form-control" placeholder="Nachricht" rows="5"></textarea>
+							</div>
+						</div>
+						<hr>
+						<div class="form-group">
+							<div class="col-sm-4">
+								<button type="button" class="btn btn-default" data-dismiss="modal" style="width: 90%">Abbrechen</button>
+							</div>
+							<div class="col-sm-1">&nbsp;</div>
+							<div class="col-sm-7">
+								<button id="send-event-submit" type="submit" class="btn btn-mmr" data-loading-text="Senden.." style="width: 90%">Senden</button>
+							</div>
+						</div>
+					</form>
 				</div>
 			</div>
 		</div>

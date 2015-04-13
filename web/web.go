@@ -39,6 +39,13 @@ type (
 		Pwd   string
 	}
 
+	sendMail struct {
+		Name    string
+		Email   string
+		Subject string
+		Text    string
+	}
+
 	appResult struct {
 		Status int
 		Error  error
@@ -48,9 +55,9 @@ type (
 
 const (
 	register_subject = "Deine Registrierung bei mitmachrepublik.de"
-	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der MitmachRepublik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der MitmachRepublik"
+	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der Mitmach-Republik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
 	password_subject = "Deine neue E-Mail-Adresse bei mitmachrepublik.de"
-	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der MitmachRepublik"
+	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
 	ga_dev           = "UA-61290824-1"
 	ga_test          = "UA-61290824-2"
 	ga_www           = "UA-61290824-3"
@@ -107,7 +114,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		return nil, errors.New("init of templates failed: " + err.Error())
 	}
 
-	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", "MitmachRepublik <mitmachrepublik@gmail.com>"}
+	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", &EmailAddress{"Mitmach-Republik", "mitmachrepublik@gmail.com"}}
 
 	ga_code := ga_dev
 	hostname := "dev.mitmachrepublik.de"
@@ -753,14 +760,9 @@ func (app *MmrApp) uploadHandler(w traffic.ResponseWriter, r *traffic.Request) {
 	app.handle(w, result)
 }
 
-func (app *MmrApp) sendEmail(to, subject, body string) error {
+func (app *MmrApp) sendEmail(to *EmailAddress, subject, body string) error {
 
-	tpl, err := app.tpls.Find("email.tpl")
-	if err != nil {
-		return err
-	}
-
-	return SendEmail(app.emailAccount, tpl, to, subject, body)
+	return SendEmail(app.emailAccount, to, subject, body)
 }
 
 func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request) {
@@ -783,7 +785,7 @@ func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request)
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		err = app.sendEmail(user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, app.hostname, user.Id.Hex()))
+		err = app.sendEmail(&EmailAddress{user.Addr.Name, user.Email}, register_subject, fmt.Sprintf(register_message, user.Addr.Name, app.hostname, user.Id.Hex()))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -810,7 +812,7 @@ func (app *MmrApp) sendCheckMailHandler(w traffic.ResponseWriter, r *traffic.Req
 			return resultUnauthorized
 		}
 
-		err = app.sendEmail(user.Email, register_subject, fmt.Sprintf(register_message, user.Addr.Name, app.hostname, user.Id.Hex()))
+		err = app.sendEmail(&EmailAddress{user.Addr.Name, user.Email}, register_subject, fmt.Sprintf(register_message, user.Addr.Name, app.hostname, user.Id.Hex()))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -880,7 +882,7 @@ func (app *MmrApp) passwordHandler(w traffic.ResponseWriter, r *traffic.Request)
 		if !isEmpty(data.Email) && data.Email != user.Email {
 			user.Email = data.Email
 			user.Approved = false
-			err := app.sendEmail(user.Email, password_subject, fmt.Sprintf(password_message, app.hostname, user.Addr.Name, user.Id.Hex()))
+			err := app.sendEmail(&EmailAddress{user.Addr.Name, user.Email}, password_subject, fmt.Sprintf(password_message, app.hostname, user.Addr.Name, user.Id.Hex()))
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
@@ -968,6 +970,26 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 		} else {
 			return resultOK
 		}
+	}()
+
+	app.handle(w, result)
+}
+
+func (app *MmrApp) sendEventMailHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	result := func() *appResult {
+
+		form, err := (&Request{r}).ReadSendMail()
+		if err != nil {
+			return resultBadRequest
+		}
+
+		err = app.sendEmail(&EmailAddress{form.Name, form.Email}, form.Subject, form.Text)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return resultOK
 	}()
 
 	app.handle(w, result)
@@ -1136,6 +1158,7 @@ func (app *MmrApp) Start() {
 	router.Post("/profile", app.profileHandler)
 	router.Post("/unregister", app.unregisterHandler)
 	router.Post("/event", app.eventHandler)
+	router.Post("/sendeventmail", app.sendEventMailHandler)
 	router.Get("/location/:location", app.locationHandler)
 	router.Get("/eventcount/:place/:dateIds/:categoryIds", app.eventCountHandler)
 	router.Get("/organizercount/:place/:categoryIds", app.organizerCountHandler)

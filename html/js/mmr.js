@@ -41,6 +41,12 @@ function initEventForm(id)
 	$("#" + id + "-Pcode").popover({content: "Bitte gib eine vollständige Postleitzahl ein.", trigger: "manual", placement: "auto top"});	
 }
 
+function initSendEventForm(id)
+{
+	$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Subject").popover({content: "Bitte gib der Nachricht einen Betreff.", trigger: "manual", placement: "auto right"});
+}
+
 function validate(ok, id) {
 
 	if (!ok) {
@@ -74,7 +80,7 @@ function validateProfileForm(id)
 
 function validateEmailAndPwdForm(id)
 {
-	ok = validate(EmailPattern.test($("#" + id +"-Email").val()), "#" + id +"-Email");
+	var ok = validate(EmailPattern.test($("#" + id +"-Email").val()), "#" + id +"-Email");
 	if ($("#" + id +"-Pwd").val().trim().length > 0) {
 		ok &= validate($("#" + id +"-Pwd").val() == $("#" + id +"-Pwd2").val(), "#" + id +"-Pwd2");
 	} else {
@@ -91,6 +97,13 @@ function validateEventForm(id)
 	ok &= validate($("#" + id +"-Web").val().trim().length == 0 || WebPattern.test($("#" + id +"-Web").val()), "#" + id +"-Web");
 	ok &= validate($("#" + id +"-Pcode").val().trim().length == 0 || PcodePattern.test($("#" + id +"-Pcode").val()), "#" + id +"-Pcode");
 	ok &= validate($("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Category");
+	return ok;
+}
+
+function validateSendEventForm(id)
+{
+	var ok = validate(EmailPattern.test($("#" + id +"-Email").val()), "#" + id +"-Email");
+	var ok = validate($("#" + id + "-Subject").val().trim().length > 0, "#" + id +"-Subject");
 	return ok;
 }
 
@@ -390,6 +403,26 @@ $(function() {
 		});
 	});
 
+	initSendEventForm("send-event");
+	
+	$("#send-event").submit(function (e) {
+		e.preventDefault();
+		if (!validateSendEventForm("send-event")) return;
+		$("#send-event-submit").button('loading');
+		var data = {"Name": $("#send-event-Name").val(), "Email": $("#send-event-Email").val(), "Subject": $("#send-event-Subject").val(), "Text": $("#send-event-Text").val()};
+		$.ajax({cache: false, url : "/sendeventmail", type: "POST", data : JSON.stringify(data),
+			success: function() {
+				$("#send-event-submit").button('reset');
+				alert("Die Nachricht wurde verschickt.")
+				$("#mail").modal("hide");
+			},
+			error : function() {
+				$("#send-event-submit").button('reset');
+				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+			}
+		});
+	});
+	
 	$("#login-form").submit(function(e) {
 		e.preventDefault();
 		var data = {"Email": $("#login-Email").val(), "Pwd": $("#login-Pwd").val()};

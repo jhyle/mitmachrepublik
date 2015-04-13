@@ -29,6 +29,17 @@ func (r *Request) ReadEmailAndPwd() (*emailAndPwd, error) {
 	return &form, nil
 }
 
+func (r *Request) ReadSendMail() (*sendMail, error) {
+
+	var form sendMail
+	err := r.ReadJson(&form)
+	if err != nil {
+		return nil, err
+	}
+
+	return &form, nil
+}
+
 func (r *Request) ReadUser() (*User, error) {
 
 	var data User
