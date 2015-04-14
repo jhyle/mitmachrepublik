@@ -8,7 +8,7 @@
 		<form role="form" id="password" class="form-horizontal" action="/password" method="POST">
 			<div class="form-group">
 				<div class="col-xs-12">
-					<span><input name="email" type="email" id="password-Email" class="form-control" placeholder="E-Mail-Adresse" value="{{.Email}}"></span>
+					<span><input name="email" type="email" id="password-Email" class="form-control" placeholder="E-Mail-Adresse" value="{{.user.Email}}"></span>
 					<span class="help-block" style="margin: 10px; width: 90%">Bei Änderung der E-Mail-Adresse werden Ihre Veranstaltungen auf nicht sichtbar geschaltet, bis Sie die neue E-Mail-Adresse bestätigt haben.</span>
 					<span><input name="pwd" type="password" id="password-Pwd" class="form-control" placeholder="Neues Kennwort">
 					<input name="pwd2" type="password" id="password-Pwd2" class="form-control" placeholder="Neues Kennwort wiederholen"></span>

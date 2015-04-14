@@ -61,6 +61,7 @@ const (
 	ga_dev           = "UA-61290824-1"
 	ga_test          = "UA-61290824-2"
 	ga_www           = "UA-61290824-3"
+	google_api_key   = "AIzaSyAFzwmkGATzuHpcqV3g0yQEO77Vk66zXUM"
 )
 
 var (
@@ -154,6 +155,7 @@ func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, da
 	data["districts"] = DistrictMap
 	data["categories"] = CategoryOrder
 	data["categoryMap"] = CategoryMap
+	data["googleApiKey"] = google_api_key
 
 	err := app.tpls.Execute(tpl, w, data)
 	if err != nil {

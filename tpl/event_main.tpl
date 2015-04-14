@@ -6,7 +6,7 @@
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>
 	<div class="col-xs-3 col-box" itemprop="organizer" itemscope itemtype="http://schema.org/Organization">
-		{{template "organizer_box.tpl" .organizer}}
+		{{template "organizer_box.tpl" .}}
 	</div>
 	{{with .event}}<div class="col-xs-7">
 		<div class="pull-left" style="margin-right: 5px; margin-bottom: 10px">
@@ -14,7 +14,9 @@
 				<img itemprop="image" style="margin-right: 10px; margin-bottom: 15px" src="/bild/{{.Image}}?width=300" title="{{.Title}}">
 			{{end}}
 			{{ if not .Addr.IsEmpty }}
-				<div><iframe width="300" height="225" src="http://maps.google.de/maps?hl=de&q={{.Addr.Street}}%20{{.Addr.Pcode}}%20{{.Addr.City}}&ie=UTF8&t=&z=14&iwloc=B&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe></div>
+			<a href="http://maps.google.de/maps?hl=de&q={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&ie=UTF8" target="_blank">
+				<img style="display: block" src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=300x225&key={{$.googleApiKey}}" title="in Google Maps öffnen">
+			</a>
 			{{end}}
 		</div>
 		<div style="height: 30px">
