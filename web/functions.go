@@ -6,6 +6,7 @@ import (
 	"labix.org/v2/mgo/bson"
 	"strconv"
 	"strings"
+	"net/url"
 	"time"
 )
 
@@ -115,6 +116,11 @@ func citypartName(addr Address) string {
 	return citypart
 }
 
+func encodePath(path  string) string {
+
+	return (&url.URL{Path: path}).String()
+}
+
 func eventSearchUrl(place string, categoryIds []int, dateIds []int, radius int) string {
 
 	dateNames := make([]string, len(dateIds))
@@ -147,7 +153,7 @@ func eventUrl(event *Event) string {
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return strings.Join(categoryNames, ",") + "/" + dateFormat(event.Start) + "/" + event.Id.Hex() + "/" + event.Title
+	return "/veranstaltung/" + strings.Join(categoryNames, ",") + "/" + dateFormat(event.Start) + "/" + event.Id.Hex() + "/" + event.Title
 }
 
 func organizerSearchUrl(place string, categoryIds []int) string {

@@ -18,8 +18,8 @@
 			{{end}}
 		</div>
 		<div style="height: 30px">
-			<div class="g-plus" style="float: left" data-action="share" data-annotation="none" data-href="http://{{$.hostname}}/veranstaltung/{{eventUrl .}}"></div>
-			<div class="fb-share-button" style="float: left; padding-right: 10px" data-href="http://{{$.hostname}}/veranstaltung/{{eventUrl .}}" data-layout="button"></div>
+			<div class="g-plus" style="float: left" data-action="share" data-annotation="none" data-href="http://{{$.hostname}}{{eventUrl .}}"></div>
+			<div class="fb-share-button" style="float: left; padding-right: 10px" data-href="http://{{$.hostname}}{{eventUrl .}}" data-layout="button"></div>
 			<div style="display: inline-block; float: right; line-height: 1"><a id="event-mail" class="highlight" href="#" data-toggle="modal" data-target="#mail"><span class="fa fa-envelope">&nbsp;E-Mail</span></a></div>
 		</div>
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
@@ -45,7 +45,7 @@
 		{{if .Web}}
 			<p><a href="{{.Web}}" class="btn btn-mmr" style="margin: 0" target="_blank">Zur Veranstaltungs-Webseite</a></p>
 		{{end}}
-		<div class="fb-comments" data-href="http://{{$.hostname}}/veranstaltung/{{eventUrl .}}" data-width="100%" data-numposts="5" data-order-by="time" data-colorscheme="light"></div>
+		<div class="fb-comments" data-href="http://{{$.hostname}}{{eventUrl .}}" data-width="100%" data-numposts="5" data-order-by="time" data-colorscheme="light"></div>
 	</div>{{end}}
 	<div class="col-xs-1">&nbsp;</div>
 </div>

@@ -103,6 +103,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		"categorySearchUrl":  categorySearchUrl,
 		"districtName":       districtName,
 		"citypartName":       citypartName,
+		"encodePath":         encodePath,
 		"eventUrl":           eventUrl,
 		"eventSearchUrl":     simpleEventSearchUrl,
 		"organizerUrl":       organizerUrl,

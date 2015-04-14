@@ -7,7 +7,7 @@
 {{range .events}}
 <div class="row-tile" itemprop="event" itemscope itemtype="http://schema.org/Event">
 	{{if not $.user }}
-		<a href="/veranstaltung/{{eventUrl .}}" itemprop="url">
+		<a href="{{eventUrl .}}" itemprop="url">
 	{{end}}
 	{{if .Image}}
 		{{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}}

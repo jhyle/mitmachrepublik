@@ -160,6 +160,7 @@
 			</div>
 		</div>
 	</div>
+{{if .event}}
 	<div class="modal" id="mail" tabindex="-5" role="dialog" aria-labelledby="email-dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -173,8 +174,13 @@
 							<div class="col-sm-12">
 								<input name="name" type="text" id="send-event-Name" class="form-control" placeholder="Name">
 								<span><input name="email" type="email" id="send-event-Email" class="form-control" placeholder="E-Mail-Adresse"></span>
-								<span><input name="subject" type="text" id="send-event-Subject" class="form-control" placeholder="Betreff"></span>
-								<textarea name="text" id="send-event-Text" class="form-control" placeholder="Nachricht" rows="5"></textarea>
+								<span><input name="subject" type="text" id="send-event-Subject" class="form-control" placeholder="Betreff" value="Veranstaltung {{.event.Title}} auf mitmach-republik.de"></span>
+								<textarea name="text" id="send-event-Text" class="form-control" placeholder="Nachricht" rows="5">Hallo,
+
+die Veranstaltung {{.event.Title}} in {{citypartName .event.Addr}} finde ich interessant, schau doch mal rein: http://{{$.hostname}}{{eventUrl .event | encodePath}}.
+
+Liebe Grüße! 
+								</textarea>
 							</div>
 						</div>
 						<hr>
@@ -192,6 +198,7 @@
 			</div>
 		</div>
 	</div>
+{{end}}
 	<div class="container">
 		<div class="row">
 			<div class="col-xs-1">&nbsp;</div>
