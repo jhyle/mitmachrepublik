@@ -8,7 +8,7 @@
 		<form role="form" id="profile-upload" class="form-horizontal" action="/upload" method="POST">
 			<div class="form-group">
 				<div class="col-xs-7">
-					<span><input name="name" type="text" id="profile-Name" class="form-control" placeholder="Deine Organisation" value="{{.user.Name}}"></span>
+					<span><input name="name" type="text" id="profile-Name" class="form-control" placeholder="Deine Organisation" value="{{.user.Name}}" autofocus></span>
 				</div>
 				<div class="col-xs-4">
 					<a id="profile-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">

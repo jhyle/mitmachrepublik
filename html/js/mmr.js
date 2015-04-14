@@ -423,6 +423,18 @@ $(function() {
 		});
 	});
 	
+	$("#login").on('shown.bs.modal', function () {
+	    $("#login input").first().focus();
+	});
+	
+	$("#register").on('shown.bs.modal', function () {
+	    $("#register input").first().focus();
+	});
+	
+	$("#mail").on('shown.bs.modal', function () {
+	    $("#mail input").first().focus();
+	});
+	
 	$("#login-form").submit(function(e) {
 		e.preventDefault();
 		var data = {"Email": $("#login-Email").val(), "Pwd": $("#login-Pwd").val()};

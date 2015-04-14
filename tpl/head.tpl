@@ -37,7 +37,7 @@
   js.src = "//connect.facebook.net/de_DE/sdk.js#xfbml=1&version=v2.3";
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
-	<div class="modal" id="login" tabindex="-2" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
+	<div class="modal fade" id="login" tabindex="-2" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -62,7 +62,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="modal" id="register" tabindex="-3" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
+	<div class="modal fade" id="register" tabindex="-3" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -135,7 +135,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="modal" id="registered" tabindex="-4" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
+	<div class="modal fade" id="registered" tabindex="-4" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -161,7 +161,7 @@
 		</div>
 	</div>
 {{if .event}}
-	<div class="modal" id="mail" tabindex="-5" role="dialog" aria-labelledby="email-dialog" aria-hidden="true">
+	<div class="modal fade" id="mail" tabindex="-5" role="dialog" aria-labelledby="email-dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
