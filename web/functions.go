@@ -274,6 +274,14 @@ func buildQuery(place string, dates [][]time.Time, categoryIds []int) bson.M {
 	return bson.M{"$and": query}
 }
 
+func pageCount(results, pageSize int) int {
+
+	if results > 0 {
+		results = results - 1
+	}
+	return (results / pageSize) + 1
+}
+
 func isEmpty(s string) bool {
 
 	return len(strings.TrimSpace(s)) == 0

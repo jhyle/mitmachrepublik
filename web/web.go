@@ -79,7 +79,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		return nil, errors.New("init of MongoDB failed: " + err.Error())
 	}
 
-	err = database.Table("user").EnsureIndices("email", "approved", "categories", "addr.city", "addr.pcode")
+	err = database.Table("user").EnsureIndices("name", "email", "approved", "categories", "addr.city", "addr.pcode")
 	if err != nil {
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
@@ -351,11 +351,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
-		results := result.Count
-		if results > 0 {
-			results = results - 1
-		}
-		pageCount := (results / pageSize) + 1
+		pageCount := pageCount(result.Count, pageSize)
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
@@ -463,11 +459,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		results := result.Count
-		if results > 0 {
-			results = results - 1
-		}
-		pageCount := (results / pageSize) + 1
+		pageCount := pageCount(result.Count, pageSize)
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
@@ -522,10 +514,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		pageCount := result.Count / pageSize
-		if pageCount == 0 {
-			pageCount = 1
-		}
+		pageCount := pageCount(result.Count, pageSize)
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
@@ -545,7 +534,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			organizer.Descr,
 		}
 
-		return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
+		return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
