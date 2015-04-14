@@ -20,6 +20,7 @@ type (
 
 	User struct {
 		Id         bson.ObjectId `bson:"_id" json:",omitempty"`
+		Name       string
 		Email      string
 		Pwd        string
 		Image      string
@@ -47,7 +48,7 @@ type (
 		Start       time.Time
 		End         time.Time `json:",omitempty"`
 		Addr        Address
-		Approved   bool
+		Approved    bool
 	}
 
 	SearchResult interface {

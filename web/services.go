@@ -160,6 +160,7 @@ func (service *SpawnEventsService) serve() {
 	}
 	
 	var event Event
+	event.Approved = true
 	event.Id = bson.NewObjectId()
 	event.OrganizerId = organizer.Id
 	event.Title = titles[rand.Intn(len(titles))]

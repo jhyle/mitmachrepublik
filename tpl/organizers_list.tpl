@@ -9,10 +9,10 @@
 	<a href="/veranstalter/{{organizerUrl .}}">
 	{{if .Image}}
 		{{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}}
-		<img class="pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" title="{{.Addr.Name}}">
+		<img class="pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" title="{{.Name}}">
 	{{end}}
 	<div class="tile-text">
-		<h3>{{.Addr.Name}}</h3>
+		<h3>{{.Name}}</h3>
 		<p>{{strClip .Descr 100}}</p>
 		{{ if not .Addr.IsEmpty }}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>

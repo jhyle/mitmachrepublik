@@ -110,14 +110,14 @@ function validateSendEventForm(id)
 function gatherProfileForm(id)
 {
 	var data = {};
-	var user_fields = ["Email", "Pwd", "Image", "Descr", "Web"];
+	var user_fields = ["Name", "Email", "Pwd", "Image", "Descr", "Web"];
 	for (var i = 0, len = user_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + user_fields[i]).length) {
 			data[user_fields[i]] = $("#" + id + "-" + user_fields[i]).val();
 		}
 	}
 	data["Addr"] = {}
-	var addr_fields = ["Name", "Street", "Pcode", "City"];
+	var addr_fields = ["Street", "Pcode", "City"];
 	for (var i = 0, len = addr_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + addr_fields[i]).length) {
 			data["Addr"][addr_fields[i]] = $("#" + id + "-" + addr_fields[i]).val();

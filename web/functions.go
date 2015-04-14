@@ -172,7 +172,7 @@ func simpleOrganizerSearchUrl(place string) string {
 
 func organizerUrl(organizer User) string {
 
-	return organizer.Id.Hex() + "/" + organizer.Addr.Name + "/0"
+	return organizer.Id.Hex() + "/" + organizer.Name + "/0"
 }
 
 func str2Int(s []string) []int {

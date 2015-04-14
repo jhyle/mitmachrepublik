@@ -79,12 +79,12 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		return nil, errors.New("init of MongoDB failed: " + err.Error())
 	}
 
-	err = database.Table("user").EnsureIndices("email", "approved", "categories", "addr.name", "addr.city", "addr.pcode")
+	err = database.Table("user").EnsureIndices("email", "approved", "categories", "addr.city", "addr.pcode")
 	if err != nil {
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
-	err = database.Table("event").EnsureIndices("organizerid", "start", "categories", "addr.city", "addr.pcode")
+	err = database.Table("event").EnsureIndices("organizerid", "approved", "start", "categories", "addr.city", "addr.pcode")
 	if err != nil {
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
@@ -347,7 +347,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 				if err != nil {
 					return &appResult{Status: http.StatusInternalServerError, Error: err}
 				}
-				organizerNames[event.OrganizerId] = user.Addr.Name
+				organizerNames[event.OrganizerId] = user.Name
 			}
 		}
 
@@ -458,7 +458,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 
 		var result OrganizerSearchResult
 		query := buildQuery(place, nil, categoryIds)
-		err = app.database.Table("user").Search(query, page*pageSize, pageSize, &result, "addr.name")
+		err = app.database.Table("user").Search(query, page*pageSize, pageSize, &result, "name")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -516,7 +516,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		var result EventSearchResult
-		query := bson.M{"$and": []bson.M{bson.M{"organizerid": organizer.Id}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
+		query := bson.M{"$and": []bson.M{bson.M{"organizerid": organizer.Id}, bson.M{"approved": true}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
 		err = app.database.Table("event").Search(query, page*pageSize, pageSize, &result, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
@@ -532,15 +532,15 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		organizerNames := map[bson.ObjectId]string{organizer.Id: organizer.Addr.Name}
+		organizerNames := map[bson.ObjectId]string{organizer.Id: organizer.Name}
 
 		imageUrl := ""
 		if !isEmpty(organizer.Image) {
 			imageUrl = "http://" + app.hostname + "/bild/" + organizer.Image
 		}
 		meta := metaTags{
-			organizer.Addr.Name + " aus " + place + " - Mitmach-Republik",
-			organizer.Addr.Name + " aus " + place,
+			organizer.Name + " aus " + place + " - Mitmach-Republik",
+			organizer.Name + " aus " + place,
 			imageUrl,
 			organizer.Descr,
 		}
@@ -786,7 +786,7 @@ func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request)
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		err = app.sendEmail(&EmailAddress{user.Addr.Name, user.Email}, register_subject, fmt.Sprintf(register_message, user.Addr.Name, app.hostname, user.Id.Hex()))
+		err = app.sendEmail(&EmailAddress{user.Name, user.Email}, register_subject, fmt.Sprintf(register_message, user.Name, app.hostname, user.Id.Hex()))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -813,7 +813,7 @@ func (app *MmrApp) sendCheckMailHandler(w traffic.ResponseWriter, r *traffic.Req
 			return resultUnauthorized
 		}
 
-		err = app.sendEmail(&EmailAddress{user.Addr.Name, user.Email}, register_subject, fmt.Sprintf(register_message, user.Addr.Name, app.hostname, user.Id.Hex()))
+		err = app.sendEmail(&EmailAddress{user.Name, user.Email}, register_subject, fmt.Sprintf(register_message, user.Name, app.hostname, user.Id.Hex()))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -840,7 +840,7 @@ func (app *MmrApp) profileHandler(w traffic.ResponseWriter, r *traffic.Request) 
 			return resultBadRequest
 		}
 
-		user.Addr.Name = data.Addr.Name
+		user.Name = data.Name
 		user.Image = data.Image
 		user.Categories = data.Categories
 		user.Descr = data.Descr
@@ -883,7 +883,7 @@ func (app *MmrApp) passwordHandler(w traffic.ResponseWriter, r *traffic.Request)
 		if !isEmpty(data.Email) && data.Email != user.Email {
 			user.Email = data.Email
 			user.Approved = false
-			err := app.sendEmail(&EmailAddress{user.Addr.Name, user.Email}, password_subject, fmt.Sprintf(password_message, app.hostname, user.Addr.Name, user.Id.Hex()))
+			err := app.sendEmail(&EmailAddress{user.Name, user.Email}, password_subject, fmt.Sprintf(password_message, app.hostname, user.Name, user.Id.Hex()))
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
