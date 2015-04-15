@@ -174,7 +174,7 @@ func (tree *LocationTree) Autocomplete(prefix string) []string {
 
 	result := make([]string, 0)
 
-	tree.WalkPrefix(prefix, func(word string, s interface{}) bool {
+	tree.WalkPrefix(strings.ToLower(prefix), func(word string, s interface{}) bool {
 		result = append(result, s.([]string)...)
 		return false
 	})
@@ -210,11 +210,11 @@ func (tree *LocationTree) Add(s string) {
 
 	for _, token := range strings.Split(s, " ") {
 		for _, word := range strings.Split(token, "-") {
-			tree.insert(word, s)
+			tree.insert(strings.ToLower(word), s)
 		}
-		tree.insert(token, s)
+		tree.insert(strings.ToLower(token), s)
 	}
-	tree.insert(s, s)
+	tree.insert(strings.ToLower(s), s)
 }
 
 func NewLocationTree(locations []string) *LocationTree {

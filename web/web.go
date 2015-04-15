@@ -529,9 +529,13 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(organizer.Image) {
 			imageUrl = "http://" + app.hostname + "/bild/" + organizer.Image
 		}
+		name := organizer.Name
+		if !isEmpty(place) {
+			name += " aus " + place
+		}
 		meta := metaTags{
-			organizer.Name + " aus " + place + " - Mitmach-Republik",
-			organizer.Name + " aus " + place,
+			name + " - Mitmach-Republik",
+			name,
 			imageUrl,
 			organizer.Descr,
 		}
