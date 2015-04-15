@@ -3,16 +3,16 @@
 
 	<div class="col-xs-2 col-foot">
 	  <ul>
-	    <li><h5>Rechtliches</h5></li>
-	    <li>Kontakt</li>
-	    <li><a href="/impressum">Impressum</a></li>
-	    <li><a href="/datenschutz">Datenschutz</a></li>
-	    <li><a href="/agbs">AGBs</a></li>
 	    <li><h5>Folge uns auf</h5></li>
 	    <li><span class="fa fa-facebook fa-fw"></span>Facebook</li>
 	    <li><span class="fa fa-twitter fa-fw" ></span>Twitter</li>
 	    <li><h5>Spenden</h5></li>
 	    <li><img src="/images/flattr_icon.png" /> Flattr</li>
+	    <li><h5>Rechtliches</h5></li>
+	    <li><a href="/agbs">Allgemeine Geschäftsbedingungen</a></li>
+	    <li><a href="/datenschutz">Datenschutz</a></li>
+	    <li><a href="/impressum">Impressum</a></li>
+	    <li><a href="/disclaimer">Haftungsausschluss (Disclaimer)</a></li>
 	  </ul>
 	</div>
 	<div class="col-xs-2 col-foot">

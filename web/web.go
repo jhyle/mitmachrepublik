@@ -668,34 +668,12 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 	app.handle(w, result)
 }
 
-func (app *MmrApp) impressumPage(w traffic.ResponseWriter, r *traffic.Request) {
+func (app *MmrApp) staticPage(w traffic.ResponseWriter, r *traffic.Request, template, headline string) {
 
-	meta := metaTags{"Impressum - Mitmach-Republik", "", "", ""}
-
-	result := func() *appResult {
-		return app.view("impressum.tpl", w, &meta, nil)
-	}()
-
-	app.handle(w, result)
-}
-
-func (app *MmrApp) datenschutzPage(w traffic.ResponseWriter, r *traffic.Request) {
-
-	meta := metaTags{"Datenschutz - Mitmach-Republik", "", "", ""}
+	meta := metaTags{headline + " - Mitmach-Republik", headline, "", ""}
 
 	result := func() *appResult {
-		return app.view("datenschutz.tpl", w, &meta, nil)
-	}()
-
-	app.handle(w, result)
-}
-
-func (app *MmrApp) agbsPage(w traffic.ResponseWriter, r *traffic.Request) {
-
-	meta := metaTags{"Allgemeine Geschäftsbedingungen - Mitmach-Republik", "", "", ""}
-
-	result := func() *appResult {
-		return app.view("agbs.tpl", w, &meta, nil)
+		return app.view(template, w, &meta, nil)
 	}()
 
 	app.handle(w, result)
@@ -1145,9 +1123,10 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
 
-	router.Get("/impressum", app.impressumPage)
-	router.Get("/datenschutz", app.datenschutzPage)
-	router.Get("/agbs", app.agbsPage)
+	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, r, "impressum.tpl", "Impressum") })
+	router.Get("/disclaimer", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, r, "disclaimer.tpl", "Haftungsausschluss (Disclaimer)") })
+	router.Get("/datenschutz", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, r, "datenschutz.tpl", "Datenschutzerklärung") })
+	router.Get("/agbs", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, r, "agbs.tpl", "Allgemeine Geschäftsbedingungen") })
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)
