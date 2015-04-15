@@ -180,6 +180,9 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 			w.WriteHeader(http.StatusFound)
 		} else {
 			w.WriteHeader(result.Status)
+			if result == resultNotFound {
+				app.staticPage(w, "notfound.tpl", "Seite nicht gefunden")
+			}
 		}
 	}
 
@@ -668,7 +671,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 	app.handle(w, result)
 }
 
-func (app *MmrApp) staticPage(w traffic.ResponseWriter, r *traffic.Request, template, headline string) {
+func (app *MmrApp) staticPage(w traffic.ResponseWriter, template, headline string) {
 
 	meta := metaTags{headline + " - Mitmach-Republik", headline, "", ""}
 
@@ -1143,10 +1146,10 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
 
-	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, r, "impressum.tpl", "Impressum") })
-	router.Get("/disclaimer", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, r, "disclaimer.tpl", "Haftungsausschluss (Disclaimer)") })
-	router.Get("/datenschutz", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, r, "datenschutz.tpl", "Datenschutzerklärung") })
-	router.Get("/agbs", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, r, "agbs.tpl", "Allgemeine Geschäftsbedingungen") })
+	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "impressum.tpl", "Impressum") })
+	router.Get("/disclaimer", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "disclaimer.tpl", "Haftungsausschluss (Disclaimer)") })
+	router.Get("/datenschutz", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "datenschutz.tpl", "Datenschutzerklärung") })
+	router.Get("/agbs", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "agbs.tpl", "Allgemeine Geschäftsbedingungen") })
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)
