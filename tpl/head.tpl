@@ -47,7 +47,7 @@
 					<form role="form" id="login-form" class="form-horizontal">
 						<div class="form-group">
 							<div class="col-sm-7" style="border-right: 1px solid #ccc; padding-right: 0">
-								<div class="big-text">Ich bin bereits als Veranstalter registriert.</div>
+								<div class="big-text">Ich bin bereits als Organisator registriert.</div>
 								<input name="email" id="login-Email" type="email" class="form-control" placeholder="E-Mail-Adresse">
 								<input name="password" id="login-Pwd" type="password" class="form-control" placeholder="Kennwort">
 								<button name="login" type="submit" class="btn btn-mmr" style="width: 90%">Anmelden</button>
@@ -107,7 +107,7 @@
 						</div>
 						<hr>
 						<p style="margin-left: 12px">
-							<span class="help-block">Gib eine Adresse an, um in der Veranstaltersuche gefunden zu werden.</span>
+							<span class="help-block">Gib eine Adresse an, um in der Organisatorsuche gefunden zu werden.</span>
 						</p>
 						<div class="form-group">
 							<div class="col-sm-5">
@@ -204,7 +204,7 @@ Liebe Grüße!
 			<div class="col-xs-1">&nbsp;</div>
 			<div class="col-xs-3 col-head"><a href="/" title="MitmachRepublik"><img src="/images/mitmachrepublik.png" style="max-width:80%" alt="MitmachRepublik"/></a></div>
 			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist Veranstalter?</span><br /><a id="head-events" href="#" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
+			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist Organisator?</span><br /><a id="head-events" href="#" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
 			<div class="col-xs-1">&nbsp;</div>
 			<div class="col-xs-2 col-head"><a id="head-login" href="#" data-toggle="modal" data-target="#login"><span class="fa fa-user highlight"></span> Anmelden</a><br /><a href="#">Über uns</a> | <a href="#">Kontakt</a></div>
 			<div class="col-xs-1">&nbsp;</div>

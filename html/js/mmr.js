@@ -241,7 +241,7 @@ function updateOrganizerCount()
 	data = gatherSearchForm();
 	$.ajax({cache: false, url : "/organizercount/" + data["place"] + "/" + data["category"], type: "GET", dataType: "json",
 		success: function(data) {
-			$("button[value=organizers]").html(data + " Veranstalter");
+			$("button[value=organizers]").html(data + (data != 1 ? " Organisatoren" : " Organisator"));
 		}
 	});
 }
