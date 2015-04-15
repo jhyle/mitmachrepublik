@@ -204,7 +204,7 @@ Liebe Grüße!
 			<div class="col-xs-1">&nbsp;</div>
 			<div class="col-xs-3 col-head"><a href="/" title="MitmachRepublik"><img src="/images/mitmachrepublik.png" style="max-width:80%" alt="MitmachRepublik"/></a></div>
 			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist Organisator?</span><br /><a id="head-events" href="#" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
+			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist ein Organisator?</span><br /><a id="head-events" href="#" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
 			<div class="col-xs-1">&nbsp;</div>
 			<div class="col-xs-2 col-head"><a id="head-login" href="#" data-toggle="modal" data-target="#login"><span class="fa fa-user highlight"></span> Anmelden</a><br /><a href="#">Über uns</a> | <a href="#">Kontakt</a></div>
 			<div class="col-xs-1">&nbsp;</div>

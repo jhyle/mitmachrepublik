@@ -14,8 +14,8 @@
 	<p><a href="{{.Web}}" target="_blank" class="highlight"><span class="fa fa-caret-right"></span> {{.Web}}</a></p>
 {{end}}
 {{ if not .Addr.IsEmpty }}
-	<a href="http://maps.google.de/maps?hl=de&q={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&ie=UTF8" target="_blank">
-		<img src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=250x187&key={{$.googleApiKey}}" title="in Google Maps öffnen">
+	<a href="http://maps.google.de/maps?hl=de&q={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&ie=UTF8" target="_blank">
+		<img src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=250x187&key={{$.googleApiKey}}" title="in Google Maps öffnen">
 	</a>
 {{end}}
 {{end}}

@@ -14,13 +14,14 @@
 				<img itemprop="image" style="margin-right: 10px; margin-bottom: 15px" src="/bild/{{.Image}}?width=300" title="{{.Title}}">
 			{{end}}
 			{{ if not .Addr.IsEmpty }}
-			<a href="http://maps.google.de/maps?hl=de&q={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&ie=UTF8" target="_blank">
-				<img style="display: block" src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=300x225&key={{$.googleApiKey}}" title="in Google Maps öffnen">
+			<a href="http://maps.google.de/maps?hl=de&q={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&ie=UTF8" target="_blank">
+				<img style="display: block" src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=300x225&key={{$.googleApiKey}}" title="in Google Maps öffnen">
 			</a>
 			{{end}}
 		</div>
-		<div style="height: 30px">
-			<div class="g-plus" style="float: left" data-action="share" data-annotation="none" data-href="http://{{$.hostname}}{{eventUrl .}}"></div>
+		<div style="height: 30px; margin-bottom: 10px">
+			<div class="g-plus" style="float: left, padding-right: 10px" data-action="share" data-annotation="none" data-href="http://{{$.hostname}}{{eventUrl .}}"></div>
+			<a class="twitter-share-button" data-count="none" href="https://twitter.com/share" target="_blank">Tweet</a><script>window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));</script>
 			<div class="fb-share-button" style="float: left; padding-right: 10px" data-href="http://{{$.hostname}}{{eventUrl .}}" data-layout="button"></div>
 			<div style="display: inline-block; float: right; line-height: 1"><a id="event-mail" class="highlight" href="#" data-toggle="modal" data-target="#mail"><span class="fa fa-envelope">&nbsp;E-Mail</span></a></div>
 		</div>

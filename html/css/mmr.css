@@ -227,3 +227,6 @@ div.page {
 div.cur-page {
 	border-radius: 20px;
 }
+.twitter-share-button {
+	margin-left: 5px;
+}
