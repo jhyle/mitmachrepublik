@@ -169,6 +169,9 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 
 	if result.Error != nil {
 		traffic.Logger().Print(result.Error.Error())
+		if app.ga_code == ga_www {
+			app.sendEmail(app.emailAccount.From, "Fehlermeldung", result.Error.Error())
+		}
 	}
 
 	if !w.Written() {
