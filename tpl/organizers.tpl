@@ -5,7 +5,7 @@
 
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-10"><h1>{{if eq .results 0}}Keine{{else}}{{if eq .results 1}}Ein{{else}}{{.results}}{{end}}{{end}} Veranstalter in {{.place}}</h1></div>
+	<div class="col-xs-10"><h1>{{if eq .results 1}}Ein Organisator{{else}}{{if eq .results 0}}Keine{{else}}{{.results}}{{end}} Organisatoren{{end}} in {{.place}}</h1></div>
 	<div class="col-xs-1">&nbsp;</div>
 </div>
 <div id="organizers" class="row tiles">

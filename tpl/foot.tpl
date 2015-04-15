@@ -8,10 +8,6 @@
 	    <li><a href="/impressum">Impressum</a></li>
 	    <li><a href="/datenschutz">Datenschutz</a></li>
 	    <li><a href="/agbs">AGBs</a></li>
-	  </ul>
-	</div>
-	<div class="col-xs-2 col-foot">
-	  <ul>
 	    <li><h5>Folge uns auf</h5></li>
 	    <li><span class="fa fa-facebook fa-fw"></span>Facebook</li>
 	    <li><span class="fa fa-twitter fa-fw" ></span>Twitter</li>
@@ -21,7 +17,7 @@
 	</div>
 	<div class="col-xs-2 col-foot">
 	  <ul>
-	    <li><h5>Was ist los in..</h5></li>
+	    <li><h5>Veranstaltungen in..</h5></li>
 	    <li><a href="/veranstaltungen/{{eventSearchUrl "Berlin"}}">Berlin</a></li>
 	    {{range $district, $quarters := .districts}}
 	    	<li><a href="/veranstaltungen/{{eventSearchUrl $district}}">{{cut $district 1}}</a></li>
@@ -41,9 +37,19 @@
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
 	    <li><h5>In Kategorie..</h5></li>
 	    {{range $category, $id := .categoryMap}}
-	    	{{if $id}}
+	    	{{if $id}}{{if le $id 9}}
 	    		<li><a href="/veranstaltungen/{{categorySearchUrl $id "Berlin"}}">{{$category}}</a></li>
-	    	{{end}}
+	    	{{end}}{{end}}
+	    {{end}}
+	  </ul>
+	</div>
+	<div class="col-xs-2 col-foot">
+	  <ul style="margin-bottom: 0; padding-bottom: 0">
+	    <li><h5>&nbsp;</h5></li>
+	    {{range $category, $id := .categoryMap}}
+	    	{{if $id}}{{if gt $id 9}}
+	    		<li><a href="/veranstaltungen/{{categorySearchUrl $id "Berlin"}}">{{$category}}</a></li>
+	    	{{end}}{{end}}
 	    {{end}}
 	  </ul>
 	</div>
