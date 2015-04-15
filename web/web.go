@@ -170,7 +170,7 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 	if result.Error != nil {
 		traffic.Logger().Print(result.Error.Error())
 		if app.ga_code == ga_www {
-			app.sendEmail(app.emailAccount.From, "Fehlermeldung", result.Error.Error())
+			app.sendEmail(app.emailAccount.From, nil, "Fehlermeldung", result.Error.Error())
 		}
 	}
 
@@ -737,9 +737,9 @@ func (app *MmrApp) uploadHandler(w traffic.ResponseWriter, r *traffic.Request) {
 	app.handle(w, result)
 }
 
-func (app *MmrApp) sendEmail(to *EmailAddress, subject, body string) error {
+func (app *MmrApp) sendEmail(to, replyTo *EmailAddress, subject, body string) error {
 
-	return SendEmail(app.emailAccount, to, subject, body)
+	return SendEmail(app.emailAccount, to, replyTo, subject, body)
 }
 
 func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request) {
@@ -747,7 +747,7 @@ func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request)
 	result := func() *appResult {
 
 		user, err := (&Request{r}).ReadUser()
-		if err != nil {
+		if err != nil || !user.AGBs {
 			return resultBadRequest
 		}
 
@@ -762,7 +762,7 @@ func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request)
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		err = app.sendEmail(&EmailAddress{user.Name, user.Email}, register_subject, fmt.Sprintf(register_message, user.Name, app.hostname, user.Id.Hex()))
+		err = app.sendEmail(&EmailAddress{user.Name, user.Email}, nil, register_subject, fmt.Sprintf(register_message, user.Name, app.hostname, user.Id.Hex()))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -789,7 +789,7 @@ func (app *MmrApp) sendCheckMailHandler(w traffic.ResponseWriter, r *traffic.Req
 			return resultUnauthorized
 		}
 
-		err = app.sendEmail(&EmailAddress{user.Name, user.Email}, register_subject, fmt.Sprintf(register_message, user.Name, app.hostname, user.Id.Hex()))
+		err = app.sendEmail(&EmailAddress{user.Name, user.Email}, nil, register_subject, fmt.Sprintf(register_message, user.Name, app.hostname, user.Id.Hex()))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -859,7 +859,7 @@ func (app *MmrApp) passwordHandler(w traffic.ResponseWriter, r *traffic.Request)
 		if !isEmpty(data.Email) && data.Email != user.Email {
 			user.Email = data.Email
 			user.Approved = false
-			err := app.sendEmail(&EmailAddress{user.Name, user.Email}, password_subject, fmt.Sprintf(password_message, app.hostname, user.Name, user.Id.Hex()))
+			err := app.sendEmail(&EmailAddress{user.Name, user.Email}, nil, password_subject, fmt.Sprintf(password_message, app.hostname, user.Name, user.Id.Hex()))
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
@@ -961,7 +961,27 @@ func (app *MmrApp) sendEventMailHandler(w traffic.ResponseWriter, r *traffic.Req
 			return resultBadRequest
 		}
 
-		err = app.sendEmail(&EmailAddress{form.Name, form.Email}, form.Subject, form.Text)
+		err = app.sendEmail(&EmailAddress{form.Name, form.Email}, nil, form.Subject, form.Text)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return resultOK
+	}()
+
+	app.handle(w, result)
+}
+
+func (app *MmrApp) sendContactMailHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	result := func() *appResult {
+
+		form, err := (&Request{r}).ReadSendMail()
+		if err != nil {
+			return resultBadRequest
+		}
+
+		err = app.sendEmail(app.emailAccount.From, &EmailAddress{form.Name, form.Email}, form.Subject, form.Text)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -1137,6 +1157,7 @@ func (app *MmrApp) Start() {
 	router.Post("/unregister", app.unregisterHandler)
 	router.Post("/event", app.eventHandler)
 	router.Post("/sendeventmail", app.sendEventMailHandler)
+	router.Post("/sendcontactmail", app.sendContactMailHandler)
 	router.Get("/location/:location", app.locationHandler)
 	router.Get("/eventcount/:place/:dateIds/:categoryIds", app.eventCountHandler)
 	router.Get("/organizercount/:place/:categoryIds", app.organizerCountHandler)

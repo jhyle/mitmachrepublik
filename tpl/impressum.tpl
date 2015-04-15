@@ -10,7 +10,7 @@ New Media Product Developer<br />
 Neue Krugallee 120, 12437 Berlin</p>
 
 <h2>Kontakt</h2>
-<p><a class="highlight" href="#">Kontaktformular</a><br />
+<p><a href="#" class="highlight" data-toggle="modal" data-target="#mail">Kontaktformular</a><br />
 E-Mail: mitmachrepublik@gmail.com</p>
 
 <h2>Umsatzsteuer-ID</h2>

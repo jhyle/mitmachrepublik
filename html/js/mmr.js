@@ -41,7 +41,7 @@ function initEventForm(id)
 	$("#" + id + "-Pcode").popover({content: "Bitte gib eine vollständige Postleitzahl ein.", trigger: "manual", placement: "auto top"});	
 }
 
-function initSendEventForm(id)
+function initSendMailForm(id)
 {
 	$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Subject").popover({content: "Bitte gib der Nachricht einen Betreff.", trigger: "manual", placement: "auto right"});
@@ -100,7 +100,7 @@ function validateEventForm(id)
 	return ok;
 }
 
-function validateSendEventForm(id)
+function validateSendMailForm(id)
 {
 	var ok = validate(EmailPattern.test($("#" + id +"-Email").val()), "#" + id +"-Email");
 	var ok = validate($("#" + id + "-Subject").val().trim().length > 0, "#" + id +"-Subject");
@@ -277,7 +277,12 @@ $(function() {
 		
 		e.preventDefault();
 		if (!validateProfileForm("register")) return;
+		if (!$("#register-AGBs").is(':checked')) {
+			alert("Bitte stimme den Allgemeinen Geschäftsbedingungen zu.");
+			return;
+		}
 		var data = gatherProfileForm("register");
+		data["agbs"] = $("#register-AGBs").is(':checked')
 		$("#register-submit").button('loading');
 
 		$.ajax({cache: false, url : "/register", type: "POST", dataType : "json", data : JSON.stringify(data),
@@ -290,6 +295,8 @@ $(function() {
 			error : function(result) {
 				if (result.status == 409) {
 					alert("Die E-Mail-Adresse ist schon registriert. Bitte wähle eine andere.");
+				} else if (result.status == 400) {
+					alert("Bitte stimme den Allgemeinen Geschäftsbedingungen zu.");
 				} else {
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
@@ -403,21 +410,41 @@ $(function() {
 		});
 	});
 
-	initSendEventForm("send-event");
+	initSendMailForm("send-event");
 	
 	$("#send-event").submit(function (e) {
 		e.preventDefault();
-		if (!validateSendEventForm("send-event")) return;
+		if (!validateSendMailForm("send-event")) return;
 		$("#send-event-submit").button('loading');
 		var data = {"Name": $("#send-event-Name").val(), "Email": $("#send-event-Email").val(), "Subject": $("#send-event-Subject").val(), "Text": $("#send-event-Text").val()};
 		$.ajax({cache: false, url : "/sendeventmail", type: "POST", data : JSON.stringify(data),
 			success: function() {
 				$("#send-event-submit").button('reset');
-				alert("Die Nachricht wurde verschickt.")
-				$("#mail").modal("hide");
+				alert("Deine Nachricht wurde verschickt.")
+				$("#share").modal("hide");
 			},
 			error : function() {
 				$("#send-event-submit").button('reset');
+				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+			}
+		});
+	});
+	
+	initSendMailForm("send-mail");
+	
+	$("#send-mail").submit(function (e) {
+		e.preventDefault();
+		if (!validateSendMailForm("send-mail")) return;
+		$("#send-mail-submit").button('loading');
+		var data = {"Name": $("#send-mail-Name").val(), "Email": $("#send-mail-Email").val(), "Subject": $("#send-mail-Subject").val(), "Text": $("#send-mail-Text").val()};
+		$.ajax({cache: false, url : "/sendcontactmail", type: "POST", data : JSON.stringify(data),
+			success: function() {
+				$("#send-mail-submit").button('reset');
+				alert("Deine Nachricht wurde verschickt.")
+				$("#mail").modal("hide");
+			},
+			error : function() {
+				$("#send-mail-submit").button('reset');
 				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 			}
 		});
@@ -433,6 +460,10 @@ $(function() {
 	
 	$("#mail").on('shown.bs.modal', function () {
 	    $("#mail input").first().focus();
+	});
+	
+	$("#share").on('shown.bs.modal', function () {
+	    $("#share input").first().focus();
 	});
 	
 	$("#login-form").submit(function(e) {

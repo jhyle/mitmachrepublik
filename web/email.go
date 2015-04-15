@@ -24,16 +24,17 @@ type (
 	emailData struct {
 		From    *EmailAddress
 		To      *EmailAddress
+		ReplyTo *EmailAddress
 		Subject string
 		Body    string
 	}
 )
 
 const (
-	emailTpl = "Content-Type: text/plain; charset=UTF-8\r\nFrom: {{if not .From.Name}}{{.From.Address}}{{else}}{{.From.Name}} <{{.From.Address}}>{{end}}\r\nTo: {{if not .To.Name}}{{.To.Address}}{{else}}{{.To.Name}} <{{.To.Address}}>{{end}}\r\nSubject: {{.Subject}}\r\n\r\n{{.Body}}\r\n"
+	emailTpl = "Content-Type: text/plain; charset=UTF-8\r\nFrom: {{if not .From.Name}}{{.From.Address}}{{else}}{{.From.Name}} <{{.From.Address}}>{{end}}\r\nTo: {{if not .To.Name}}{{.To.Address}}{{else}}{{.To.Name}} <{{.To.Address}}>{{end}}\r\n{{if .ReplyTo}}Reply-To: {{if not .ReplyTo.Name}}{{.ReplyTO.Address}}{{else}}{{.ReplyTo.Name}} <{{.ReplyTo.Address}}>{{end}}\r\n{{end}}Subject: {{.Subject}}\r\n\r\n{{.Body}}\r\n"
 )
 
-func SendEmail(account *EmailAccount, to *EmailAddress, subject, body string) error {
+func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, body string) error {
 
 	tpl, err := template.New("email").Parse(emailTpl)
 	if err != nil {
@@ -41,7 +42,7 @@ func SendEmail(account *EmailAccount, to *EmailAddress, subject, body string) er
 	}
 	
 	var doc bytes.Buffer
-	err =  tpl.Execute(&doc, &emailData{account.From, to, subject, body})
+	err =  tpl.Execute(&doc, &emailData{account.From, to, replyTo, subject, body})
 	if err != nil {
 		return err
 	}

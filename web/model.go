@@ -28,6 +28,7 @@ type (
 		Descr      string
 		Web        string
 		Addr       Address
+		AGBs       bool
 		Approved   bool
 	}
 
