@@ -48,6 +48,7 @@ type (
 		Categories  []int
 		Start       time.Time
 		End         time.Time `json:",omitempty"`
+		Rsvp        bool
 		Addr        Address
 		Approved    bool
 	}

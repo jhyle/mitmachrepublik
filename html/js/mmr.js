@@ -154,6 +154,8 @@ function gatherEventForm(id)
 		delete data["End"];
 	}
 
+	data["Rsvp"] = $("#" + id + "-Rsvp").is(':checked');	
+	
 	data["Addr"] = {}
 	var addr_fields = ["Name", "Street", "Pcode", "City"];
 	for (var i = 0, len = addr_fields.length; i < len; i++) {

@@ -10,6 +10,7 @@
 <a href="/veranstalter/{{organizerUrl .}}">
 	<p itemprop="description">{{.Descr}}</p>
 </a>
+	<p><a href="/veranstalter/{{organizerUrl .}}" class="highlight"><span class="fa fa-caret-right"></span> Alle Veranstaltungen</a></p>
 {{if .Web}}
 	<p><a href="{{.Web}}" target="_blank" class="highlight"><span class="fa fa-caret-right"></span> {{.Web}}</a></p>
 {{end}}
