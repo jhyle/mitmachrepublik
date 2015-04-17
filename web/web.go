@@ -197,9 +197,9 @@ func (app *MmrApp) countEvents(place string, categoryIds []int, dateNames []stri
 	return app.database.Table("event").Count(query)
 }
 
-func (app *MmrApp) countOrganizers(place string) (int, error) {
+func (app *MmrApp) countOrganizers(place string, categoryIds []int) (int, error) {
 
-	query := buildQuery(place, nil, nil)
+	query := buildQuery(place, nil, categoryIds)
 	return app.database.Table("user").Count(query)
 }
 
@@ -223,7 +223,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place)
+		organizerCnt, err := app.countOrganizers(place, nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -335,7 +335,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place)
+		organizerCnt, err := app.countOrganizers(place, categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -402,7 +402,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place)
+		organizerCnt, err := app.countOrganizers(place, nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -455,7 +455,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place)
+		organizerCnt, err := app.countOrganizers(place, categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -510,7 +510,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place)
+		organizerCnt, err := app.countOrganizers(place, nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -1033,7 +1033,9 @@ func (app *MmrApp) organizerCountHandler(w traffic.ResponseWriter, r *traffic.Re
 
 	result := func() *appResult {
 
-		cnt, err := app.countOrganizers(r.Param("place"))
+		categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
+
+		cnt, err := app.countOrganizers(r.Param("place"), categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
