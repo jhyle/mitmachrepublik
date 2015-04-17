@@ -149,7 +149,8 @@
 				<div class="modal-body">
 					<div class="big-text">
 						Danke für Deine Registrierung. Zur Überprüfung Deiner E-Mail-Adresse haben wir Dir eine E-Mail mit einem Aktivierungslink zugesendet.
-						Von Dir eingegebene Veranstaltungen werden erst nach der Aktivierung Deines Profils sichtbar.
+						Von Dir eingegebene Veranstaltungen werden erst nach der Aktivierung Deines Profils sichtbar.<br />
+						Bitte hab Verständnis dafür, dass wir noch in der Testphase sind. Schreib uns eine Nachricht, wenn etwas nicht so funktioniert wie erwartet.
 					</div>
 					<div class="form-group">
 						<div class="col-sm-4">
@@ -243,6 +244,6 @@ Liebe Grüße!
 			<div class="col-xs-1">&nbsp;</div>
 			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist ein Organisator?</span><br /><a id="head-events" href="#" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
 			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-2 col-head"><a id="head-login" href="#" data-toggle="modal" data-target="#login"><span class="fa fa-user highlight"></span> Anmelden</a><br /><a href="#">Über uns</a> | <a href="#" data-toggle="modal" data-target="#mail">Kontakt</a></div>
+			<div class="col-xs-2 col-head"><a id="head-login" href="#" data-toggle="modal" data-target="#login"><span class="fa fa-user highlight"></span> Anmelden</a><br /><!-- a href="#">Über uns</a--><a href="https://www.facebook.com/mitmachrepublik" target="_blank"><span class="fa fa-facebook"></span></a> <a href="https://twitter.com/mitmachrepublik" target="_blank"><span class="fa fa-twitter" ></span></a> | <a href="#" class="highlight" data-toggle="modal" data-target="#mail">Kontakt</a></div>
 			<div class="col-xs-1">&nbsp;</div>
 		</div>
