@@ -17,7 +17,7 @@ function initProfileForm(id)
 		$("#" + id + "-Pwd").popover({content: "Bitte gib ein Kennwort ein.", trigger: "manual", placement: "auto right"});
 		$("#" + id + "-Pwd2").popover({content: "Kennwort und Kennwortwiederholung stimmen nicht überein.", trigger: "manual", placement: "auto right"});
 	}
-	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (URL) ein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (mit http://) ein.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Pcode").popover({content: "Bitte gib eine vollständige Postleitzahl ein.", trigger: "manual", placement: "auto top"});	
 }
 
@@ -37,7 +37,7 @@ function initEventForm(id)
 	$("#" + id + "-Start").popover({content: "Bitte gib den Veranstaltungsbeginn an.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-End").popover({content: "Bitte gib ein gültiges Ende an.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Category").popover({content: "Bitte wähle mindestens eine Kategorie aus.", trigger: "manual", placement: "auto right"});
-	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (URL) ein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (mit http://) ein.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Pcode").popover({content: "Bitte gib eine vollständige Postleitzahl ein.", trigger: "manual", placement: "auto top"});	
 }
 

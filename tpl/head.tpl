@@ -150,7 +150,7 @@
 					<div class="big-text">
 						Danke für Deine Registrierung. Zur Überprüfung Deiner E-Mail-Adresse haben wir Dir eine E-Mail mit einem Aktivierungslink zugesendet.
 						Von Dir eingegebene Veranstaltungen werden erst nach der Aktivierung Deines Profils sichtbar.<br />
-						Bitte hab Verständnis dafür, dass wir noch in der Testphase sind. Schreib uns eine Nachricht, wenn etwas nicht so funktioniert wie erwartet.
+						Bitte habe Verständnis dafür, dass wir noch in der Testphase sind. Schreibe uns eine Nachricht, wenn etwas nicht so funktioniert wie erwartet.
 					</div>
 					<div class="form-group">
 						<div class="col-sm-4">
