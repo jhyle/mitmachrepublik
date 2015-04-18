@@ -411,9 +411,13 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(event.Image) {
 			imageUrl = "http://" + app.hostname + "/bild/" + event.Image
 		}
+		location := place
+		if !isEmpty(event.Addr.Name) {
+			location = event.Addr.Name + ", " + location
+		}
 		meta := metaTags{
-			event.Title + " in " + place + " - Mitmach-Republik",
-			event.Title + " in " + place,
+			event.Title + " - " + location + " - Mitmach-Republik",
+			event.Title + " - " + location,
 			imageUrl,
 			event.Descr,
 		}
