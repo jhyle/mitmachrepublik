@@ -428,6 +428,28 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 	app.handle(w, result)
 }
 
+func (app *MmrApp) sendEventPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	meta := metaTags{"Veranstaltung empfehlen - Mitmach-Republik", "", "", ""}
+
+	result := func() *appResult {
+
+		if !bson.IsObjectIdHex(r.Param("id")) {
+			return resultNotFound
+		}
+
+		var event Event
+		err := app.database.Table("event").LoadById(bson.ObjectIdHex(r.Param("id")), &event)
+		if err != nil {
+			return resultNotFound
+		}
+
+		return app.view("sendevent.tpl", w, &meta, bson.M{"event": &event})
+	}()
+
+	app.handle(w, result)
+}
+
 func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	pageSize := 5
@@ -1156,6 +1178,11 @@ func (app *MmrApp) Start() {
 	router.Get("/disclaimer", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "disclaimer.tpl", "Haftungsausschluss (Disclaimer)") })
 	router.Get("/datenschutz", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "datenschutz.tpl", "Datenschutzerklärung") })
 	router.Get("/agbs", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "agbs.tpl", "Allgemeine Geschäftsbedingungen") })
+	router.Get("/dialog/contact", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "contact.tpl", "") })
+	router.Get("/dialog/registered", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "registered.tpl", "") })
+	router.Get("/dialog/login", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "login.tpl", "") })
+	router.Get("/dialog/register", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "register.tpl", "") })
+	router.Get("/dialog/sendevent/:id", app.sendEventPage)	
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)

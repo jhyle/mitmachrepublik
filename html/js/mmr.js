@@ -9,22 +9,30 @@ function initProfileForm(id)
 		$(this).parent().find("input").click();
 	});
 
-	$("#" + id + "-Name").popover({content: "Bitte gib den Namen Deiner Organisation ein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Name").popover({content: "Bitte gib den Namen Deiner Organisation ein.", trigger: "manual", placement: "right"});
+	$("#" + id + "-Name").focus(function () { $("#" + id + "-Name").popover('hide'); });
 	if ($("#" + id + "-Email").length) {
-		$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto right"});
+		$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "right"});
+		$("#" + id + "-Email").focus(function () { $("#" + id + "-Email").popover('hide'); });
 	}
 	if ($("#" + id + "-Pwd").length) {
-		$("#" + id + "-Pwd").popover({content: "Bitte gib ein Kennwort ein.", trigger: "manual", placement: "auto right"});
-		$("#" + id + "-Pwd2").popover({content: "Kennwort und Kennwortwiederholung stimmen nicht überein.", trigger: "manual", placement: "auto right"});
+		$("#" + id + "-Pwd").popover({content: "Bitte gib ein Kennwort ein.", trigger: "manual", placement: "right"});
+		$("#" + id + "-Pwd").focus(function () { $("#" + id + "-Pwd").popover('hide'); });
+		$("#" + id + "-Pwd2").popover({content: "Kennwort und Kennwortwiederholung stimmen nicht überein.", trigger: "manual", placement: "right"});
+		$("#" + id + "-Pwd2").focus(function () { $("#" + id + "-Pwd2").popover('hide'); });
 	}
-	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (mit http://) ein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (mit http://) ein.", trigger: "manual", placement: "auto"});
+	$("#" + id + "-Web").focus(function () { $("#" + id + "-Web").popover('hide'); });
 	$("#" + id + "-Pcode").popover({content: "Bitte gib eine vollständige Postleitzahl ein.", trigger: "manual", placement: "auto top"});	
+	$("#" + id + "-Pcode").focus(function () { $("#" + id + "-Pcode").popover('hide'); });
 }
 
 function initEmailAndPwdForm(id)
 {
 	$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Email").focus(function () { $("#" + id + "-Email").popover('hide'); });
 	$("#" + id + "-Pwd2").popover({content: "Kennwort und Kennwortwiederholung stimmen nicht überein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Pwd2").focus(function () { $("#" + id + "-Pwd2").popover('hide'); });
 }
 
 function initEventForm(id)
@@ -34,17 +42,25 @@ function initEventForm(id)
 	});
 
 	$("#" + id + "-Title").popover({content: "Bitte gib der Veranstaltung einen Titel.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Title").focus(function () { $("#" + id + "-Title").popover('hide'); });
 	$("#" + id + "-Start").popover({content: "Bitte gib den Veranstaltungsbeginn an.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Start").focus(function () { $("#" + id + "-Start").popover('hide'); });
 	$("#" + id + "-End").popover({content: "Bitte gib ein gültiges Ende an.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-End").focus(function () { $("#" + id + "-End").popover('hide'); });
 	$("#" + id + "-Category").popover({content: "Bitte wähle mindestens eine Kategorie aus.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Category").focus(function () { $("#" + id + "-Category").popover('hide'); });
 	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (mit http://) ein.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Web").focus(function () { $("#" + id + "-Web").popover('hide'); });
 	$("#" + id + "-Pcode").popover({content: "Bitte gib eine vollständige Postleitzahl ein.", trigger: "manual", placement: "auto top"});	
+	$("#" + id + "-Pcode").focus(function () { $("#" + id + "-Pcode").popover('hide'); });
 }
 
 function initSendMailForm(id)
 {
-	$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto right"});
-	$("#" + id + "-Subject").popover({content: "Bitte gib der Nachricht einen Betreff.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto"});
+	$("#" + id + "-Email").focus(function () { $("#" + id + "-Email").popover('hide'); });
+	$("#" + id + "-Subject").popover({content: "Bitte gib der Nachricht einen Betreff.", trigger: "manual", placement: "auto"});
+	$("#" + id + "-Subject").focus(function () { $("#" + id + "-Subject").popover('hide'); });
 }
 
 function validate(ok, id) {
@@ -103,7 +119,7 @@ function validateEventForm(id)
 function validateSendMailForm(id)
 {
 	var ok = validate(EmailPattern.test($("#" + id +"-Email").val()), "#" + id +"-Email");
-	var ok = validate($("#" + id + "-Subject").val().trim().length > 0, "#" + id +"-Subject");
+	ok &= validate($("#" + id + "-Subject").val().trim().length > 0, "#" + id +"-Subject");
 	return ok;
 }
 
@@ -250,59 +266,23 @@ function updateOrganizerCount()
 
 $(function() {
 
-	initProfileForm("register");
+	initEmailAndPwdForm("password");
 
-	$("#register-upload").fileupload({
-		
-		dataType: "json",
-		dropZone: $("#register-dropzone"),
-		
-		add: function (e, data) {
-			activateSpinner("register");
-			data.submit();
-		},
-		
-		done: function(e, data) {
-			deactivateSpinner("register");
-			removeErrorMessage("register-thumbnail");
-			$("#register-thumbnail").attr("src", "/bild/" + data.result + "?height=200&width=200");
-			$("#register-Image").attr("value", data.result);
-		},
-		
-		fail: function(e, data) {
-			deactivateSpinner("register");
-			setErrorMessage("register-thumbnail", "Beim Hochladen des Bildes ist ein Fehler aufgetreten.");
-		}
-	});
-	
-	$("#register-upload").submit(function(e) {
+	$("#password").submit(function(e) {
 		
 		e.preventDefault();
-		if (!validateProfileForm("register")) return;
-		if (!$("#register-AGBs").is(':checked')) {
-			alert("Bitte stimme den Allgemeinen Geschäftsbedingungen zu.");
-			return;
-		}
-		var data = gatherProfileForm("register");
-		data["agbs"] = $("#register-AGBs").is(':checked')
-		$("#register-submit").button('loading');
-
-		$.ajax({cache: false, url : "/register", type: "POST", dataType : "json", data : JSON.stringify(data),
-			success: function(sessionid) {
-				$("#register-submit").button('reset');
-				$("#register").modal("hide");
-				$.cookie("SESSIONID", sessionid, {path: '/'});
-				$("#registered").modal("show");
-			},
+		if (!validateEmailAndPwdForm("password")) return;
+		$("#password-submit").button('loading');
+		var data = {"Email": $("#password-Email").val(), "Pwd": $("#password-Pwd").val()};
+		
+		$.ajax({cache: false, url : "/password", type: "POST", dataType : "json", data : JSON.stringify(data),
 			error : function(result) {
-				if (result.status == 409) {
-					alert("Die E-Mail-Adresse ist schon registriert. Bitte wähle eine andere.");
-				} else if (result.status == 400) {
-					alert("Bitte stimme den Allgemeinen Geschäftsbedingungen zu.");
+				if (result.status == 200) {
+					window.location.href = "/veranstalter/verwaltung/0";
 				} else {
+					$("#password-submit").button('reset');
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
-				$("#register-submit").button('reset');
 			}
 		});
 	});
@@ -343,27 +323,6 @@ $(function() {
 				if (result.status == 200) {
 					window.location.href = "/veranstalter/verwaltung/0";
 				} else {
-					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
-				}
-			}
-		});
-	});
-	
-	initEmailAndPwdForm("password");
-
-	$("#password").submit(function(e) {
-		
-		e.preventDefault();
-		if (!validateEmailAndPwdForm("password")) return;
-		$("#password-submit").button('loading');
-		var data = {"Email": $("#password-Email").val(), "Pwd": $("#password-Pwd").val()};
-		
-		$.ajax({cache: false, url : "/password", type: "POST", dataType : "json", data : JSON.stringify(data),
-			error : function(result) {
-				if (result.status == 200) {
-					window.location.href = "/veranstalter/verwaltung/0";
-				} else {
-					$("#password-submit").button('reset');
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
 			}
@@ -412,79 +371,136 @@ $(function() {
 		});
 	});
 
-	initSendMailForm("send-event");
-	
-	$("#send-event").submit(function (e) {
-		e.preventDefault();
-		if (!validateSendMailForm("send-event")) return;
-		$("#send-event-submit").button('loading');
-		var data = {"Name": $("#send-event-Name").val(), "Email": $("#send-event-Email").val(), "Subject": $("#send-event-Subject").val(), "Text": $("#send-event-Text").val()};
-		$.ajax({cache: false, url : "/sendeventmail", type: "POST", data : JSON.stringify(data),
-			success: function() {
-				$("#send-event-submit").button('reset');
-				alert("Deine Nachricht wurde verschickt.")
-				$("#share").modal("hide");
-			},
-			error : function() {
-				$("#send-event-submit").button('reset');
-				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
-			}
-		});
-	});
-	
-	initSendMailForm("send-mail");
-	
-	$("#send-mail").submit(function (e) {
-		e.preventDefault();
-		if (!validateSendMailForm("send-mail")) return;
-		$("#send-mail-submit").button('loading');
-		var data = {"Name": $("#send-mail-Name").val(), "Email": $("#send-mail-Email").val(), "Subject": $("#send-mail-Subject").val(), "Text": $("#send-mail-Text").val()};
-		$.ajax({cache: false, url : "/sendcontactmail", type: "POST", data : JSON.stringify(data),
-			success: function() {
-				$("#send-mail-submit").button('reset');
-				alert("Deine Nachricht wurde verschickt.")
-				$("#mail").modal("hide");
-			},
-			error : function() {
-				$("#send-mail-submit").button('reset');
-				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
-			}
-		});
-	});
-	
 	$("#login").on('shown.bs.modal', function () {
+		$("#login-form").submit(function(e) {
+			e.preventDefault();
+			var data = {"Email": $("#login-Email").val(), "Pwd": $("#login-Pwd").val()};
+			$.ajax({cache: false, url : "/login", type: "POST", dataType : "json", data : JSON.stringify(data),
+				success: function(sessionid) {
+					$("#login").modal("hide");
+					$.cookie("SESSIONID", sessionid, {path: '/'});
+					window.location.href = "/veranstalter/verwaltung/0";
+				},
+				error : function(result) {
+					if (result.status == 404) {
+						alert("Diese Anmeldedaten sind uns nicht bekannt.");
+					} else {
+						alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+					}
+				}
+			});
+		});
+		
 	    $("#login input").first().focus();
 	});
 	
 	$("#register").on('shown.bs.modal', function () {
+		initProfileForm("register");
+
+		$("#register-upload").fileupload({
+			
+			dataType: "json",
+			dropZone: $("#register-dropzone"),
+			
+			add: function (e, data) {
+				activateSpinner("register");
+				data.submit();
+			},
+			
+			done: function(e, data) {
+				deactivateSpinner("register");
+				removeErrorMessage("register-thumbnail");
+				$("#register-thumbnail").attr("src", "/bild/" + data.result + "?height=200&width=200");
+				$("#register-Image").attr("value", data.result);
+			},
+			
+			fail: function(e, data) {
+				deactivateSpinner("register");
+				setErrorMessage("register-thumbnail", "Beim Hochladen des Bildes ist ein Fehler aufgetreten.");
+			}
+		});
+		
+		$("#register-upload").submit(function(e) {
+			
+			e.preventDefault();
+			if (!validateProfileForm("register")) return;
+			if (!$("#register-AGBs").is(':checked')) {
+				alert("Bitte stimme den Allgemeinen Geschäftsbedingungen zu.");
+				return;
+			}
+			var data = gatherProfileForm("register");
+			data["agbs"] = $("#register-AGBs").is(':checked')
+			$("#register-submit").button('loading');
+
+			$.ajax({cache: false, url : "/register", type: "POST", dataType : "json", data : JSON.stringify(data),
+				success: function(sessionid) {
+					$("#register-submit").button('reset');
+					$("#register").modal("hide");
+					$.cookie("SESSIONID", sessionid, {path: '/'});
+					$("#registered").load("/dialog/registered").modal("show");
+				},
+				error : function(result) {
+					if (result.status == 409) {
+						alert("Die E-Mail-Adresse ist schon registriert. Bitte wähle eine andere.");
+					} else if (result.status == 400) {
+						alert("Bitte stimme den Allgemeinen Geschäftsbedingungen zu.");
+					} else {
+						alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+					}
+					$("#register-submit").button('reset');
+				}
+			});
+		});
+		
 	    $("#register input").first().focus();
 	});
 	
 	$("#mail").on('shown.bs.modal', function () {
+		initSendMailForm("send-mail");
+		
+		$("#send-mail").submit(function (e) {
+			e.preventDefault();
+			if (!validateSendMailForm("send-mail")) return;
+			$("#send-mail-submit").button('loading');
+			var data = {"Name": $("#send-mail-Name").val(), "Email": $("#send-mail-Email").val(), "Subject": $("#send-mail-Subject").val(), "Text": $("#send-mail-Text").val()};
+			$.ajax({cache: false, url : "/sendcontactmail", type: "POST", data : JSON.stringify(data),
+				success: function() {
+					$("#send-mail-submit").button('reset');
+					alert("Deine Nachricht wurde verschickt.")
+					$("#mail").modal("hide");
+				},
+				error : function() {
+					$("#send-mail-submit").button('reset');
+					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+				}
+			});
+		});
+		
 	    $("#mail input").first().focus();
 	});
 	
 	$("#share").on('shown.bs.modal', function () {
-	    $("#share input").first().focus();
-	});
-	
-	$("#login-form").submit(function(e) {
-		e.preventDefault();
-		var data = {"Email": $("#login-Email").val(), "Pwd": $("#login-Pwd").val()};
-		$.ajax({cache: false, url : "/login", type: "POST", dataType : "json", data : JSON.stringify(data),
-			success: function(sessionid) {
-				$("#login").modal("hide");
-				$.cookie("SESSIONID", sessionid, {path: '/'});
-				window.location.href = "/veranstalter/verwaltung/0";
-			},
-			error : function(result) {
-				if (result.status == 404) {
-					alert("Diese Anmeldedaten sind uns nicht bekannt.");
-				} else {
+		initSendMailForm("send-event");
+		
+		$("#send-event").submit(function (e) {
+			e.preventDefault();
+			if (!validateSendMailForm("send-event")) return;
+			$("#send-event-submit").button('loading');
+			var data = {"Name": $("#send-event-Name").val(), "Email": $("#send-event-Email").val(), "Subject": $("#send-event-Subject").val(), "Text": $("#send-event-Text").val()};
+			$.ajax({cache: false, url : "/sendeventmail", type: "POST", data : JSON.stringify(data),
+				success: function() {
+					$("#send-event-submit").button('reset');
+					alert("Deine Nachricht wurde verschickt.")
+					$("#share").modal("hide");
+				},
+				error : function() {
+					$("#send-event-submit").button('reset');
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
-			}
+			});
 		});
+		
+	    $("#share input").first().focus();
 	});
 	
 	$("#delete-profile").click(function(e) {
