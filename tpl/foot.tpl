@@ -9,10 +9,10 @@
 	    <li><h5>Spenden</h5></li>
 	    <li><a href="https://flattr.com/submit/auto?user_id=mitmachrepublik&url={{"http://www.mitmachrepublik.de/"}}&title=Mitmach-Republik&description={{.meta.FB_Descr}}&language=de_DE" target="_blank"><img src="/images/flattr_icon.png"> Flattr</a></li>
 	    <li><h5>Rechtliches</h5></li>
-	    <li><a href="/agbs">Allgemeine Geschäftsbedingungen</a></li>
-	    <li><a href="/datenschutz">Datenschutz</a></li>
-	    <li><a href="/impressum">Impressum</a></li>
-	    <li><a href="/disclaimer">Haftungsausschluss (Disclaimer)</a></li>
+	    <li><a rel="nofollow" href="/agbs">Allgemeine Geschäftsbedingungen</a></li>
+	    <li><a rel="nofollow" href="/datenschutz">Datenschutz</a></li>
+	    <li><a rel="nofollow" href="/impressum">Impressum</a></li>
+	    <li><a rel="nofollow" href="/disclaimer">Haftungsausschluss (Disclaimer)</a></li>
 	  </ul>
 	</div>
 	<div class="col-xs-2 col-foot">
