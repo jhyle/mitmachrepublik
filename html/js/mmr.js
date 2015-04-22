@@ -5,6 +5,11 @@ var WebPattern = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]
 
 function initProfileForm(id)
 {
+	$('#' + id + '-Descr').summernote({
+		height: 300,
+		lang: 'de-DE'
+	});
+	
 	$("#" + id + "-dropzone").click(function() {
 		$(this).parent().find("input").click();
 	});
@@ -37,6 +42,11 @@ function initEmailAndPwdForm(id)
 
 function initEventForm(id)
 {
+	$('#' + id + '-Descr').summernote({
+		height: 300,
+		lang: 'de-DE'
+	});
+	
 	$("#" + id + "-dropzone").click(function() {
 		$(this).parent().find("input").click();
 	});
@@ -126,12 +136,15 @@ function validateSendMailForm(id)
 function gatherProfileForm(id)
 {
 	var data = {};
-	var user_fields = ["Name", "Email", "Pwd", "Image", "Descr", "Web"];
+	var user_fields = ["Name", "Email", "Pwd", "Image", "Web"];
 	for (var i = 0, len = user_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + user_fields[i]).length) {
 			data[user_fields[i]] = $("#" + id + "-" + user_fields[i]).val();
 		}
 	}
+
+	data["Descr"] = $("#" + id + "-Descr").code();
+	
 	data["Addr"] = {}
 	var addr_fields = ["Street", "Pcode", "City"];
 	for (var i = 0, len = addr_fields.length; i < len; i++) {
@@ -150,12 +163,14 @@ function gatherProfileForm(id)
 function gatherEventForm(id)
 {
 	var data = {};
-	var event_fields = ["Id", "Title", "Start", "End", "Image", "Descr", "Web"];
+	var event_fields = ["Id", "Title", "Start", "End", "Image", "Web"];
 	for (var i = 0, len = event_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + event_fields[i]).length) {
 			data[event_fields[i]] = $("#" + id + "-" + event_fields[i]).val();
 		}
 	}
+	
+	data["Descr"] = $("#" + id + "-Descr").code();
 	
 	if (data["Start"].length > 0) {
 		DateTimePattern.exec(data["Start"]);

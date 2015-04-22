@@ -46,7 +46,7 @@
 			<p class="small-icon pull-left"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></p>{{end}}
 			<p>{{range $i, $category := .Categories}}{{if $i}}, {{end}}{{categoryTitle $category}}{{end}}</p>
 		{{end}}
-		<p style="margin-top: 25px" itemprop="description">{{.Descr}}</p>
+		<p style="margin-top: 25px" itemprop="description">{{.HtmlDescription}}</p>
 		<div class="clearfix"></div>
 		{{if .Web}}
 			<p><a href="{{.Web}}" class="btn btn-mmr" style="margin: 0" target="_blank">Zur Veranstaltungs-Webseite</a></p>

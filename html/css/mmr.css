@@ -48,9 +48,9 @@ div.col-banner h2 {
 div.col-banner h4 {
 	color: white;
 }
-.btn, .form-control {
-	border-radius: 0;
+.btn-cancel, .btn-mmr, .form-control {
 	font-size: 17px;
+	border-radius: 0;
 	margin: 10px;
 	padding: 8px;
 	display: block;
@@ -233,4 +233,8 @@ div.cur-page {
 }
 .twitter-share-button {
 	margin-left: 5px;
+}
+.note-editor {
+	width: 90%;
+	margin: 10px;
 }

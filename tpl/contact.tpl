@@ -15,7 +15,7 @@
 		<hr>
 		<div class="form-group">
 			<div class="col-sm-4">
-				<button type="button" class="btn btn-default" data-dismiss="modal" style="width: 90%">Abbrechen</button>
+				<button type="button" class="btn btn-default btn-cancel" data-dismiss="modal" style="width: 90%">Abbrechen</button>
 			</div>
 			<div class="col-sm-1">&nbsp;</div>
 			<div class="col-sm-7">

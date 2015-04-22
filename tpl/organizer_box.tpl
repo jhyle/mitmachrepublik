@@ -8,7 +8,7 @@
 	<p itemprop="location" itemscope itemtype="http://schema.org/Place">{{ if .Addr.Name }}<span itemprop="name">{{.Addr.Name}}</span><br />{{ end }}<span class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">{{ if .Addr.Street }}<span itemprop="streetAddress">{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span itemprop="postalCode">{{.Addr.Pcode}}</span> {{ end }}<span itemprop="addressLocality">{{.Addr.City}}</span></span></p>
 {{ end }}
 <a href="/veranstalter/{{organizerUrl .}}">
-	<p itemprop="description">{{.Descr}}</p>
+	<p itemprop="description">{{.HtmlDescription}}</p>
 </a>
 	<p><a href="/veranstalter/{{organizerUrl .}}" class="highlight"><span class="fa fa-caret-right"></span> Alle Veranstaltungen</a></p>
 {{if .Web}}

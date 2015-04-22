@@ -1,7 +1,9 @@
 package mmr
 
 import (
+	"html/template"
 	"labix.org/v2/mgo/bson"
+	"github.com/kennygrant/sanitize"
 	"time"
 )
 
@@ -174,6 +176,17 @@ func (user *User) SetId(id bson.ObjectId) {
 	user.Id = id
 }
 
+func (user *User) HtmlDescription() template.HTML {
+
+	html, _ := sanitize.HTMLAllowing(user.Descr)
+	return template.HTML(html)
+}
+
+func (user *User) PlainDescription() string {
+
+	return sanitize.HTML(user.Descr)
+}
+
 func (user *User) IsAdmin() bool {
 
 	return user.Email == "admin@mitmachrepublik.de"
@@ -190,6 +203,17 @@ func (event *Event) GetId() bson.ObjectId {
 
 func (event *Event) SetId(id bson.ObjectId) {
 	event.Id = id
+}
+
+func (event *Event) HtmlDescription() template.HTML {
+
+	html, _ :=  sanitize.HTMLAllowing(event.Descr)
+	return template.HTML(html)
+}
+
+func (event *Event) PlainDescription() string {
+
+	return sanitize.HTML(event.Descr)
 }
 
 func (session *Session) GetId() bson.ObjectId {

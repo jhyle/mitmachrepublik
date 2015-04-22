@@ -34,7 +34,7 @@
 		<hr>
 		<div class="form-group">
 			<div class="col-sm-12">
-				<textarea name="description" id="register-Descr" class="form-control" placeholder="Beschreibung" rows="5"></textarea>
+				<div id="register-Descr" placeholder="Beschreibung"></div>
 				<span><input name="website" type="text" id="register-Web" class="form-control" placeholder="Webseite"></span>
 			</div>
 		</div>
@@ -61,7 +61,7 @@
 		</div>
 		<div class="form-group">
 			<div class="col-sm-4">
-				<button type="button" class="btn btn-default" data-dismiss="modal" style="width: 90%">Abbrechen</button>
+				<button type="button" class="btn btn-default btn-cancel" data-dismiss="modal" style="width: 90%">Abbrechen</button>
 			</div>
 			<div class="col-sm-1">&nbsp;</div>
 			<div class="col-sm-7">

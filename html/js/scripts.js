@@ -7,4 +7,6 @@
 <!--#include file="bootstrap-datetimepicker.min.js" -->
 <!--#include file="locales/bootstrap-datetimepicker.de.js" -->
 <!--#include file="bootstrap3-typeahead.js" -->
+<!--#include file="summernote.min.js" -->
+<!--#include file="lang/summernote-de-DE.js" -->
 <!--#include file="mmr.js" -->

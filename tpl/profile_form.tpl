@@ -37,7 +37,7 @@
 			<hr>
 			<div class="form-group">
 				<div class="col-xs-12">
-					<textarea name="description" id="profile-Descr" class="form-control" placeholder="Beschreibung">{{.user.Descr}}</textarea>
+					<div id="profile-Descr" placeholder="Beschreibung">{{.user.HtmlDescription}}</div>
 					<span><input name="website" type="text" id="profile-Web" class="form-control" placeholder="Webseite" value="{{.user.Web}}"></span>
 				</div>
 			</div>
@@ -59,7 +59,7 @@
 			<hr>
 			<div class="form-group">
 				<div class="col-xs-4">
-					<a href="/veranstalter/verwaltung/0" onClick="history.back(); return false" class="btn btn-default" style="width: 90%">Abbrechen</a>
+					<a href="/veranstalter/verwaltung/0" onClick="history.back(); return false" class="btn btn-default btn-cancel" style="width: 90%">Abbrechen</a>
 				</div>
 				<div class="col-xs-1">&nbsp;</div>
 				<div class="col-xs-7">

@@ -11,7 +11,7 @@
 			</div>
 			<div class="form-group">
 				<div class="col-sm-4">
-					<a href="/" class="btn btn-default" style="width: 90%">Schließen</a>
+					<a href="/" class="btn btn-default btn-cancel" style="width: 90%">Schließen</a>
 				</div>
 				<div class="col-sm-1">&nbsp;</div>
 				<div class="col-sm-7">

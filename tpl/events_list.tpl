@@ -19,7 +19,7 @@
 		{{ end }}
 		<h3 itemprop="name">{{.Title}}</h3>
 		<p class="datetime" itemprop="startDate" content="{{iso8601Format .Start}}">{{datetimeFormat .Start}} Uhr {{if $.organizerNames}} - {{index $.organizerNames .OrganizerId}}{{end}}</p>
-		<p itemprop="description">{{strClip .Descr 100}}</p>
+		<p itemprop="description">{{strClip .PlainDescription 100}}</p>
 		{{ if not .Addr.IsEmpty }}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
 			<p class="pull-left place" itemprop="location" itemscope itemtype="http://schema.org/Place">{{ if .Addr.Name }}<span itemprop="name">{{.Addr.Name}}</span><br />{{ end }}<span class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">{{ if .Addr.Street }}<span itemprop="streetAddress">{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span itemprop="postalCode">{{.Addr.Pcode}}</span> {{ end }}<span itemprop="addressLocality">{{citypartName .Addr}}</span></span></p>

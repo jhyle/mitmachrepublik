@@ -17,7 +17,7 @@
 			<hr>
 			<div class="form-group">
 				<div class="col-xs-4">
-					<a href="/veranstalter/verwaltung/0" onClick="history.back(); return false" class="btn btn-default" style="width: 90%">Abbrechen</a>
+					<a href="/veranstalter/verwaltung/0" onClick="history.back(); return false" class="btn btn-default btn-cancel" style="width: 90%">Abbrechen</a>
 				</div>
 				<div class="col-xs-1">&nbsp;</div>
 				<div class="col-xs-7">
