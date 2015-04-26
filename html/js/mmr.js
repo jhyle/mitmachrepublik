@@ -604,6 +604,7 @@ $(function() {
 	var hash = window.location.hash;
 	if (hash.substring(1) == "login") {
 		$.removeCookie("SESSIONID", {path: '/'});
+		$("#login .modal-content").load("/dialog/login");
 		$("#login").modal("show");
 	}
 
