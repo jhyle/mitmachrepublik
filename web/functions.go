@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"labix.org/v2/mgo/bson"
+	"net/url"
 	"strconv"
 	"strings"
-	"net/url"
+	"html/template"
 	"time"
 )
 
@@ -69,6 +70,11 @@ func iso8601Format(t time.Time) string {
 	}
 }
 
+func noescape(s string) template.HTML {
+
+	return template.HTML(s)
+}
+
 func strClip(s string, n int) string {
 
 	runes := 0
@@ -116,7 +122,7 @@ func citypartName(addr Address) string {
 	return citypart
 }
 
-func encodePath(path  string) string {
+func encodePath(path string) string {
 
 	return (&url.URL{Path: path}).String()
 }
