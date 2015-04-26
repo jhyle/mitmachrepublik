@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /veranstalter/verwaltung/
+Disallow: /agbs
+Disallow: /disclaimer
+Disallow: /impressum
+Disallow: /datenschutz
+Disallow: /dialog/
