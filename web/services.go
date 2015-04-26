@@ -34,7 +34,8 @@ type (
 
 	SpawnEventsService struct {
 		BasicService
-		database  Database
+		database Database
+		events *EventService
 		imgServer string
 	}
 )
@@ -128,9 +129,9 @@ func (service *UnusedImgService) serve() {
 	}
 }
 
-func NewSpawnEventsService(interval int, database Database, imgServer string) Service {
+func NewSpawnEventsService(interval int, database Database, events *EventService, imgServer string) Service {
 
-	return &SpawnEventsService{BasicService{idle, interval, nil}, database, imgServer}
+	return &SpawnEventsService{BasicService{idle, interval, nil}, database, events, imgServer}
 }
 
 func (service *SpawnEventsService) Start() {
@@ -159,8 +160,7 @@ func (service *SpawnEventsService) serve() {
 		districts = append(districts, district)
 	}
 	
-	var event Event
-	event.Approved = true
+	event := new(Event)
 	event.Id = bson.NewObjectId()
 	event.OrganizerId = organizer.Id
 	event.Title = titles[rand.Intn(len(titles))]
@@ -177,7 +177,7 @@ func (service *SpawnEventsService) serve() {
 	district := districts[rand.Intn(len(districts))]
 	event.Addr.Pcode = PostcodeMap[district][rand.Intn(len(PostcodeMap[district]))]
 	event.Addr.City = "Berlin"
-	service.database.Table("event").UpsertById(event.Id, &event)
+	service.events.Store(event)
 }
 
 func (service *BasicService) start(serve func()) {

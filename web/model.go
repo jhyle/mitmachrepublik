@@ -1,9 +1,9 @@
 package mmr
 
 import (
+	"github.com/kennygrant/sanitize"
 	"html/template"
 	"labix.org/v2/mgo/bson"
-	"github.com/kennygrant/sanitize"
 	"time"
 )
 
@@ -52,7 +52,11 @@ type (
 		End         time.Time `json:",omitempty"`
 		Rsvp        bool
 		Addr        Address
-		Approved    bool
+	}
+
+	Date struct {
+		Event
+		EventId  bson.ObjectId
 	}
 
 	SearchResult interface {
@@ -67,6 +71,12 @@ type (
 		Count  int
 		Start  int
 		Events []*Event
+	}
+
+	DateSearchResult struct {
+		Count  int
+		Start  int
+		Dates []*Date
 	}
 
 	OrganizerSearchResult struct {
@@ -207,7 +217,7 @@ func (event *Event) SetId(id bson.ObjectId) {
 
 func (event *Event) HtmlDescription() template.HTML {
 
-	html, _ :=  sanitize.HTMLAllowing(event.Descr)
+	html, _ := sanitize.HTMLAllowing(event.Descr)
 	return template.HTML(html)
 }
 
@@ -242,6 +252,26 @@ func (result *EventSearchResult) GetSize() int {
 
 func (result *EventSearchResult) GetItem(i int) Item {
 	return result.Events[i]
+}
+
+func (result *DateSearchResult) SetCount(count int) {
+	result.Count = count
+}
+
+func (result *DateSearchResult) SetStart(start int) {
+	result.Start = start
+}
+
+func (result *DateSearchResult) GetData() interface{} {
+	return &result.Dates
+}
+
+func (result *DateSearchResult) GetSize() int {
+	return len(result.Dates)
+}
+
+func (result *DateSearchResult) GetItem(i int) Item {
+	return result.Dates[i]
 }
 
 func (result *OrganizerSearchResult) SetCount(count int) {

@@ -10,7 +10,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type (
@@ -20,6 +19,8 @@ type (
 		tpls         *Templates
 		imgServer    string
 		database     Database
+		users        *UserService
+		events       *EventService
 		ga_code      string
 		hostname     string
 		emailAccount *EmailAccount
@@ -80,12 +81,12 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		return nil, errors.New("init of MongoDB failed: " + err.Error())
 	}
 
-	err = database.Table("user").EnsureIndices("name", "email", "approved", "categories", "addr.city", "addr.pcode")
+	users, err := NewUserService(database, "user")
 	if err != nil {
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
-	err = database.Table("event").EnsureIndices("organizerid", "approved", "start", "categories", "addr.city", "addr.pcode")
+	events, err := NewEventService(database, "event", "date")
 	if err != nil {
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
@@ -129,8 +130,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		hostname = "test.mitmachrepublik.de"
 	}
 
-	var cities []string
-	err = database.Table("event").Distinct(bson.M{}, "addr.city", &cities)
+	cities, err := events.Cities()
 	if err != nil {
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
@@ -139,10 +139,10 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 	services = append(services, NewSessionService(60, database))
 	services = append(services, NewUnusedImgService(3600, database, imgServer))
 	if env != "www" {
-		services = append(services, NewSpawnEventsService(3600, database, imgServer))
+		services = append(services, NewSpawnEventsService(3600, database, events, imgServer))
 	}
 
-	return &MmrApp{host, port, tpls, imgServer, database, ga_code, hostname, emailAccount, NewLocationTree(cities), services}, nil
+	return &MmrApp{host, port, tpls, imgServer, database, users, events, ga_code, hostname, emailAccount, NewLocationTree(cities), services}, nil
 }
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, data bson.M) *appResult {
@@ -192,18 +192,6 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 	}
 }
 
-func (app *MmrApp) countEvents(place string, categoryIds []int, dateNames []string) (int, error) {
-
-	query := buildQuery(place, timeSpans(dateNames), categoryIds)
-	return app.database.Table("event").Count(query)
-}
-
-func (app *MmrApp) countOrganizers(place string, categoryIds []int) (int, error) {
-
-	query := buildQuery(place, nil, categoryIds)
-	return app.database.Table("user").Count(query)
-}
-
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	eventsPerRow := 4
@@ -219,42 +207,41 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *appResult {
 
-		eventCnt, err := app.countEvents(place, nil, dateNames)
+		eventCnt, err := app.events.Count(place, timeSpans(dateNames), nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place, nil)
+		organizerCnt, err := app.users.Count(place, nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		var result EventSearchResult
-		err = app.database.Table("event").Search(buildQuery(place, timeSpans(dateNames), nil), 0, eventsPerRow*2, &result, "start")
+		result, err := app.events.SearchDates(place, timeSpans(dateNames), nil, 0, eventsPerRow*2, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		var events [][]*Event
-		if len(result.Events) > 0 {
-			events = make([][]*Event, ((len(result.Events)-1)/eventsPerRow)+1)
-			for i := range events {
+		var dates [][]*Date
+		if len(result.Dates) > 0 {
+			dates = make([][]*Date, ((len(result.Dates)-1)/eventsPerRow)+1)
+			for i := range dates {
 
-				rowSize := len(result.Events) - i*eventsPerRow
+				rowSize := len(result.Dates) - i*eventsPerRow
 				if rowSize > eventsPerRow {
 					rowSize = eventsPerRow
 				}
-				events[i] = make([]*Event, rowSize)
+				dates[i] = make([]*Date, rowSize)
 
 				for j := 0; j < rowSize; j++ {
-					events[i][j] = result.Events[i*eventsPerRow+j]
+					dates[i][j] = result.Dates[i*eventsPerRow+j]
 				}
 			}
 		} else {
-			events = make([][]*Event, 0)
+			dates = make([][]*Date, 0)
 		}
 
-		return app.view("start.tpl", w, &meta, bson.M{"events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt})
+		return app.view("start.tpl", w, &meta, bson.M{"events": dates, "eventCnt": eventCnt, "organizerCnt": organizerCnt})
 	}()
 
 	app.handle(w, result)
@@ -274,27 +261,15 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 		var err error = nil
 
 		if bson.IsObjectIdHex(r.Param("id")) {
-			var user User
-			userId := bson.ObjectIdHex(r.Param("id"))
-
-			if err = app.database.Table("user").LoadById(userId, &user); err == nil {
-
+			user, err := app.users.Load(bson.ObjectIdHex(r.Param("id")))
+			if err == nil {
 				user.Approved = true
-				if _, err = app.database.Table("user").UpsertById(user.Id, &user); err != nil {
-					return &appResult{Status: http.StatusInternalServerError, Error: err}
-				}
-
-				var events []Event
-				if err = app.database.Table("event").Find(bson.M{"organizerid": user.Id}, &events, "_id"); err == nil {
-					for _, event := range events {
-						event.Approved = true
-						_, err = app.database.Table("event").UpsertById(event.Id, &event)
-						if err != nil {
-							break
-						}
-					}
-				}
+				err = app.users.Store(user)
 			}
+			if err != nil {
+				return &appResult{Status: http.StatusInternalServerError, Error: err}
+			}
+			// TODO create dates for existing events
 		} else {
 			err = errors.New("No organizer id given.")
 		}
@@ -331,32 +306,29 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *appResult {
 
-		eventCnt, err := app.countEvents(place, categoryIds, dateNames)
+		eventCnt, err := app.events.Count(place, timeSpans(dateNames), categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place, categoryIds)
+		organizerCnt, err := app.users.Count(place, categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		var result EventSearchResult
-		query := buildQuery(place, timeSpans(dateNames), categoryIds)
-		err = app.database.Table("event").Search(query, page*pageSize, pageSize, &result, "start")
+		result, err := app.events.SearchDates(place, timeSpans(dateNames), categoryIds, page, pageSize, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
 		organizerNames := make(map[bson.ObjectId]string)
-		for _, event := range result.Events {
-			if _, found := organizerNames[event.OrganizerId]; !found {
-				var user User
-				err = app.database.Table("user").LoadById(event.OrganizerId, &user)
+		for _, date := range result.Dates {
+			if _, found := organizerNames[date.OrganizerId]; !found {
+				user, err := app.users.Load(date.OrganizerId)
 				if err != nil {
 					return &appResult{Status: http.StatusInternalServerError, Error: err}
 				}
-				organizerNames[event.OrganizerId] = user.Name
+				organizerNames[date.OrganizerId] = user.Name
 			}
 		}
 
@@ -367,7 +339,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds})
+		return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds})
 	}()
 
 	app.handle(w, result)
@@ -384,26 +356,24 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultNotFound
 		}
 
-		var event Event
-		err := app.database.Table("event").LoadById(bson.ObjectIdHex(r.Param("id")), &event)
+		event, err := app.events.Load(bson.ObjectIdHex(r.Param("id")))
 		if err != nil {
 			return resultNotFound
 		}
 
-		var organizer User
-		err = app.database.Table("user").LoadById(event.OrganizerId, &organizer)
+		organizer, err := app.users.Load(event.OrganizerId)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
 		place := citypartName(event.Addr)
 
-		eventCnt, err := app.countEvents(place, nil, dateNames)
+		eventCnt, err := app.events.Count(place, timeSpans(dateNames), nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place, nil)
+		organizerCnt, err := app.users.Count(place, nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -439,8 +409,7 @@ func (app *MmrApp) sendEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultNotFound
 		}
 
-		var event Event
-		err := app.database.Table("event").LoadById(bson.ObjectIdHex(r.Param("id")), &event)
+		event, err := app.events.LoadDate(bson.ObjectIdHex(r.Param("id")))
 		if err != nil {
 			return resultNotFound
 		}
@@ -477,19 +446,17 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 
 	result := func() *appResult {
 
-		eventCnt, err := app.countEvents(place, categoryIds, dateNames)
+		eventCnt, err := app.events.Count(place, timeSpans(dateNames), categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place, categoryIds)
+		organizerCnt, err := app.users.Count(place, categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		var result OrganizerSearchResult
-		query := buildQuery(place, nil, categoryIds)
-		err = app.database.Table("user").Search(query, page*pageSize, pageSize, &result, "name")
+		result, err := app.users.Search(place, categoryIds, page, pageSize, "name")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -524,27 +491,24 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultNotFound
 		}
 
-		var organizer User
-		err := app.database.Table("user").LoadById(bson.ObjectIdHex(r.Param("id")), &organizer)
+		organizer, err := app.users.Load(bson.ObjectIdHex(r.Param("id")))
 		if err != nil {
 			return resultNotFound
 		}
 
 		place := citypartName(organizer.Addr)
 
-		eventCnt, err := app.countEvents(place, nil, dateNames)
+		eventCnt, err := app.events.Count(place, timeSpans(dateNames), nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerCnt, err := app.countOrganizers(place, nil)
+		organizerCnt, err := app.users.Count(place, nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		var result EventSearchResult
-		query := bson.M{"$and": []bson.M{bson.M{"organizerid": organizer.Id}, bson.M{"approved": true}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
-		err = app.database.Table("event").Search(query, page*pageSize, pageSize, &result, "start")
+		result, err := app.events.SearchDatesOfUser(organizer.Id, page, pageSize, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -573,7 +537,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			organizer.Descr,
 		}
 
-		return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
+		return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
 	}()
 
 	app.handle(w, result)
@@ -611,8 +575,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultUnauthorized
 		}
 
-		var result EventSearchResult
-		err = app.database.Table("event").Search(bson.M{"organizerid": user.Id}, page*pageSize, pageSize, &result, "-start")
+		result, err := app.events.SearchEventsOfUser(user.Id, page, pageSize, "-start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -678,11 +641,10 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultUnauthorized
 		}
 
-		var data Event
-		event := &data
+		var event *Event
 		if bson.IsObjectIdHex(r.Param("id")) {
 
-			err = app.database.Table("event").LoadById(bson.ObjectIdHex(r.Param("id")), event)
+			event, err = app.events.Load(bson.ObjectIdHex(r.Param("id")))
 			if err != nil {
 				return &appResult{Status: http.StatusNotFound, Error: err}
 			}
@@ -690,6 +652,8 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			if event.OrganizerId != user.Id {
 				return resultBadRequest
 			}
+		} else {
+			event = new(Event)
 		}
 
 		return app.view("event_edit.tpl", w, &meta, bson.M{"user": user, "event": event})
@@ -781,13 +745,13 @@ func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request)
 			return resultBadRequest
 		}
 
-		err = validateUser(app.database, user)
+		err = app.users.Validate(user)
 		if err != nil {
 			return resultConflict
 		}
 
 		user.Id = bson.NewObjectId()
-		_, err = app.database.Table("user").UpsertById(user.Id, user)
+		err = app.users.Store(user)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -855,7 +819,7 @@ func (app *MmrApp) profileHandler(w traffic.ResponseWriter, r *traffic.Request) 
 		user.Addr.Pcode = data.Addr.Pcode
 		user.Addr.City = data.Addr.City
 
-		_, err = app.database.Table("user").UpsertById(user.Id, user)
+		err = app.users.Store(user)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -895,7 +859,7 @@ func (app *MmrApp) passwordHandler(w traffic.ResponseWriter, r *traffic.Request)
 			}
 		}
 
-		_, err = app.database.Table("user").UpsertById(user.Id, user)
+		err = app.users.Store(user)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -915,12 +879,12 @@ func (app *MmrApp) unregisterHandler(w traffic.ResponseWriter, r *traffic.Reques
 			return resultUnauthorized
 		}
 
-		err = app.database.Table("event").Delete(bson.M{"organizerid": user.Id})
+		err = app.events.DeleteOfUser(user.Id)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		err = app.database.Table("user").DeleteById(user.Id)
+		err = app.users.Delete(user.Id)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -952,10 +916,8 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 		created := false
 		if event.Id.Valid() {
-			var oldData Event
-			oldEvent := &oldData
-			app.database.Table("event").LoadById(event.Id, oldEvent)
-			if oldEvent.OrganizerId != user.Id {
+			oldEvent, err := app.events.Load(event.Id)
+			if err != nil || oldEvent.OrganizerId != user.Id {
 				return resultBadRequest
 			}
 		} else {
@@ -963,9 +925,8 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 			event.Id = bson.NewObjectId()
 		}
 		event.OrganizerId = user.Id
-		event.Approved = user.Approved
 
-		_, err = app.database.Table("event").UpsertById(event.Id, event)
+		err = app.events.Store(event)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -1040,12 +1001,12 @@ func (app *MmrApp) eventCountHandler(w traffic.ResponseWriter, r *traffic.Reques
 		categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
 		dateIds := str2Int(strings.Split(r.Param("dateIds"), ","))
-		dates := make([]string, len(dateIds))
+		dateNames := make([]string, len(dateIds))
 		for i, dateId := range dateIds {
-			dates[i] = DateIdMap[dateId]
+			dateNames[i] = DateIdMap[dateId]
 		}
 
-		cnt, err := app.countEvents(r.Param("place"), categoryIds, dates)
+		cnt, err := app.events.Count(r.Param("place"), timeSpans(dateNames), categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -1062,7 +1023,7 @@ func (app *MmrApp) organizerCountHandler(w traffic.ResponseWriter, r *traffic.Re
 
 		categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
-		cnt, err := app.countOrganizers(r.Param("place"), categoryIds)
+		cnt, err := app.users.Count(r.Param("place"), categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -1131,9 +1092,7 @@ func (app *MmrApp) deleteEventHandler(w traffic.ResponseWriter, r *traffic.Reque
 			return resultBadRequest
 		}
 
-		var data Event
-		event := &data
-		err = app.database.Table("event").LoadById(bson.ObjectIdHex(r.Param("id")), event)
+		event, err := app.events.Load(bson.ObjectIdHex(r.Param("id")))
 		if err != nil {
 			return resultOK
 		}
@@ -1142,10 +1101,12 @@ func (app *MmrApp) deleteEventHandler(w traffic.ResponseWriter, r *traffic.Reque
 			return resultBadRequest
 		}
 
-		err = app.database.Table("event").DeleteById(event.Id)
+		err = app.events.Delete(event.Id)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
+
+		// TODO delete dates
 
 		return resultOK
 	}()
@@ -1176,14 +1137,20 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
 
 	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "impressum.tpl", "Impressum") })
-	router.Get("/disclaimer", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "disclaimer.tpl", "Haftungsausschluss (Disclaimer)") })
-	router.Get("/datenschutz", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "datenschutz.tpl", "Datenschutzerklärung") })
-	router.Get("/agbs", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "agbs.tpl", "Allgemeine Geschäftsbedingungen") })
+	router.Get("/disclaimer", func(w traffic.ResponseWriter, r *traffic.Request) {
+		app.staticPage(w, "disclaimer.tpl", "Haftungsausschluss (Disclaimer)")
+	})
+	router.Get("/datenschutz", func(w traffic.ResponseWriter, r *traffic.Request) {
+		app.staticPage(w, "datenschutz.tpl", "Datenschutzerklärung")
+	})
+	router.Get("/agbs", func(w traffic.ResponseWriter, r *traffic.Request) {
+		app.staticPage(w, "agbs.tpl", "Allgemeine Geschäftsbedingungen")
+	})
 	router.Get("/dialog/contact", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "contact.tpl", "") })
 	router.Get("/dialog/registered", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "registered.tpl", "") })
 	router.Get("/dialog/login", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "login.tpl", "") })
 	router.Get("/dialog/register", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "register.tpl", "") })
-	router.Get("/dialog/sendevent/:id", app.sendEventPage)	
+	router.Get("/dialog/sendevent/:id", app.sendEventPage)
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)

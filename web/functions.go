@@ -1,7 +1,6 @@
 package mmr
 
 import (
-	"errors"
 	"fmt"
 	"labix.org/v2/mgo/bson"
 	"net/url"
@@ -291,23 +290,4 @@ func pageCount(results, pageSize int) int {
 func isEmpty(s string) bool {
 
 	return len(strings.TrimSpace(s)) == 0
-}
-
-func validateUser(db Database, user *User) error {
-
-	table := db.Table("user")
-
-	var result []User
-	err := table.Find(bson.M{"email": user.Email}, &result)
-	if err != nil {
-		return err
-	}
-
-	for i := 0; i < len(result); i++ {
-		if result[i].Email == user.Email && result[i].Id != user.Id {
-			return errors.New("Email address is already in use.")
-		}
-	}
-
-	return nil
 }
