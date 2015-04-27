@@ -3,6 +3,16 @@ var DateTimePattern = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}).(\d{2})$/;
 var EmailPattern = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 var WebPattern = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/;
 
+function zeroFill( number, width )
+{
+	width -= number.toString().length;
+	if ( width > 0 )
+	{
+		return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+	}
+	return number + ""; // always return a string
+}
+
 function initProfileForm(id)
 {
 	$('#' + id + '-Descr').summernote({
@@ -594,11 +604,15 @@ $(function() {
 		$("#events-form").submit();
 	});
 
+	var now = new Date();
 	$(".form-datetime").datetimepicker({
 		format: "dd.mm.yyyy hh:ii",
 		autoclose: true,
+		fontAwesome: true,
 		language: "de",
-		pickerPosition: "bottom-right"
+		pickerPosition: "bottom-right",
+		todayHighlight: true,
+		startDate: zeroFill(now.getDate(), 2) + "." + zeroFill(now.getMonth() + 1, 2) + "." + now.getFullYear() + " " + zeroFill(now.getHours(), 2) + ":" + zeroFill(now.getMinutes(), 2)
 	});
 	
 	var hash = window.location.hash;
