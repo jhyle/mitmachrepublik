@@ -27,10 +27,36 @@ func (users *UserService) table() Table {
 	return users.database.Table(users.tablename)
 }
 
+func (users *UserService) buildQuery(place string, categoryIds []int) bson.M {
+
+	query := make([]bson.M, 0, 3)
+
+	query = append(query, bson.M{"approved": true})
+
+	if len(place) > 0 {
+		postcodes := Postcodes(place)
+		placesQuery := make([]bson.M, len(postcodes)+1)
+		for i, postcode := range postcodes {
+			placesQuery[i] = bson.M{"addr.pcode": postcode}
+		}
+		placesQuery[len(postcodes)] = bson.M{"addr.city": place}
+		query = append(query, bson.M{"$or": placesQuery})
+	}
+
+	if len(categoryIds) > 0 && categoryIds[0] != 0 {
+		categoriesQuery := make([]bson.M, len(categoryIds))
+		for i, categoryId := range categoryIds {
+			categoriesQuery[i] = bson.M{"categories": categoryId}
+		}
+		query = append(query, bson.M{"$or": categoriesQuery})
+	}
+
+	return bson.M{"$and": query}
+}
+
 func (users *UserService) Count(place string, categoryIds []int) (int, error) {
 
-	query := buildQuery(place, nil, categoryIds)
-	return users.table().Count(query)
+	return users.table().Count(users.buildQuery(place, categoryIds))
 }
 
 func (users *UserService) Validate(user *User) error {
@@ -60,8 +86,7 @@ func (users *UserService) Load(id bson.ObjectId) (*User, error) {
 func (users *UserService) Search(place string, categoryIds []int, page, pageSize int, sort string) (*OrganizerSearchResult, error) {
 
 	var result OrganizerSearchResult
-	query := buildQuery(place, nil, categoryIds)
-	err := users.table().Search(query, page*pageSize, pageSize, &result, "name")
+	err := users.table().Search(users.buildQuery(place, categoryIds), page*pageSize, pageSize, &result, "name")
 	return &result, err
 }
 

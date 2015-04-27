@@ -11,7 +11,7 @@
 				<span><input name="subject" type="text" id="send-event-Subject" class="form-control" placeholder="Betreff" value="Veranstaltung {{.event.Title}} auf mitmach-republik.de"></span>
 				<textarea name="text" id="send-event-Text" class="form-control" placeholder="Nachricht" rows="5">Hallo,
 
-die Veranstaltung {{.event.Title}} in {{citypartName .event.Addr}} finde ich interessant, schau doch mal rein: http://{{$.hostname}}{{eventUrl .event | encodePath}}.
+die Veranstaltung {{.event.Title}} in {{citypartName .event.Addr}} finde ich interessant, schau doch mal rein: http://{{$.hostname}}{{.event.Url | encodePath}}.
 
 Liebe Grüße! 
 				</textarea>

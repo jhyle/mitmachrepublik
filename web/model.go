@@ -4,6 +4,7 @@ import (
 	"github.com/kennygrant/sanitize"
 	"html/template"
 	"labix.org/v2/mgo/bson"
+	"strings"
 	"time"
 )
 
@@ -56,7 +57,7 @@ type (
 
 	Date struct {
 		Event
-		EventId  bson.ObjectId
+		EventId bson.ObjectId
 	}
 
 	SearchResult interface {
@@ -74,8 +75,8 @@ type (
 	}
 
 	DateSearchResult struct {
-		Count  int
-		Start  int
+		Count int
+		Start int
 		Dates []*Date
 	}
 
@@ -186,6 +187,11 @@ func (user *User) SetId(id bson.ObjectId) {
 	user.Id = id
 }
 
+func (user *User) Url() string {
+
+	return "/veranstalter/" + user.Id.Hex() + "/" + user.Name + "/0"
+}
+
 func (user *User) HtmlDescription() template.HTML {
 
 	html, _ := sanitize.HTMLAllowing(user.Descr)
@@ -224,6 +230,24 @@ func (event *Event) HtmlDescription() template.HTML {
 func (event *Event) PlainDescription() string {
 
 	return sanitize.HTML(event.Descr)
+}
+
+func (date *Date) GetId() bson.ObjectId {
+	return date.Id
+}
+
+func (date *Date) SetId(id bson.ObjectId) {
+	date.Id = id
+}
+
+func (date *Date) Url() string {
+
+	categoryNames := make([]string, len(date.Categories))
+	for i, id := range date.Categories {
+		categoryNames[i] = CategoryIdMap[id]
+	}
+
+	return "/veranstaltung/" + strings.Join(categoryNames, ",") + "/" + dateFormat(date.Start) + "/" + date.Id.Hex() + "/" + date.Title
 }
 
 func (session *Session) GetId() bson.ObjectId {

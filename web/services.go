@@ -177,7 +177,7 @@ func (service *SpawnEventsService) serve() {
 	district := districts[rand.Intn(len(districts))]
 	event.Addr.Pcode = PostcodeMap[district][rand.Intn(len(PostcodeMap[district]))]
 	event.Addr.City = "Berlin"
-	service.events.Store(event)
+	service.events.Store(event, organizer.Approved)
 }
 
 func (service *BasicService) start(serve func()) {

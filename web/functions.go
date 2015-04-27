@@ -2,7 +2,6 @@ package mmr
 
 import (
 	"fmt"
-	"labix.org/v2/mgo/bson"
 	"net/url"
 	"strconv"
 	"strings"
@@ -151,16 +150,6 @@ func categorySearchUrl(category int, place string) string {
 	return eventSearchUrl(place, []int{category}, []int{0}, 0)
 }
 
-func eventUrl(event *Event) string {
-
-	categoryNames := make([]string, len(event.Categories))
-	for i, id := range event.Categories {
-		categoryNames[i] = CategoryIdMap[id]
-	}
-
-	return "/veranstaltung/" + strings.Join(categoryNames, ",") + "/" + dateFormat(event.Start) + "/" + event.Id.Hex() + "/" + event.Title
-}
-
 func organizerSearchUrl(place string, categoryIds []int) string {
 
 	categoryNames := make([]string, len(categoryIds))
@@ -173,11 +162,6 @@ func organizerSearchUrl(place string, categoryIds []int) string {
 func simpleOrganizerSearchUrl(place string) string {
 
 	return organizerSearchUrl(place, []int{0})
-}
-
-func organizerUrl(organizer User) string {
-
-	return organizer.Id.Hex() + "/" + organizer.Name + "/0"
 }
 
 func str2Int(s []string) []int {
@@ -203,6 +187,15 @@ func int2Str(i []int) []string {
 	}
 
 	return a
+}
+
+func min(m, n int) int {
+
+	if (m < n) {
+		return m
+	} else {
+		return n
+	}
 }
 
 func timeSpans(dateNames []string) [][]time.Time {
@@ -237,46 +230,6 @@ func timeSpans(dateNames []string) [][]time.Time {
 	}
 
 	return timeSpans
-}
-
-func buildQuery(place string, dates [][]time.Time, categoryIds []int) bson.M {
-
-	query := make([]bson.M, 0, 4)
-
-	query = append(query, bson.M{"approved": true})
-
-	if len(place) > 0 {
-		postcodes := Postcodes(place)
-		placesQuery := make([]bson.M, len(postcodes)+1)
-		for i, postcode := range postcodes {
-			placesQuery[i] = bson.M{"addr.pcode": postcode}
-		}
-		placesQuery[len(postcodes)] = bson.M{"addr.city": place}
-		query = append(query, bson.M{"$or": placesQuery})
-	}
-
-	if len(dates) > 0 {
-		datesQuery := make([]bson.M, len(dates))
-		for i, timespan := range dates {
-			rangeQuery := make(bson.M)
-			rangeQuery["$gte"] = timespan[0]
-			if timespan[1] != timespan[0] {
-				rangeQuery["$lt"] = timespan[1]
-			}
-			datesQuery[i] = bson.M{"start": rangeQuery}
-		}
-		query = append(query, bson.M{"$or": datesQuery})
-	}
-
-	if len(categoryIds) > 0 && categoryIds[0] != 0 {
-		categoriesQuery := make([]bson.M, len(categoryIds))
-		for i, categoryId := range categoryIds {
-			categoriesQuery[i] = bson.M{"categories": categoryId}
-		}
-		query = append(query, bson.M{"$or": categoriesQuery})
-	}
-
-	return bson.M{"$and": query}
 }
 
 func pageCount(results, pageSize int) int {
