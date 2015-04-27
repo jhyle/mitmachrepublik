@@ -9,6 +9,9 @@
 	<meta name="og:site_name" content="Mitmach-Republik">
 	<meta name="og:image" content="{{.meta.FB_Image}}">
 	<meta name="og:description" content="{{.meta.FB_Descr}}">
+{{if .event}}
+	<link rel="canonical" href="http://{{.hostname}}{{.event.Url}}">
+{{end}}
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">
 	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
