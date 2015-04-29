@@ -41,6 +41,21 @@ type (
 		Contact time.Time
 	}
 
+	Recurrence int
+
+	WeeklyRecurrence struct {
+		Interval int
+		Weekdays []time.Weekday
+	}
+
+	WeekOfMonth int
+
+	MonthlyRecurrence struct {
+		Week     WeekOfMonth
+		Weekday  time.Weekday
+		Interval int
+	}
+
 	Event struct {
 		Id          bson.ObjectId `bson:"_id" json:",omitempty"`
 		OrganizerId bson.ObjectId `json:",omitempty"`
@@ -51,13 +66,26 @@ type (
 		Categories  []int
 		Start       time.Time
 		End         time.Time `json:",omitempty"`
+		Recurrency  Recurrence
+		Weekly      WeeklyRecurrence
+		Monthly     MonthlyRecurrence
 		Rsvp        bool
 		Addr        Address
 	}
 
 	Date struct {
-		Event
-		EventId bson.ObjectId
+		Id          bson.ObjectId
+		EventId     bson.ObjectId
+		OrganizerId bson.ObjectId
+		Title       string
+		Image       string
+		Descr       string
+		Web         string
+		Categories  []int
+		Start       time.Time
+		End         time.Time
+		Rsvp        bool
+		Addr        Address
 	}
 
 	SearchResult interface {
@@ -85,6 +113,18 @@ type (
 		Start      int
 		Organizers []*User
 	}
+)
+
+const (	
+	NoRecurrence Recurrence = iota
+	Weekly
+	Monthly 
+
+	FirstWeek WeekOfMonth = iota
+	SecondWeek
+	ThirdWeek
+	FourthWeek
+	LastWeek
 )
 
 var (
@@ -248,6 +288,17 @@ func (date *Date) Url() string {
 	}
 
 	return "/veranstaltung/" + strings.Join(categoryNames, ",") + "/" + dateFormat(date.Start) + "/" + date.Id.Hex() + "/" + date.Title
+}
+
+func (date *Date) HtmlDescription() template.HTML {
+
+	html, _ := sanitize.HTMLAllowing(date.Descr)
+	return template.HTML(html)
+}
+
+func (date *Date) PlainDescription() string {
+
+	return sanitize.HTML(date.Descr)
 }
 
 func (session *Session) GetId() bson.ObjectId {

@@ -52,9 +52,9 @@ func (events *EventService) buildQuery(place string, dates [][]time.Time, catego
 		postcodes := Postcodes(place)
 		placesQuery := make([]bson.M, len(postcodes)+1)
 		for i, postcode := range postcodes {
-			placesQuery[i] = bson.M{"event.addr.pcode": postcode}
+			placesQuery[i] = bson.M{"addr.pcode": postcode}
 		}
-		placesQuery[len(postcodes)] = bson.M{"event.addr.city": place}
+		placesQuery[len(postcodes)] = bson.M{"addr.city": place}
 		query = append(query, bson.M{"$or": placesQuery})
 	}
 
@@ -66,7 +66,7 @@ func (events *EventService) buildQuery(place string, dates [][]time.Time, catego
 			if timespan[1] != timespan[0] {
 				rangeQuery["$lt"] = timespan[1]
 			}
-			datesQuery[i] = bson.M{"event.start": rangeQuery}
+			datesQuery[i] = bson.M{"start": rangeQuery}
 		}
 		query = append(query, bson.M{"$or": datesQuery})
 	}
@@ -74,7 +74,7 @@ func (events *EventService) buildQuery(place string, dates [][]time.Time, catego
 	if len(categoryIds) > 0 && categoryIds[0] != 0 {
 		categoriesQuery := make([]bson.M, len(categoryIds))
 		for i, categoryId := range categoryIds {
-			categoriesQuery[i] = bson.M{"event.categories": categoryId}
+			categoriesQuery[i] = bson.M{"categories": categoryId}
 		}
 		query = append(query, bson.M{"$or": categoriesQuery})
 	}
@@ -111,7 +111,7 @@ func (events *EventService) SearchDates(place string, dates [][]time.Time, categ
 func (events *EventService) SearchDatesOfUser(userId bson.ObjectId, page, pageSize int, sort string) (*DateSearchResult, error) {
 
 	var result DateSearchResult
-	query := bson.M{"$and": []bson.M{bson.M{"event.organizerid": userId}, bson.M{"event.start": bson.M{"$gte": time.Now()}}}}
+	query := bson.M{"$and": []bson.M{bson.M{"organizerid": userId}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
 	err := events.dateTable().Search(query, page*pageSize, pageSize, &result, sort)
 	return &result, err
 }
@@ -172,7 +172,7 @@ func (events *EventService) SyncDates(event *Event) error {
 	genDates := events.generateDates(event, now)
 
 	var dates []Date
-	query := bson.M{"$and": []bson.M{bson.M{"eventid": event.Id}, bson.M{"event.start": bson.M{"$gte": now}}}}
+	query := bson.M{"$and": []bson.M{bson.M{"eventid": event.Id}, bson.M{"start": bson.M{"$gte": now}}}}
 	err := events.dateTable().Find(query, &dates, "start")
 	if err != nil {
 		return err
@@ -206,7 +206,7 @@ func (events *EventService) SyncDates(event *Event) error {
 
 func (events *EventService) DeleteDatesOfUser(userId bson.ObjectId) error {
 
-	query := bson.M{"event.organizerid": userId}
+	query := bson.M{"organizerid": userId}
 	return events.dateTable().Delete(query)
 }
 
