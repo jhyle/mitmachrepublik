@@ -197,6 +197,26 @@ function gatherEventForm(id)
 
 	data["Rsvp"] = $("#" + id + "-Rsvp").is(':checked');	
 	
+	var recurrency = $("input[type=radio][name=recurrency]:checked").val();
+	if (recurrency == "weekly") {
+		data["Recurrency"] = 1;
+		data["Weekly"] = {
+			"Interval": parseInt($("#" + id + "-Recurrency-Weekly-Interval").val()),
+			"Weekdays": []
+		};
+		weekdays = $("input[name=" + id + "-Recurrency-Weekly-Weekday]:checked").map(function () {return this.value;}).get();
+		for (i = 0; i < weekdays.length; i++) {
+			data["Weekly"]["Weekdays"][i] = parseInt(weekdays[i]);
+		}
+	} else if (recurrency == "monthly") {
+		data["Recurrency"] = 2;
+		data["Monthly"] = {
+			"Interval": parseInt($("#" + id + "-Recurrency-Monthly-Interval").val()),
+			"Week": parseInt($("#" + id + "-Recurrency-Monthly-Week").val()),
+			"Weekday": parseInt($("#" + id + "-Recurrency-Monthly-Weekday").val())
+		};
+	}
+	
 	data["Addr"] = {}
 	var addr_fields = ["Name", "Street", "Pcode", "City"];
 	for (var i = 0, len = addr_fields.length; i < len; i++) {
@@ -210,6 +230,7 @@ function gatherEventForm(id)
 	for (i = 0; i < categories.length; i++) {
 		data["Categories"][i] = parseInt(categories[i]);
 	}
+	
 	return data;
 }
 
@@ -613,6 +634,19 @@ $(function() {
 		pickerPosition: "bottom-right",
 		todayHighlight: true,
 		startDate: zeroFill(now.getDate(), 2) + "." + zeroFill(now.getMonth() + 1, 2) + "." + now.getFullYear() + " " + zeroFill(now.getHours(), 2) + ":" + zeroFill(now.getMinutes(), 2)
+	});
+	
+	$("input[type=radio][name=recurrency]").change(function () {
+		if (this.value == "weekly") {
+			$("#event-monthly").hide();
+			$("#event-weekly").show();
+		} else if (this.value == "monthly") {
+			$("#event-weekly").hide();
+			$("#event-monthly").show();
+		} else {
+			$("#event-weekly").hide();
+			$("#event-monthly").hide();
+		}
 	});
 	
 	var hash = window.location.hash;

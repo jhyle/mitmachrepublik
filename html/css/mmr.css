@@ -28,6 +28,9 @@ label {
 .radio-inline + .radio-inline, .checkbox-inline + .checkbox-inline {
 	margin-left: 0;
 }
+.radio-inline {
+	margin-right: 25px;
+}
 body, a, a:hover, a:focus, .form-control, div.col-box h3 {
 	color: #2f3030;
 }

@@ -67,8 +67,8 @@ type (
 		Start       time.Time
 		End         time.Time `json:",omitempty"`
 		Recurrency  Recurrence
-		Weekly      WeeklyRecurrence
-		Monthly     MonthlyRecurrence
+		Weekly      WeeklyRecurrence `json:",omitempty"`
+		Monthly     MonthlyRecurrence `json:",omitempty"`
 		Rsvp        bool
 		Addr        Address
 	}

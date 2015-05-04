@@ -27,6 +27,69 @@
 			<hr>
 			<div class="form-group">
 				<div class="col-xs-12" style="margin-left: 10px">
+					<span id="event-Recurrency" class="help-block">Wiederholung</span>
+					<fieldset>
+						<label for="event-Recurrency-None" class="radio-inline"><input type="radio" id="event-Recurrency-None" name="recurrency" value="none" {{if eq .event.Recurrency 0}}checked{{end}}> Keine</label>
+						<label for="event-Recurrency-Weekly" class="radio-inline"><input type="radio" id="event-Recurrency-Weekly" name="recurrency" value="weekly" {{if eq .event.Recurrency 1}}checked{{end}}> Wöchentlich</label>
+						<label for="event-Recurrency-Monthly" class="radio-inline"><input type="radio" id="event-Recurrency-Monthly" name="recurrency" value="monthly" {{if eq .event.Recurrency 2}}checked{{end}}> Monatlich</label>
+					</fieldset>
+				</div>
+				<div id="event-weekly" class="col-xs-12" style="margin-top: 10px; {{if not (eq .event.Recurrency 1)}}display: none{{end}}">
+					<span class="checkbox-inline">jede <select name="weekly-interval" id="event-Recurrency-Weekly-Interval">
+						<option value="1" {{if eq .event.Weekly.Interval 1}}selected{{end}}>1. Woche</option>
+						<option value="2" {{if eq .event.Weekly.Interval 2}}selected{{end}}>2. Woche</option>
+						<option value="3" {{if eq .event.Weekly.Interval 3}}selected{{end}}>3. Woche</option>
+						<option value="4" {{if eq .event.Weekly.Interval 4}}selected{{end}}>4. Woche</option>
+						<option value="5" {{if eq .event.Weekly.Interval 5}}selected{{end}}>5. Woche</option>
+						<option value="6" {{if eq .event.Weekly.Interval 6}}selected{{end}}>6. Woche</option>
+						<option value="7" {{if eq .event.Weekly.Interval 7}}selected{{end}}>7. Woche</option>
+						<option value="8" {{if eq .event.Weekly.Interval 8}}selected{{end}}>8. Woche</option>
+						<option value="9" {{if eq .event.Weekly.Interval 9}}selected{{end}}>9. Woche</option>
+						<option value="10" {{if eq .event.Weekly.Interval 10}}selected{{end}}>10. Woche</option>
+					</select>&nbsp;&nbsp;am&nbsp;&nbsp;</span>
+					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="1" {{range .event.Weekly.Weekdays}}{{if eq . 1}}checked{{end}}{{end}}> Mo&nbsp;&nbsp;</label>
+					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="2" {{range .event.Weekly.Weekdays}}{{if eq . 2}}checked{{end}}{{end}}> Di&nbsp;&nbsp;</label>
+					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="3" {{range .event.Weekly.Weekdays}}{{if eq . 3}}checked{{end}}{{end}}> Mi&nbsp;&nbsp;</label>
+					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="4" {{range .event.Weekly.Weekdays}}{{if eq . 4}}checked{{end}}{{end}}> Do&nbsp;&nbsp;</label>
+					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="5" {{range .event.Weekly.Weekdays}}{{if eq . 5}}checked{{end}}{{end}}> Fr&nbsp;&nbsp;</label>
+					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="6" {{range .event.Weekly.Weekdays}}{{if eq . 6}}checked{{end}}{{end}}> Sa&nbsp;&nbsp;</label>
+					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="0" {{range .event.Weekly.Weekdays}}{{if eq . 0}}checked{{end}}{{end}}> So&nbsp;&nbsp;</label>
+				</div>
+				<div id="event-monthly" class="col-xs-12" style="margin-top: 10px; {{if not (eq .event.Recurrency 2)}}display: none{{end}}">
+					<span class="checkbox-inline">jeder <select name="monthly-week" id="event-Recurrency-Monthly-Week">
+						<option value="1" {{if eq .event.Monthly.Week 1}}selected{{end}}>erste</option>
+						<option value="2" {{if eq .event.Monthly.Week 2}}selected{{end}}>zweite</option>
+						<option value="3" {{if eq .event.Monthly.Week 3}}selected{{end}}>dritte</option>
+						<option value="4" {{if eq .event.Monthly.Week 4}}selected{{end}}>vierte</option>
+						<option value="5" {{if eq .event.Monthly.Week 5}}selected{{end}}>letzte</option>
+					</select>&nbsp;&nbsp;<select name="monthly-weekday" id="event-Recurrency-Monthly-Weekday">
+						<option value="1" {{if eq .event.Monthly.Weekday 1}}selected{{end}}>Montag</option>
+						<option value="2" {{if eq .event.Monthly.Weekday 2}}selected{{end}}>Dienstag</option>
+						<option value="3" {{if eq .event.Monthly.Weekday 3}}selected{{end}}>Mittwoch</option>
+						<option value="4" {{if eq .event.Monthly.Weekday 4}}selected{{end}}>Donnerstag</option>
+						<option value="5" {{if eq .event.Monthly.Weekday 5}}selected{{end}}>Freitag</option>
+						<option value="6" {{if eq .event.Monthly.Weekday 6}}selected{{end}}>Samstag</option>
+						<option value="0" {{if eq .event.Monthly.Weekday 0}}selected{{end}}>Sonntag</option>
+					</select>&nbsp;&nbsp;von jedem&nbsp;&nbsp;<select name="monthly-interval" id="event-Recurrency-Monthly-Interval">
+						<option value="1" {{if eq .event.Monthly.Interval 1}}selected{{end}}>1. Monat</option>
+						<option value="2" {{if eq .event.Monthly.Interval 2}}selected{{end}}>2. Monat</option>
+						<option value="3" {{if eq .event.Monthly.Interval 3}}selected{{end}}>3. Monat</option>
+						<option value="4" {{if eq .event.Monthly.Interval 4}}selected{{end}}>4. Monat</option>
+						<option value="5" {{if eq .event.Monthly.Interval 5}}selected{{end}}>5. Monat</option>
+						<option value="6" {{if eq .event.Monthly.Interval 6}}selected{{end}}>6. Monat</option>
+						<option value="7" {{if eq .event.Monthly.Interval 7}}selected{{end}}>7. Monat</option>
+						<option value="8" {{if eq .event.Monthly.Interval 8}}selected{{end}}>8. Monat</option>
+						<option value="9" {{if eq .event.Monthly.Interval 9}}selected{{end}}>9. Monat</option>
+						<option value="10" {{if eq .event.Monthly.Interval 10}}selected{{end}}>10. Monat</option>
+						<option value="11" {{if eq .event.Monthly.Interval 11}}selected{{end}}>11. Monat</option>
+						<option value="12" {{if eq .event.Monthly.Interval 12}}selected{{end}}>12. Monat</option>
+					</select>
+					</span>
+				</div>
+			</div>
+			<hr>
+			<div class="form-group">
+				<div class="col-xs-12" style="margin-left: 10px">
 					<span id="event-Category" class="help-block">Wähle eine oder mehrere Kategorien aus:</span>
 				{{ range .categories }}
 					{{ $id := index $.categoryMap . }}
