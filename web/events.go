@@ -186,7 +186,9 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 						day = day.Add(24 * time.Hour)
 					}
 					date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
-					date.End = date.Start.Add(eventDuration)
+					if eventDuration != 0 {
+						date.End = date.Start.Add(eventDuration)
+					}
 					date.Id = bson.NewObjectId()
 					dates = append(dates, date)
 				}
@@ -211,7 +213,9 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 					day = days[event.Monthly.Week]
 				}
 				date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
-				date.End = date.Start.Add(eventDuration)
+				if eventDuration != 0 {
+					date.End = date.Start.Add(eventDuration)
+				}
 				date.Id = bson.NewObjectId()
 				dates = append(dates, date)
 			}
