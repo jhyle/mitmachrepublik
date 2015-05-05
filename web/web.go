@@ -215,7 +215,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		result, err := app.events.SearchDates(place, timeSpans(dateNames), nil, 0, eventsPerRow*2, "event.start")
+		result, err := app.events.SearchDates(place, timeSpans(dateNames), nil, 0, eventsPerRow*2, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -327,7 +327,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		result, err := app.events.SearchDates(place, timeSpans(dateNames), categoryIds, page, pageSize, "event.start")
+		result, err := app.events.SearchDates(place, timeSpans(dateNames), categoryIds, page, pageSize, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -519,7 +519,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		result, err := app.events.SearchDatesOfUser(organizer.Id, page, pageSize, "event.start")
+		result, err := app.events.SearchDatesOfUser(organizer.Id, page, pageSize, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}

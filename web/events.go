@@ -135,7 +135,6 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 	dates := make([]Date, 0)
 
 	var date Date
-	date.Id = bson.NewObjectId()
 	date.OrganizerId = event.OrganizerId
 	date.EventId = event.Id
 	date.Title = event.Title
@@ -149,7 +148,74 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 	date.Addr = event.Addr
 
 	if !date.Start.Before(now) {
+		date.Id = bson.NewObjectId()
 		dates = append(dates, date)
+	}
+
+	if event.Recurrency != NoRecurrence {
+		timeHorizon := now.Add(366 * 24 * time.Hour)
+
+		var eventDuration time.Duration = 0
+		if !event.End.IsZero() {
+			eventDuration = event.End.Sub(event.Start)
+		}
+
+		year, week := event.Start.ISOWeek()
+		var startOfFirstWeek int = -3
+		for {
+			firstWeek := time.Date(year, time.January, startOfFirstWeek, 6, 0, 0, 0, time.Local)
+			testYear, _ := firstWeek.ISOWeek()
+			if testYear == year {
+				break
+			} else {
+				startOfFirstWeek++
+			}
+		}
+
+		month := int(event.Start.Month())
+		hour := event.Start.Hour()
+		minute := event.Start.Minute()
+
+		if event.Recurrency == Weekly {
+			for date.Start.Before(timeHorizon) {
+				week += event.Weekly.Interval
+				weekDate := time.Date(year, time.January, (7*(week-1))+startOfFirstWeek, 6, 0, 0, 0, time.Local)
+				for _, weekday := range event.Weekly.Weekdays {
+					day := weekDate
+					for day.Weekday() != weekday {
+						day = day.Add(24 * time.Hour)
+					}
+					date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
+					date.End = date.Start.Add(eventDuration)
+					date.Id = bson.NewObjectId()
+					dates = append(dates, date)
+				}
+			}
+		}
+
+		if event.Recurrency == Monthly {
+			for date.Start.Before(timeHorizon) {
+				month += event.Monthly.Interval
+				monthDate := time.Date(year, time.Month(month), 1, 6, 0, 0, 0, time.Local)
+				day := monthDate
+				days := make([]time.Time, 0)
+				for day.Month() == monthDate.Month() {
+					if day.Weekday() == event.Monthly.Weekday {
+						days = append(days, day)
+					}
+					day = day.Add(24 * time.Hour)
+				}
+				if event.Monthly.Week == LastWeek || int(event.Monthly.Week) >= len(days) {
+					day = days[len(days)-1]
+				} else {
+					day = days[event.Monthly.Week]
+				}
+				date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
+				date.End = date.Start.Add(eventDuration)
+				date.Id = bson.NewObjectId()
+				dates = append(dates, date)
+			}
+		}
 	}
 
 	return dates

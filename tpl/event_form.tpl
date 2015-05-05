@@ -57,11 +57,11 @@
 				</div>
 				<div id="event-monthly" class="col-xs-12" style="margin-top: 10px; {{if not (eq .event.Recurrency 2)}}display: none{{end}}">
 					<span class="checkbox-inline">jeder <select name="monthly-week" id="event-Recurrency-Monthly-Week">
-						<option value="1" {{if eq .event.Monthly.Week 1}}selected{{end}}>erste</option>
-						<option value="2" {{if eq .event.Monthly.Week 2}}selected{{end}}>zweite</option>
-						<option value="3" {{if eq .event.Monthly.Week 3}}selected{{end}}>dritte</option>
-						<option value="4" {{if eq .event.Monthly.Week 4}}selected{{end}}>vierte</option>
-						<option value="5" {{if eq .event.Monthly.Week 5}}selected{{end}}>letzte</option>
+						<option value="0" {{if eq .event.Monthly.Week 0}}selected{{end}}>erste</option>
+						<option value="1" {{if eq .event.Monthly.Week 1}}selected{{end}}>zweite</option>
+						<option value="2" {{if eq .event.Monthly.Week 2}}selected{{end}}>dritte</option>
+						<option value="3" {{if eq .event.Monthly.Week 3}}selected{{end}}>vierte</option>
+						<option value="4" {{if eq .event.Monthly.Week 4}}selected{{end}}>letzte</option>
 					</select>&nbsp;&nbsp;<select name="monthly-weekday" id="event-Recurrency-Monthly-Weekday">
 						<option value="1" {{if eq .event.Monthly.Weekday 1}}selected{{end}}>Montag</option>
 						<option value="2" {{if eq .event.Monthly.Weekday 2}}selected{{end}}>Dienstag</option>
