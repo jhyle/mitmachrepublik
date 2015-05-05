@@ -138,8 +138,8 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 	date.OrganizerId = event.OrganizerId
 	date.EventId = event.Id
 	date.Title = event.Title
-	date.Start = event.Start
-	date.End = event.End
+	date.Start = event.Start.Local()
+	date.End = event.End.Local()
 	date.Image = event.Image
 	date.Categories = event.Categories
 	date.Descr = event.Descr
@@ -155,15 +155,15 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 	if event.Recurrency != NoRecurrence {
 		timeHorizon := now.Add(366 * 24 * time.Hour)
 
-		var eventDuration time.Duration = 0
-		if !event.End.IsZero() {
-			eventDuration = event.End.Sub(event.Start)
+		var dateDuration time.Duration = 0
+		if !date.End.IsZero() {
+			dateDuration = date.End.Sub(date.Start)
 		}
 
-		year, week := event.Start.ISOWeek()
+		year, week := date.Start.ISOWeek()
 		var startOfFirstWeek int = -3
 		for {
-			firstWeek := time.Date(year, time.January, startOfFirstWeek, 6, 0, 0, 0, time.UTC)
+			firstWeek := time.Date(year, time.January, startOfFirstWeek, 6, 0, 0, 0, time.Local)
 			testYear, _ := firstWeek.ISOWeek()
 			if testYear == year {
 				break
@@ -172,22 +172,22 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 			}
 		}
 
-		month := int(event.Start.Month())
-		hour := event.Start.Hour()
-		minute := event.Start.Minute()
+		month := int(date.Start.Month())
+		hour := date.Start.Hour()
+		minute := date.Start.Minute()
 
 		if event.Recurrency == Weekly {
 			for date.Start.Before(timeHorizon) {
 				week += event.Weekly.Interval
-				weekDate := time.Date(year, time.January, (7*(week-1))+startOfFirstWeek, 6, 0, 0, 0, time.UTC)
+				weekDate := time.Date(year, time.January, (7*(week-1))+startOfFirstWeek, 6, 0, 0, 0, time.Local)
 				for _, weekday := range event.Weekly.Weekdays {
 					day := weekDate
 					for day.Weekday() != weekday {
 						day = day.Add(24 * time.Hour)
 					}
-					date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.UTC)
-					if eventDuration != 0 {
-						date.End = date.Start.Add(eventDuration)
+					date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
+					if dateDuration != 0 {
+						date.End = date.Start.Add(dateDuration)
 					}
 					date.Id = bson.NewObjectId()
 					dates = append(dates, date)
@@ -198,7 +198,7 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 		if event.Recurrency == Monthly {
 			for date.Start.Before(timeHorizon) {
 				month += event.Monthly.Interval
-				monthDate := time.Date(year, time.Month(month), 1, 6, 0, 0, 0, time.UTC)
+				monthDate := time.Date(year, time.Month(month), 1, 6, 0, 0, 0, time.Local)
 				day := monthDate
 				days := make([]time.Time, 0)
 				for day.Month() == monthDate.Month() {
@@ -212,9 +212,9 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 				} else {
 					day = days[event.Monthly.Week]
 				}
-				date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.UTC)
-				if eventDuration != 0 {
-					date.End = date.Start.Add(eventDuration)
+				date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
+				if dateDuration != 0 {
+					date.End = date.Start.Add(dateDuration)
 				}
 				date.Id = bson.NewObjectId()
 				dates = append(dates, date)
