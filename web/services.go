@@ -2,11 +2,11 @@ package mmr
 
 import (
 	"encoding/json"
-	"net/http"
-	"time"
-	"strconv"
-	"math/rand"
 	"labix.org/v2/mgo/bson"
+	"math/rand"
+	"net/http"
+	"strconv"
+	"time"
 )
 
 type (
@@ -32,10 +32,15 @@ type (
 		imgServer string
 	}
 
+	UpdateRecurrencesService struct {
+		BasicService
+		events *EventService
+	}
+
 	SpawnEventsService struct {
 		BasicService
-		database Database
-		events *EventService
+		database  Database
+		events    *EventService
 		imgServer string
 	}
 )
@@ -83,13 +88,13 @@ func listImages(imgServer string, age int) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return images, nil
 }
 
 func (service *UnusedImgService) serve() {
 
-	images, err := listImages(service.imgServer, 3600 * 24)
+	images, err := listImages(service.imgServer, 3600*24)
 	if err != nil {
 		return
 	}
@@ -110,23 +115,38 @@ func (service *UnusedImgService) serve() {
 	for _, image := range images {
 		unusedImages[image] = image
 	}
-	
+
 	for _, image := range eventImages {
 		delete(unusedImages, image)
 	}
-	
+
 	for _, image := range userImages {
 		delete(unusedImages, image)
 	}
-	
+
 	for image := range unusedImages {
 
-		req, err := http.NewRequest("DELETE", service.imgServer + "/" + image, nil)
+		req, err := http.NewRequest("DELETE", service.imgServer+"/"+image, nil)
 		if err != nil {
 			return
 		}
 		http.DefaultClient.Do(req)
 	}
+}
+
+func NewUpdateRecurrencesService(interval int, events *EventService) Service {
+
+	return &UpdateRecurrencesService{BasicService{idle, interval, nil}, events}
+}
+
+func (service *UpdateRecurrencesService) Start() {
+
+	service.start(service.serve)
+}
+
+func (service *UpdateRecurrencesService) serve() {
+
+	service.events.UpdateRecurrences()
 }
 
 func NewSpawnEventsService(interval int, database Database, events *EventService, imgServer string) Service {
@@ -144,22 +164,22 @@ func (service *SpawnEventsService) serve() {
 
 	titles := []string{"Volleyballtunier", "Wir haben es satt!", "Chor Open Stage Open Air", "Kinderbastelgruppe", "Jüdische Kulturtage", "Fit, Fun, Family im FEZ"}
 	locations := []string{"Sportzentrum", "Brandenburger Tor", "Heiligengeistkirche", "Kindercafé", "Gemeindezentrum", "FEZ"}
-	
+
 	images, err := listImages(service.imgServer, 0)
 	if err != nil {
 		return
 	}
-	
+
 	organizer, err := service.database.LoadUserByEmailAndPassword("leonhard.holz@web.de", "julius21")
 	if err != nil {
 		return
 	}
-	
+
 	districts := make([]string, 0, len(PostcodeMap))
 	for district := range PostcodeMap {
 		districts = append(districts, district)
 	}
-	
+
 	event := new(Event)
 	event.Id = bson.NewObjectId()
 	event.OrganizerId = organizer.Id
@@ -171,7 +191,7 @@ func (service *SpawnEventsService) serve() {
 	event.Categories = make([]int, 0)
 	for i := 0; i < rand.Intn(len(CategoryOrder)); i++ {
 		event.Categories = append(event.Categories, CategoryMap[CategoryOrder[rand.Intn(len(CategoryOrder))]])
-	} 
+	}
 	event.Addr.Name = locations[rand.Intn(len(locations))]
 	event.Addr.Street = "Baker Street 221"
 	district := districts[rand.Intn(len(districts))]

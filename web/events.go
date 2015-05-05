@@ -15,7 +15,7 @@ type (
 
 func NewEventService(database Database, eventTableName, dateTableName string) (*EventService, error) {
 
-	err := database.Table(eventTableName).EnsureIndices("organizerid", "start")
+	err := database.Table(eventTableName).EnsureIndices("organizerid", "start", "recurrency")
 	if err == nil {
 		err = database.Table(dateTableName).EnsureIndices("eventid", "organizerid", "start", "categories", "addr.city", "addr.pcode")
 	}
@@ -267,6 +267,36 @@ func (events *EventService) SyncDates(event *Event) error {
 		}
 	}
 
+	return nil
+}
+
+func (events *EventService) UpdateRecurrences() error {
+
+	var result []Event
+	err := events.eventTable().Find(bson.M{"recurrency": Weekly}, &result, "start")
+	if err != nil {
+		return err
+	}
+	
+	for _, event := range result {
+		err = events.SyncDates(&event)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = events.eventTable().Find(bson.M{"recurrency": Monthly}, &result, "start")
+	if err != nil {
+		return err
+	}
+	
+	for _, event := range result {
+		err = events.SyncDates(&event)
+		if err != nil {
+			return err
+		}
+	}
+	
 	return nil
 }
 

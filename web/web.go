@@ -135,8 +135,9 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 
 	services := make([]Service, 0, 3)
 	services = append(services, NewSessionService(60, database))
+	services = append(services, NewUpdateRecurrencesService(3600, events))
 	services = append(services, NewUnusedImgService(3600, database, imgServer))
-	if env != "www" {
+	if env == "dev" {
 		services = append(services, NewSpawnEventsService(3600, database, events, imgServer))
 	}
 
