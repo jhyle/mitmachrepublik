@@ -74,7 +74,7 @@ type (
 	}
 
 	Date struct {
-		Id          bson.ObjectId
+		Id          bson.ObjectId `bson:"_id"`
 		EventId     bson.ObjectId
 		OrganizerId bson.ObjectId
 		Title       string
