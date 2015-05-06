@@ -2,10 +2,11 @@ package mmr
 
 import (
 	"fmt"
+	"github.com/kennygrant/sanitize"
+	"html/template"
 	"net/url"
 	"strconv"
 	"strings"
-	"html/template"
 	"time"
 )
 
@@ -71,6 +72,17 @@ func iso8601Format(t time.Time) string {
 func noescape(s string) template.HTML {
 
 	return template.HTML(s)
+}
+
+var (
+	allowedTags = []string{"h1", "h2", "h3", "h4", "h5", "h6", "div", "span", "hr", "p", "br", "b", "i", "strong", "em", "ol", "ul", "li", "a", "img", "table", "tbody", "tr", "td"}
+	allowedAttributes = []string{"id", "class", "src", "href", "title", "alt", "name", "rel", "style", "data-filename"}
+)
+
+func sanitizeHtml(s string) string {
+
+	html, _ := sanitize.HTMLAllowing(strings.Replace(s, "data:", "data#", -1), allowedTags, allowedAttributes)
+	return strings.Replace(html, "data#", "data:", -1)
 }
 
 func strClip(s string, n int) string {
@@ -191,7 +203,7 @@ func int2Str(i []int) []string {
 
 func min(m, n int) int {
 
-	if (m < n) {
+	if m < n {
 		return m
 	} else {
 		return n

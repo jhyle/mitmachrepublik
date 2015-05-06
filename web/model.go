@@ -67,7 +67,7 @@ type (
 		Start       time.Time
 		End         time.Time `json:",omitempty"`
 		Recurrency  Recurrence
-		Weekly      WeeklyRecurrence `json:",omitempty"`
+		Weekly      WeeklyRecurrence  `json:",omitempty"`
 		Monthly     MonthlyRecurrence `json:",omitempty"`
 		Rsvp        bool
 		Addr        Address
@@ -115,10 +115,10 @@ type (
 	}
 )
 
-const (	
+const (
 	NoRecurrence Recurrence = iota
 	Weekly
-	Monthly 
+	Monthly
 
 	FirstWeek WeekOfMonth = iota
 	SecondWeek
@@ -234,8 +234,7 @@ func (user *User) Url() string {
 
 func (user *User) HtmlDescription() template.HTML {
 
-	html, _ := sanitize.HTMLAllowing(user.Descr)
-	return template.HTML(html)
+	return noescape(sanitizeHtml(user.Descr))
 }
 
 func (user *User) PlainDescription() string {
@@ -263,8 +262,7 @@ func (event *Event) SetId(id bson.ObjectId) {
 
 func (event *Event) HtmlDescription() template.HTML {
 
-	html, _ := sanitize.HTMLAllowing(event.Descr)
-	return template.HTML(html)
+	return noescape(sanitizeHtml(event.Descr))
 }
 
 func (event *Event) PlainDescription() string {
@@ -292,8 +290,7 @@ func (date *Date) Url() string {
 
 func (date *Date) HtmlDescription() template.HTML {
 
-	html, _ := sanitize.HTMLAllowing(date.Descr)
-	return template.HTML(html)
+	return noescape(sanitizeHtml(date.Descr))
 }
 
 func (date *Date) PlainDescription() string {
