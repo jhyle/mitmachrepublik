@@ -194,6 +194,8 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	eventsPerRow := 4
+	numberOfRows := 2
+	pageSize := eventsPerRow * numberOfRows
 	place := "Berlin"
 	dateNames := []string{"aktuell"}
 
@@ -216,24 +218,46 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		result, err := app.events.SearchDates(place, timeSpans(dateNames), nil, 0, eventsPerRow*2, "start")
-		if err != nil {
-			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		page := 0
+		moreEvents := true
+		events := make([]*Date, 0, eventsPerRow*2)
+		for len(events) < eventsPerRow*numberOfRows && moreEvents {
+			result, err := app.events.SearchDates(place, timeSpans(dateNames), nil, page, pageSize, "start")
+			if err != nil {
+				return &appResult{Status: http.StatusInternalServerError, Error: err}
+			}
+			if result.GetSize() == 0 {
+				moreEvents = false
+			} else {
+				for _, date := range result.Dates {
+					alreadyIncluded := false
+					for _, event := range events {
+						if event.EventId == date.EventId {
+							alreadyIncluded = true
+							break
+						}
+					}
+					if !alreadyIncluded {
+						events = append(events, date)
+					}
+				}
+			}
+			page++
 		}
 
 		var dates [][]*Date
-		if len(result.Dates) > 0 {
-			dates = make([][]*Date, ((len(result.Dates)-1)/eventsPerRow)+1)
+		if len(events) > 0 {
+			dates = make([][]*Date, ((len(events)-1)/eventsPerRow)+1)
 			for i := range dates {
 
-				rowSize := len(result.Dates) - i*eventsPerRow
+				rowSize := len(events) - i*eventsPerRow
 				if rowSize > eventsPerRow {
 					rowSize = eventsPerRow
 				}
 				dates[i] = make([]*Date, rowSize)
 
 				for j := 0; j < rowSize; j++ {
-					dates[i][j] = result.Dates[i*eventsPerRow+j]
+					dates[i][j] = events[i*eventsPerRow+j]
 				}
 			}
 		} else {
