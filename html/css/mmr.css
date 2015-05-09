@@ -87,7 +87,7 @@ div.col-banner h4 {
 .container {
 	width: 1170px !important;
 }
-.highlight, a.highlight:hover, a.highlight:focus, div.col-box h5 {
+.highlight, a.highlight:hover, a.highlight:focus, div.col-box h5, .note-editable a, .description a {
 	color: #2ba42b;
 }
 div.col-head {

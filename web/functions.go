@@ -76,7 +76,7 @@ func noescape(s string) template.HTML {
 
 var (
 	allowedTags = []string{"h1", "h2", "h3", "h4", "h5", "h6", "div", "span", "hr", "p", "br", "b", "i", "strong", "em", "ol", "ul", "li", "a", "img", "table", "tbody", "tr", "td"}
-	allowedAttributes = []string{"id", "class", "src", "href", "title", "alt", "name", "rel", "style", "data-filename"}
+	allowedAttributes = []string{"id", "class", "src", "href", "target", "title", "alt", "name", "rel", "style", "data-filename"}
 )
 
 func sanitizeHtml(s string) string {
