@@ -426,7 +426,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			date.Title + " - " + location + " - Mitmach-Republik",
 			date.Title + " - " + location,
 			imageUrl,
-			strClip(date.PlainDescription(), 160),
+			strClip(date.PlainDescription(), 300),
 		}
 
 		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": date, "organizer": organizer})
@@ -570,7 +570,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			name + " - Mitmach-Republik",
 			name,
 			imageUrl,
-			strClip(organizer.PlainDescription(), 160),
+			strClip(organizer.PlainDescription(), 300),
 		}
 
 		return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
