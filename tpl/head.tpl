@@ -5,10 +5,10 @@
 	<meta name="viewport" content="width=1170">
 	<title>{{.meta.Title}}</title>
 	<meta name="description" content="{{.meta.FB_Descr}}">
-	<meta name="og:title" content="{{.meta.FB_Title}}">
-	<meta name="og:site_name" content="Mitmach-Republik">
-	<meta name="og:image" content="{{.meta.FB_Image}}">
-	<meta name="og:description" content="{{.meta.FB_Descr}}">
+	<meta property="og:title" content="{{.meta.FB_Title}}">
+	<meta property="og:site_name" content="Mitmach-Republik">
+	<meta property="og:image" content="{{.meta.FB_Image}}">
+	<meta property="og:description" content="{{.meta.FB_Descr}}">
 {{if and (.event) (not .user)}}
 	<link rel="canonical" href="http://{{.hostname}}{{.event.Url}}">
 {{end}}
