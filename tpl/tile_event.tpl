@@ -1,7 +1,7 @@
 <div class="col-xs-2 col-tile">
 	<a href="{{.Url}}" style="display:block">
 		{{ if .Image }}
-			{{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}}
+			<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
 			<img src="/bild/{{.Image}}?width=220&height=165" title="{{.Title}}">
 		{{ end }}
 		<div class="tile-text">
