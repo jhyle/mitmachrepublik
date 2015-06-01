@@ -196,14 +196,14 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	eventsPerRow := 4
 	numberOfRows := 2
 	pageSize := eventsPerRow * numberOfRows
-	place := "Berlin"
+	place := ""
 	dateNames := []string{"aktuell"}
 
 	meta := metaTags{
 		"Willkommen in der Mitmach-Republik!",
 		"Gemeinsam aktiv werden.",
 		"http://" + app.hostname + "/images/mitmachrepublik.gif",
-		"Hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Suche nach Nachbarschaftstreffen, Sportvereinen, gemeinnützigen Initiativen, religiösen Gemeinden und anderen Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen.",
+		"Gemeinsam aktiv werden - hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Suche nach Nachbarschaftstreffen, Sportvereinen, gemeinnützigen Initiativen, religiösen Gemeinden und anderen Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen.",
 	}
 
 	result := func() *appResult {
