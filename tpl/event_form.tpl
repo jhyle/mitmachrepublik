@@ -9,8 +9,8 @@
 			{{if .event.Id }}<input type="hidden" id="event-Id" value="{{.event.Id.Hex}}">{{ end }}
 			<div class="form-group">
 				<div class="col-xs-7">
-					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Was willst Du machen?" value="{{.event.Title}}" maxlength="40" autofocus></span>
-					<span><input name="start" type="datetime-local" id="event-Start" class="form-control form-datetime" placeholder="Fängt an" value="{{datetimeFormat .event.Start}}"></span>
+					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Wie heißt die Veranstaltung?" value="{{.event.Title}}" maxlength="40" autofocus></span>
+					<span><input name="start" type="datetime-local" id="event-Start" class="form-control form-datetime" placeholder="Beginnt" value="{{datetimeFormat .event.Start}}"></span>
 					<span><input name="end" type="datetime-local" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{datetimeFormat .event.End}}"></span>
 					<label class="checkbox-inline" style="margin-left: 12px"><input type="checkbox" name="rsvp" id="event-Rsvp" {{if .event.Rsvp}}checked{{end}}> Anmeldung erforderlich</label>
 				</div>

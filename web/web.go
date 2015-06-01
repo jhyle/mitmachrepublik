@@ -474,8 +474,8 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
 	meta := metaTags{
-		"Veranstalter in " + place + " - Mitmach-Republik",
-		"Veranstalter in " + place,
+		"Organisatoren in " + place + " - Mitmach-Republik",
+		"Organisatoren in " + place,
 		"http://" + app.hostname + "/images/mitmachrepublik.gif",
 		"",
 	}

@@ -7,7 +7,7 @@
 {{range .events}}
 <div class="row-tile" itemprop="event" itemscope itemtype="http://schema.org/Event">
 	{{if not $.user }}
-		<a href="{{.Url}}" itemprop="url">
+		<a href="{{.Url}}" itemprop="url" title="Veranstaltung anzeigen">
 	{{end}}
 	{{if .Image}}
 		<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
@@ -34,18 +34,18 @@
 </div>
 {{end}}
 <div class="pages">
-	<a href="./0#events"><div class="page">Anfang</div></a>
-	{{if gt $.page 0}}<a href="./{{dec $.page}}#events">{{end}}<div class="page">&lt;</div>{{if gt $.page 0}}</a>{{end}}
+	<a href="./0#events" title="Zum Anfang der Liste"><div class="page">Anfang</div></a>
+	{{if gt $.page 0}}<a href="./{{dec $.page}}#events" title="Vorherige Seite">{{end}}<div class="page">&lt;</div>{{if gt $.page 0}}</a>{{end}}
 	{{range $.pages}}
 		{{if or (and (ge . (dec (dec $.page))) (le . (inc (inc $.page)))) (or (eq $.page .) (or (le . 1) (ge . (dec $.maxPage))))}}
-			<a href="./{{.}}#events"><div class="page {{if eq . $.page}}cur-page{{end}}">{{inc .}}</div></a>
+			<a href="./{{.}}#events" title="Zu Seite {{inc .}}"><div class="page {{if eq . $.page}}cur-page{{end}}">{{inc .}}</div></a>
 		{{else}}
 			{{if or (eq . (dec (dec (dec $.page)))) (eq . (inc (inc (inc $.page))))}}
 				<div class="page">..</div>
 			{{end}}
 		{{end}}
 	{{end}}
-	{{if lt $.page $.maxPage}}<a href="./{{inc $.page}}#events">{{end}}<div class="page">&gt;</div>{{if lt $.page $.maxPage}}</a>{{end}}
-	<a href="./{{$.maxPage}}#events"><div class="page">Ende</div></a>
+	{{if lt $.page $.maxPage}}<a href="./{{inc $.page}}#events" title="Nächste Seite">{{end}}<div class="page">&gt;</div>{{if lt $.page $.maxPage}}</a>{{end}}
+	<a href="./{{$.maxPage}}#events" title="Ans Ende der Liste"><div class="page">Ende</div></a>
 </div>
 {{end}}
