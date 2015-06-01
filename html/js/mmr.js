@@ -262,7 +262,6 @@ function gatherSearchForm()
 {
 	var data = {};
 	place = $("input[name=place]").val().trim();
-	if (place.length == 0) place = "Berlin";
 	data["place"] = place;
 	
 	var category = "";
@@ -609,12 +608,6 @@ $(function() {
 	$("select[name=category]").change(function() {
 		updateEventCount();
 		updateOrganizerCount();
-	});
-	
-	$("#events-form").submit(function() {
-		if (!$("input[name=place]").val()) {
-			$("input[name=place]").val($("input[name=place]").attr("placeholder"))
-		}
 	});
 	
 	$("input[name=category]").change(function() {

@@ -1,7 +1,6 @@
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-10"><h1>{{if eq .results 1}}Eine Veranstaltung{{else}}{{if eq .results 0}}Keine{{else}}{{.results}}{{end}} Veranstaltungen{{end}} von {{.meta.FB_Title}}</h1></div>
-	<div class="col-xs-1">&nbsp;</div>
+	<div class="col-xs-11"><h1>{{if eq .results 1}}Eine Veranstaltung{{else}}{{if eq .results 0}}Keine{{else}}{{.results}}{{end}} Veranstaltungen{{end}} von {{.meta.FB_Title}} gefunden{{if gt .results 0}} - Seite {{inc .page}} von {{inc .maxPage}}{{end}}</h1></div>
 </div>
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>

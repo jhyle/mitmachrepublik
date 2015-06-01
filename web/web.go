@@ -333,9 +333,14 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	dateNames := strings.Split(r.Param("dates"), ",")
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
+	title := "Veranstaltungen"
+	if !isEmpty(place) {
+		title = "Veranstaltungen in " + place
+	}
+
 	meta := metaTags{
-		"Veranstaltungen in " + place + " - Mitmach-Republik",
-		"Veranstaltungen in " + place,
+		title + " - Mitmach-Republik",
+		title,
 		"http://" + app.hostname + "/images/mitmachrepublik.gif",
 		"",
 	}
@@ -418,9 +423,13 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(date.Image) {
 			imageUrl = "http://" + app.hostname + "/bild/" + date.Image
 		}
+
 		location := place
 		if !isEmpty(date.Addr.Name) {
-			location = date.Addr.Name + ", " + location
+			location = date.Addr.Name
+			if (!isEmpty(place)) {
+				location += ", " + place
+			}
 		}
 		meta := metaTags{
 			date.Title + " - " + location + " - Mitmach-Republik",
@@ -473,9 +482,13 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	dateNames := []string{"aktuell"}
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
+	title := "Organisatoren"
+	if !isEmpty(place) {
+		title = "Organisatoren in " + place
+	}
 	meta := metaTags{
-		"Organisatoren in " + place + " - Mitmach-Republik",
-		"Organisatoren in " + place,
+		title + " - Mitmach-Republik",
+		title,
 		"http://" + app.hostname + "/images/mitmachrepublik.gif",
 		"",
 	}
@@ -712,9 +725,6 @@ func (app *MmrApp) staticPage(w traffic.ResponseWriter, template, headline strin
 func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 	place := strings.Trim(r.PostFormValue("place"), " ")
-	if isEmpty(place) {
-		place = "Berlin"
-	}
 
 	radius, err := strconv.Atoi(r.PostFormValue("radius"))
 	if err != nil {
@@ -1173,10 +1183,12 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstalter/verwaltung/veranstaltung/:id", app.editEventPage)
 	router.Get("/veranstalter/verwaltung/:page", app.adminPage)
 	router.Get("/veranstaltungen/:place/:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
-	router.Get("/veranstaltung//:date/:id/:title", app.eventPage)
+	router.Get("/veranstaltungen//:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
 	router.Get("/veranstaltung/:categories/:date/:id/:title", app.eventPage)
-	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
+	router.Get("/veranstaltung//:date/:id/:title", app.eventPage)
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
+	router.Get("/veranstalter//:categoryIds/:categories/:page", app.organizersPage)
+	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 
 	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "impressum.tpl", "Impressum") })
 	router.Get("/disclaimer", func(w traffic.ResponseWriter, r *traffic.Request) {
@@ -1206,7 +1218,9 @@ func (app *MmrApp) Start() {
 	router.Post("/sendcontactmail", app.sendContactMailHandler)
 	router.Get("/location/:location", app.locationHandler)
 	router.Get("/eventcount/:place/:dateIds/:categoryIds", app.eventCountHandler)
+	router.Get("/eventcount//:dateIds/:categoryIds", app.eventCountHandler)
 	router.Get("/organizercount/:place/:categoryIds", app.organizerCountHandler)
+	router.Get("/organizercount//:categoryIds", app.organizerCountHandler)
 	router.Post("/login", app.loginHandler)
 	router.Post("/logout", app.logoutHandler)
 
