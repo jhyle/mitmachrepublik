@@ -194,7 +194,7 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	eventsPerRow := 4
-	numberOfRows := 2
+	numberOfRows := 3
 	pageSize := eventsPerRow * numberOfRows
 	place := ""
 	dateNames := []string{"aktuell"}
