@@ -194,7 +194,7 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	eventsPerRow := 4
-	numberOfRows := 3
+	numberOfRows := 4
 	pageSize := eventsPerRow * numberOfRows
 	place := ""
 	dateNames := []string{"aktuell"}
@@ -237,7 +237,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 							break
 						}
 					}
-					if !alreadyIncluded {
+					if !alreadyIncluded && len(events) < eventsPerRow*numberOfRows {
 						events = append(events, date)
 					}
 				}
@@ -427,7 +427,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		location := place
 		if !isEmpty(date.Addr.Name) {
 			location = date.Addr.Name
-			if (!isEmpty(place)) {
+			if !isEmpty(place) {
 				location += ", " + place
 			}
 		}
@@ -484,7 +484,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 
 	title := "Organisatoren"
 	if !isEmpty(place) {
-		title = "Organisatoren in " + place
+		title = "Veranstalter in " + place
 	}
 	meta := metaTags{
 		title + " - Mitmach-Republik",
@@ -575,7 +575,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(organizer.Image) {
 			imageUrl = "http://" + app.hostname + "/bild/" + organizer.Image
 		}
-		name := organizer.Name
+		name := "Veranstalter " + organizer.Name
 		if !isEmpty(place) {
 			name += " aus " + place
 		}
