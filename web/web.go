@@ -203,7 +203,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		"Willkommen in der Mitmach-Republik!",
 		"Gemeinsam aktiv werden.",
 		"http://" + app.hostname + "/images/mitmachrepublik.gif",
-		"Gemeinsam aktiv werden - hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Suche nach Nachbarschaftstreffen, Sportvereinen, gemeinnützigen Initiativen, religiösen Gemeinden und anderen Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen.",
+		"Gemeinsam aktiv werden - hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Suche nach Nachbarschaftstreffen, Sportvereinen, gemeinnützigen Initiativen, religiösen Gemeinden und anderen Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
 	}
 
 	result := func() *appResult {
@@ -575,7 +575,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(organizer.Image) {
 			imageUrl = "http://" + app.hostname + "/bild/" + organizer.Image
 		}
-		name := "Veranstalter " + organizer.Name
+		name := "Gemeinschaftliche Veranstaltungen von " + organizer.Name
 		if !isEmpty(place) {
 			name += " aus " + place
 		}
