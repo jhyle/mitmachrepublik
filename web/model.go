@@ -142,7 +142,7 @@ var (
 		"Kultur":           10,
 		"Bildung":          11,
 		"Religion":         12,
-		"Umwelt":           13,
+		"Umweltschutz":     13,
 		"Tierschutz":       14,
 		"Demonstrationen":  15,
 		"Soziales":         16,

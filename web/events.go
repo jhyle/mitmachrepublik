@@ -15,9 +15,21 @@ type (
 
 func NewEventService(database Database, eventTableName, dateTableName string) (*EventService, error) {
 
-	err := database.Table(eventTableName).EnsureIndices("organizerid", "start", "recurrency")
+	err := database.Table(eventTableName).EnsureIndices("organizerid", "start")
 	if err == nil {
-		err = database.Table(dateTableName).EnsureIndices("eventid", "organizerid", "start", "categories", "addr.city", "addr.pcode")
+		err = database.Table(eventTableName).EnsureIndices("recurrency")
+	}
+	if err == nil {
+		err = database.Table(eventTableName).EnsureIndices("$text:title")
+	}
+	if err == nil {
+		err = database.Table(dateTableName).EnsureIndices("start", "categories", "addr.city", "addr.pcode")
+	}
+	if err == nil {
+		err = database.Table(dateTableName).EnsureIndices("eventid", "start")
+	}
+	if err == nil {
+		err = database.Table(dateTableName).EnsureIndices("organizerid", "start")
 	}
 
 	if err != nil {
@@ -123,10 +135,16 @@ func (events *EventService) FindEventsOfUser(userId bson.ObjectId, sort string) 
 	return result, err
 }
 
-func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, page, pageSize int, sort string) (*EventSearchResult, error) {
+func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, search string, page, pageSize int, sort string) (*EventSearchResult, error) {
 
 	var result EventSearchResult
-	err := events.eventTable().Search(bson.M{"organizerid": userId}, page*pageSize, pageSize, &result, sort)
+	var query bson.M
+	if isEmpty(search) {
+		query = bson.M{"organizerid": userId}
+	} else {
+		query = bson.M{"$and": []bson.M{bson.M{"organizerid": userId}, bson.M{"$text": bson.M{"$search": search, "$language": "de"}}}}
+	}
+	err := events.eventTable().Search(query, page*pageSize, pageSize, &result, sort)
 	return &result, err
 }
 

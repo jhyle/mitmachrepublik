@@ -8,6 +8,9 @@
 		<p><a href="#" id="delete-profile" class="btn btn-mmr" style="width: 90%">Profil löschen</a></p>
 	</div>
 	<div class="col-xs-7">
+		<form class="form-inline pull-left" role="form" action="0?">
+			<input type="text" name="q" class="form-control" style="margin-left: 0; width: 300px" placeholder="Suche" value="{{.query}}">
+		</form>
 		<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung" class="btn btn-mmr" style="margin-right: 0">Veranstaltung eintragen</a></p>
 		<p class="clearfix"></p>
 		{{if not .user.Approved}}
