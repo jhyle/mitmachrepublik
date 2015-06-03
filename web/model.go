@@ -147,6 +147,7 @@ var (
 		"Demonstrationen":  15,
 		"Soziales":         16,
 		"Ehrenamt":         17,
+		"Natur":            18,
 	}
 
 	CategoryIdMap map[int]string = map[int]string{
@@ -168,6 +169,7 @@ var (
 		15: "Demonstrationen",
 		16: "Soziales",
 		17: "Ehrenamt",
+		18: "Natur",
 	}
 
 	CategoryIconMap map[int]string = map[int]string{
@@ -189,6 +191,7 @@ var (
 		15: "globe",
 		16: "heart",
 		17: "heart",
+		18: "leaf",
 	}
 
 	CategoryOrder []string = []string{
@@ -201,10 +204,11 @@ var (
 		"Leute treffen",
 		"Sport",
 		"Gärtnern",
+		"Natur",
 		"Kultur",
 		"Bildung",
 		"Religion",
-		"Umwelt",
+		"Umweltschutz",
 		"Tierschutz",
 		"Demonstrationen",
 		"Soziales",

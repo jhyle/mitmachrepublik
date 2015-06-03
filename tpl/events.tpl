@@ -36,7 +36,7 @@
 		{{ range $.dates }}
 			{{ if eq "wochenende" . }} checked {{ end }}
 		{{ end }}
-		>  Am Wochenende</label>
+		>  Nächstes Wochenende</label>
 	</div>
 	<div class="col-xs-7">
 		{{template "events_list.tpl" .}}
