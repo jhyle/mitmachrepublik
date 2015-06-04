@@ -33,6 +33,7 @@ type (
 		FB_Title string
 		FB_Image string
 		FB_Descr string
+		RSS      bool
 	}
 
 	emailAndPwd struct {
@@ -50,7 +51,15 @@ type (
 	appResult struct {
 		Status int
 		Error  error
+		XML    string
 		JSON   interface{}
+	}
+
+	rssItem struct {
+		Id          string
+		Title       string
+		Description string
+		Link        string
 	}
 )
 
@@ -165,6 +174,23 @@ func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, da
 	return resultOK
 }
 
+func (app *MmrApp) output(tpl string, w traffic.ResponseWriter, contentType string, meta *metaTags, data bson.M) *appResult {
+
+	if data == nil {
+		data = bson.M{}
+	}
+	data["meta"] = meta
+	data["hostname"] = app.hostname
+
+	w.Header().Set("Content-Type", contentType)
+	err := app.tpls.Execute(tpl, w, data)
+	if err != nil {
+		return &appResult{Status: http.StatusInternalServerError, Error: err}
+	}
+
+	return resultOK
+}
+
 func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 
 	if result.Error != nil {
@@ -202,8 +228,9 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	meta := metaTags{
 		"Willkommen in der Mitmach-Republik!",
 		"Gemeinsam aktiv werden.",
-		"http://" + app.hostname + "/images/mitmachrepublik.gif",
+		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		"Gemeinsam aktiv werden - hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Suche nach Nachbarschaftstreffen, Sportvereinen, gemeinnützigen Initiativen, religiösen Gemeinden und anderen Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
+		true,
 	}
 
 	result := func() *appResult {
@@ -245,26 +272,29 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			page++
 		}
 
-		var dates [][]*Date
-		if len(events) > 0 {
-			dates = make([][]*Date, ((len(events)-1)/eventsPerRow)+1)
-			for i := range dates {
-
-				rowSize := len(events) - i*eventsPerRow
-				if rowSize > eventsPerRow {
-					rowSize = eventsPerRow
-				}
-				dates[i] = make([]*Date, rowSize)
-
-				for j := 0; j < rowSize; j++ {
-					dates[i][j] = events[i*eventsPerRow+j]
-				}
-			}
+		if r.Param("fmt") == "RSS" {
+			return app.output("rss.tpl", w, "application/rss+xml", &meta, bson.M{"items": dates2RSSItems(events)})
 		} else {
-			dates = make([][]*Date, 0)
-		}
+			var dates [][]*Date
+			if len(events) > 0 {
+				dates = make([][]*Date, ((len(events)-1)/eventsPerRow)+1)
+				for i := range dates {
 
-		return app.view("start.tpl", w, &meta, bson.M{"events": dates, "eventCnt": eventCnt, "organizerCnt": organizerCnt})
+					rowSize := len(events) - i*eventsPerRow
+					if rowSize > eventsPerRow {
+						rowSize = eventsPerRow
+					}
+					dates[i] = make([]*Date, rowSize)
+
+					for j := 0; j < rowSize; j++ {
+						dates[i][j] = events[i*eventsPerRow+j]
+					}
+				}
+			} else {
+				dates = make([][]*Date, 0)
+			}
+			return app.view("start.tpl", w, &meta, bson.M{"events": dates, "eventCnt": eventCnt, "organizerCnt": organizerCnt})
+		}
 	}()
 
 	app.handle(w, result)
@@ -275,8 +305,9 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 	meta := metaTags{
 		"Registrierung bestätigen - Mitmach-Republik",
 		"Registrierung bestätigen",
-		"http://" + app.hostname + "/images/mitmachrepublik.gif",
+		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		"",
+		false,
 	}
 
 	result := func() *appResult {
@@ -324,6 +355,11 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		page = 0
 	}
 
+	if r.Param("fmt") == "RSS" {
+		pageSize = 1000
+		page = 0
+	}
+
 	radius, err := strconv.Atoi(r.Param("radius"))
 	if err != nil {
 		radius = 0
@@ -341,8 +377,9 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	meta := metaTags{
 		title + " - Mitmach-Republik",
 		title,
-		"http://" + app.hostname + "/images/mitmachrepublik.gif",
+		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		"",
+		true,
 	}
 
 	result := func() *appResult {
@@ -373,14 +410,17 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
-		pageCount := pageCount(result.Count, pageSize)
-		pages := make([]int, pageCount)
-		for i := 0; i < pageCount; i++ {
-			pages[i] = i
+		if r.Param("fmt") == "RSS" {
+			return app.output("rss.tpl", w, "application/rss+xml", &meta, bson.M{"items": dates2RSSItems(result.Dates)})
+		} else {
+			pageCount := pageCount(result.Count, pageSize)
+			pages := make([]int, pageCount)
+			for i := 0; i < pageCount; i++ {
+				pages[i] = i
+			}
+			maxPage := pageCount - 1
+			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds})
 		}
-		maxPage := pageCount - 1
-
-		return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds})
 	}()
 
 	app.handle(w, result)
@@ -436,6 +476,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			date.Title + " - " + location,
 			imageUrl,
 			strClip(date.PlainDescription(), 300),
+			false,
 		}
 
 		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": date, "organizer": organizer})
@@ -446,7 +487,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) sendEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"Veranstaltung empfehlen - Mitmach-Republik", "", "", ""}
+	meta := metaTags{"Veranstaltung empfehlen - Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -489,8 +530,9 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	meta := metaTags{
 		title + " - Mitmach-Republik",
 		title,
-		"http://" + app.hostname + "/images/mitmachrepublik.gif",
+		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		"",
+		false,
 	}
 
 	result := func() *appResult {
@@ -531,6 +573,11 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		page = 0
 	}
 
+	if r.Param("fmt") == "RSS" {
+		pageSize = 1000
+		page = 0
+	}
+
 	radius := 2
 	dateNames := []string{"aktuell"}
 
@@ -562,13 +609,6 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		pageCount := pageCount(result.Count, pageSize)
-		pages := make([]int, pageCount)
-		for i := 0; i < pageCount; i++ {
-			pages[i] = i
-		}
-		maxPage := pageCount - 1
-
 		organizerNames := map[bson.ObjectId]string{organizer.Id: organizer.Name}
 
 		imageUrl := ""
@@ -584,9 +624,20 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			name,
 			imageUrl,
 			strClip(organizer.PlainDescription(), 300),
+			true,
 		}
 
-		return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
+		if r.Param("fmt") == "RSS" {
+			return app.output("rss.tpl", w, "application/rss+xml", &meta, bson.M{"items": dates2RSSItems(result.Dates)})
+		} else {
+			pageCount := pageCount(result.Count, pageSize)
+			pages := make([]int, pageCount)
+			for i := 0; i < pageCount; i++ {
+				pages[i] = i
+			}
+			maxPage := pageCount - 1
+			return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer})
+		}
 	}()
 
 	app.handle(w, result)
@@ -615,8 +666,8 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		page = 0
 	}
 
-	query := r.Param("q");
-	meta := metaTags{"Verwaltung - Mitmach-Republik", "", "", ""}
+	query := r.Param("q")
+	meta := metaTags{"Verwaltung - Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -648,7 +699,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"Profil bearbeiten - Mitmach-Republik", "", "", ""}
+	meta := metaTags{"Profil bearbeiten - Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -665,7 +716,7 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"E-Mail-Adresse oder Kennwort ändern - Mitmach-Republik", "", "", ""}
+	meta := metaTags{"E-Mail-Adresse oder Kennwort ändern - Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -682,7 +733,7 @@ func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"Veranstaltung bearbeiten - Mitmach-Republik", "", "", ""}
+	meta := metaTags{"Veranstaltung bearbeiten - Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -714,7 +765,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) staticPage(w traffic.ResponseWriter, template, headline string) {
 
-	meta := metaTags{headline + " - Mitmach-Republik", headline, "", ""}
+	meta := metaTags{headline + " - Mitmach-Republik", headline, "", "", false}
 
 	result := func() *appResult {
 		return app.view(template, w, &meta, nil)

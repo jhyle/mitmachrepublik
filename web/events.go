@@ -20,9 +20,6 @@ func NewEventService(database Database, eventTableName, dateTableName string) (*
 		err = database.Table(eventTableName).EnsureIndices("recurrency")
 	}
 	if err == nil {
-		err = database.Table(eventTableName).EnsureIndices("$text:title")
-	}
-	if err == nil {
 		err = database.Table(dateTableName).EnsureIndices("start", "categories", "addr.city", "addr.pcode")
 	}
 	if err == nil {

@@ -14,6 +14,9 @@
 {{end}}
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">
+	{{if .meta.RSS}}
+		<link rel="alternate" type="application/rss+xml" title="RSS" href="?fmt=RSS">
+	{{end}}
 	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
 	<link href="/css/styles-5.css" rel="stylesheet">
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">

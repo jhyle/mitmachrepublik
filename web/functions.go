@@ -75,7 +75,7 @@ func noescape(s string) template.HTML {
 }
 
 var (
-	allowedTags = []string{"h1", "h2", "h3", "h4", "h5", "h6", "div", "span", "hr", "p", "br", "b", "i", "strong", "em", "ol", "ul", "li", "a", "img", "table", "tbody", "tr", "td"}
+	allowedTags       = []string{"h1", "h2", "h3", "h4", "h5", "h6", "div", "span", "hr", "p", "br", "b", "i", "strong", "em", "ol", "ul", "li", "a", "img", "table", "tbody", "tr", "td"}
 	allowedAttributes = []string{"id", "class", "src", "href", "target", "title", "alt", "name", "rel", "style", "data-filename"}
 )
 
@@ -102,6 +102,15 @@ func strClip(s string, n int) string {
 	}
 
 	return clipped
+}
+
+func dates2RSSItems(dates []*Date) []rssItem {
+
+	items := make([]rssItem, len(dates))
+	for i, date := range dates {
+		items[i] = rssItem{date.Id.Hex(), date.Title, citypartName(date.Addr) + ", " + datetimeFormat(date.Start) + " - " + date.PlainDescription(), date.Url()}
+	}
+	return items
 }
 
 func categoryIcon(categoryId int) string {
