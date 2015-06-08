@@ -360,13 +360,18 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		page = 0
 	}
 
+	place := r.Param("place")
 	radius, err := strconv.Atoi(r.Param("radius"))
 	if err != nil {
 		radius = 0
 	}
 
-	place := r.Param("place")
-	dateIds := str2Int(strings.Split(r.Param("dates"), ","))
+	var dateIds []int
+	if r.Param("dates") == "aktuell" {
+		dateIds = []int{FromNow}
+	} else {
+		dateIds = str2Int(strings.Split(r.Param("dates"), ","))
+	}
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
 	title := "Veranstaltungen"
