@@ -22,21 +22,16 @@
 		{{ end }}
 		<h5>Datum</h5>
 		<hr>
-		<label class="checkbox"><input type="checkbox" name="date" value="1"
-		{{ range $.dates }}
-			{{ if eq "heute" . }} checked {{ end }}
+		{{ range .dates }}
+			{{ $id := . }}
+			{{ if gt $id 0 }}
+				<label class="checkbox"><input type="checkbox" name="date" value="{{$id}}"
+				{{ range $.dateIds }}
+					{{ if eq $id . }} checked {{ end }}
+				{{ end }}
+				>  {{ index $.dateMap $id }}</label>
+			{{ end }}
 		{{ end }}
-		>  Heute</label>
-		<label class="checkbox"><input type="checkbox" name="date" value="2"
-		{{ range $.dates }}
-			{{ if eq "morgen" . }} checked {{ end }}
-		{{ end }}
-		>  Morgen</label>
-		<label class="checkbox"><input type="checkbox" name="date" value="3"
-		{{ range $.dates }}
-			{{ if eq "wochenende" . }} checked {{ end }}
-		{{ end }}
-		>  Nächstes Wochenende</label>
 	</div>
 	<div class="col-xs-7">
 		{{template "events_list.tpl" .}}

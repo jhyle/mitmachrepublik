@@ -278,10 +278,14 @@ function gatherSearchForm()
 	data["category"] = category;
 	
 	var date = "";
-	dates = $("input[name=date]:checked").map(function () {return this.value;}).get();
-	for (i = 0; i < dates.length; i++) {
-		if (i > 0) date += ",";
-		date += dates[i];
+	if ($("select[name=date]").length) {
+		date = $("select[name=date]").val();
+	} else {
+		dates = $("input[name=date]:checked").map(function () {return this.value;}).get();
+		for (i = 0; i < dates.length; i++) {
+			if (i > 0) date += ",";
+			date += dates[i];
+		}
 	}
 	if (date == "") date = "0";
 	data["date"] = date;
@@ -606,6 +610,11 @@ $(function() {
 	});
 	
 	$("select[name=category]").change(function() {
+		updateEventCount();
+		updateOrganizerCount();
+	});
+	
+	$("select[name=date]").change(function() {
 		updateEventCount();
 		updateOrganizerCount();
 	});

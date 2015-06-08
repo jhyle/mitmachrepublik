@@ -13,6 +13,11 @@
 					<option value="{{$id}}">{{.}}</option>					
 				{{ end }}
 			</select>
+			<select name="date" class="form-control">
+				{{ range .dates }}
+					<option value="{{.}}">{{index $.dateMap .}}</option>					
+				{{ end }}
+			</select>
 			<!--select name="radius" class="form-control">
 				<option value="0">kein Umkreis</option>
 				<option value="2">2 km</option>

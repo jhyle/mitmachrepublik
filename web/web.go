@@ -223,7 +223,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	numberOfRows := 4
 	pageSize := eventsPerRow * numberOfRows
 	place := ""
-	dateNames := []string{"aktuell"}
+	dateIds := []int{FromNow}
 
 	meta := metaTags{
 		"Willkommen in der Mitmach-Republik!",
@@ -235,7 +235,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *appResult {
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateNames), nil)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -249,7 +249,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		moreEvents := true
 		events := make([]*Date, 0, eventsPerRow*2)
 		for len(events) < eventsPerRow*numberOfRows && moreEvents {
-			result, err := app.events.SearchDates(place, timeSpans(dateNames), nil, page, pageSize, "start")
+			result, err := app.events.SearchDates(place, timeSpans(dateIds), nil, page, pageSize, "start")
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
@@ -293,7 +293,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			} else {
 				dates = make([][]*Date, 0)
 			}
-			return app.view("start.tpl", w, &meta, bson.M{"events": dates, "eventCnt": eventCnt, "organizerCnt": organizerCnt})
+			return app.view("start.tpl", w, &meta, bson.M{"events": dates, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "dates": DateOrder, "dateMap": DateIdMap})
 		}
 	}()
 
@@ -366,7 +366,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	place := r.Param("place")
-	dateNames := strings.Split(r.Param("dates"), ",")
+	dateIds := str2Int(strings.Split(r.Param("dates"), ","))
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
 	title := "Veranstaltungen"
@@ -384,7 +384,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *appResult {
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateNames), categoryIds)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -394,7 +394,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		result, err := app.events.SearchDates(place, timeSpans(dateNames), categoryIds, page, pageSize, "start")
+		result, err := app.events.SearchDates(place, timeSpans(dateIds), categoryIds, page, pageSize, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -419,7 +419,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 				pages[i] = i
 			}
 			maxPage := pageCount - 1
-			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": dateNames, "categoryIds": categoryIds})
+			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "categoryIds": categoryIds})
 		}
 	}()
 
@@ -429,7 +429,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	radius := 2
-	dateNames := []string{"aktuell"}
+	dateIds := []int{FromNow}
 
 	result := func() *appResult {
 
@@ -449,7 +449,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		place := citypartName(date.Addr)
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateNames), nil)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -520,7 +520,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	}
 
 	place := r.Param("place")
-	dateNames := []string{"aktuell"}
+	dateIds := []int{FromNow}
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
 	title := "Organisatoren"
@@ -537,7 +537,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 
 	result := func() *appResult {
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateNames), categoryIds)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -579,7 +579,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	radius := 2
-	dateNames := []string{"aktuell"}
+	dateIds := []int{FromNow}
 
 	result := func() *appResult {
 
@@ -594,7 +594,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		place := citypartName(organizer.Addr)
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateNames), nil)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -1102,15 +1102,10 @@ func (app *MmrApp) eventCountHandler(w traffic.ResponseWriter, r *traffic.Reques
 
 	result := func() *appResult {
 
+		dateIds := str2Int(strings.Split(r.Param("dateIds"), ","))
 		categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
-		dateIds := str2Int(strings.Split(r.Param("dateIds"), ","))
-		dateNames := make([]string, len(dateIds))
-		for i, dateId := range dateIds {
-			dateNames[i] = DateIdMap[dateId]
-		}
-
-		cnt, err := app.events.Count(r.Param("place"), timeSpans(dateNames), categoryIds)
+		cnt, err := app.events.Count(r.Param("place"), timeSpans(dateIds), categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}

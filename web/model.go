@@ -127,6 +127,15 @@ const (
 	LastWeek
 )
 
+const (
+	FromNow = iota
+	Today
+	Tomorrow
+	ThisWeek
+	NextWeekend
+	NextWeek
+)
+
 var (
 	CategoryMap map[string]int = map[string]int{
 		"alle Kategorien":  0,
@@ -216,11 +225,15 @@ var (
 	}
 
 	DateIdMap map[int]string = map[int]string{
-		0: "aktuell",
-		1: "heute",
-		2: "morgen",
-		3: "wochenende",
+		FromNow: "ab jetzt",
+		Today: "heute",
+		Tomorrow: "morgen",
+		ThisWeek: "diese Woche",
+		NextWeekend: "am Wochenende",
+		NextWeek: "nächste Woche",
 	}
+	
+	DateOrder []int = []int{FromNow, Today, Tomorrow, ThisWeek, NextWeekend, NextWeek}
 )
 
 func (user *User) GetId() bson.ObjectId {

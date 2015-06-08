@@ -148,17 +148,12 @@ func encodePath(path string) string {
 
 func eventSearchUrl(place string, categoryIds []int, dateIds []int, radius int) string {
 
-	dateNames := make([]string, len(dateIds))
-	for i, id := range dateIds {
-		dateNames[i] = DateIdMap[id]
-	}
-
 	categoryNames := make([]string, len(categoryIds))
 	for i, id := range categoryIds {
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return place + "/" + strings.Join(dateNames, ",") + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + strings.Join(categoryNames, ",") + "/0"
+	return place + "/" + strings.Join(int2Str(dateIds), ",") + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + strings.Join(categoryNames, ",") + "/0"
 }
 
 func simpleEventSearchUrl(place string) string {
@@ -219,33 +214,59 @@ func min(m, n int) int {
 	}
 }
 
-func timeSpans(dateNames []string) [][]time.Time {
+func dayStart(now time.Time) time.Time {
+	
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+}
 
-	timeSpans := make([][]time.Time, len(dateNames))
+func dayEnd(now time.Time) time.Time {
+	
+	return time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
+}
 
-	for i, date := range dateNames {
+func timeSpans(dateIds []int) [][]time.Time {
+
+	timeSpans := make([][]time.Time, len(dateIds))
+
+	for i, dateId := range dateIds {
 		now := time.Now()
 		timespan := make([]time.Time, 2)
 
-		if date == "aktuell" {
+		if dateId == FromNow {
 			timespan[0] = now
 			timespan[1] = now
-		} else if date == "heute" {
-			timespan[0] = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
-			timespan[1] = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
-		} else if date == "morgen" {
+		} else if dateId == Today {
+			timespan[0] = dayStart(now)
+			timespan[1] = dayEnd(now)
+		} else if dateId == Tomorrow {
 			now = now.AddDate(0, 0, 1)
-			timespan[0] = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
-			timespan[1] = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
-		} else if date == "wochenende" {
-			for now.Weekday() != time.Saturday && now.Weekday() != time.Sunday {
-				now = now.AddDate(0, 0, 1)
-			}
-			timespan[0] = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+			timespan[0] = dayStart(now)
+			timespan[1] = dayEnd(now)
+		} else if dateId == ThisWeek {
+			timespan[0] = now
 			for now.Weekday() != time.Sunday {
 				now = now.AddDate(0, 0, 1)
 			}
-			timespan[1] = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
+			timespan[1] = dayEnd(now)
+		} else if dateId == NextWeekend {
+			for now.Weekday() != time.Saturday && now.Weekday() != time.Sunday {
+				now = now.AddDate(0, 0, 1)
+			}
+			timespan[0] = dayStart(now)
+			for now.Weekday() != time.Sunday {
+				now = now.AddDate(0, 0, 1)
+			}
+			timespan[1] = dayEnd(now)
+		} else if dateId == NextWeek {
+			for now.Weekday() != time.Sunday {
+				now = now.AddDate(0, 0, 1)
+			}
+			now = now.AddDate(0, 0, 1)
+			timespan[0] = dayStart(now)
+			for now.Weekday() != time.Sunday {
+				now = now.AddDate(0, 0, 1)
+			}
+			timespan[1] = dayEnd(now)
 		}
 		timeSpans[i] = timespan
 	}
