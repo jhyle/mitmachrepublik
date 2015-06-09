@@ -26,13 +26,17 @@
 		</div>
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
 		<p class="date" itemprop="startDate" content="{{iso8601Format .Start}}">{{dateFormat .Start}}</p>
-		<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
-		<p class="date">{{timeFormat .Start}}{{if timeFormat .End}} bis{{if eq (dateFormat .Start) (dateFormat .End)}} {{timeFormat .End}}{{end}}{{end}} Uhr</p>
+		{{if ne (timeFormat .Start) ("00:00")}}
+			<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
+			<p class="date">{{timeFormat .Start}}{{if timeFormat .End}} bis{{if eq (dateFormat .Start) (dateFormat .End)}} {{timeFormat .End}}{{end}}{{end}} Uhr</p>
+		{{end}}
 		{{if dateFormat .End}}{{if ne (dateFormat .Start) (dateFormat .End)}}
 			<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Enddatum"></span></p>
 			<p class="date">{{dateFormat .End}}</p>
-			<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
-			<p class="date">{{timeFormat .End}} Uhr</p>
+			{{if ne (timeFormat .Start) ("23:59")}}
+				<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
+				<p class="date">{{timeFormat .End}} Uhr</p>
+			{{end}}
 		{{end}}{{end}}
 		{{if .Rsvp}}
 			<p style="margin-bottom: 18px"><a style="padding-left: 44px" href="{{.Web}}" class="highlight" target="_blank"><span class="fa fa-caret-right"></span> Anmeldung erforderlich</a></p>

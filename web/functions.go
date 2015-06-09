@@ -56,7 +56,11 @@ func datetimeFormat(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	} else {
-		return fmt.Sprintf("%02d.%02d.%04d %02d:%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
+		if t.Hour() == 0 && t.Minute() == 0 {
+			return fmt.Sprintf("%02d.%02d.%04d", t.Day(), int(t.Month()), t.Year())
+		} else {
+			return fmt.Sprintf("%02d.%02d.%04d %02d:%02d", t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
+		}
 	}
 }
 
