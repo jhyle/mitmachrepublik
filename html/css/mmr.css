@@ -208,6 +208,11 @@ p.place {
 	font-size: 13px;
 	color: #7a7d7d;
 }
+div.tile-text p.description {
+	height: 150px;
+	overflow: hidden;
+	margin-bottom: 20px;
+}
 .big-text {
 	font-size: 17px;
 	padding: 0 10px 15px 10px;
