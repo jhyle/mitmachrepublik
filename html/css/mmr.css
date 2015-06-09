@@ -115,7 +115,7 @@ div.col-tile {
 	padding: 0;
 	border: 1px solid #e6e6e6;
 	min-width: 19%;
-	min-height: 420px;
+	min-height: 450px;
 	overflow: hidden;
 }
 div.row-tile {
@@ -209,7 +209,7 @@ p.place {
 	color: #7a7d7d;
 }
 div.tile-text p.description {
-	height: 150px;
+	height: 130px;
 	overflow: hidden;
 	margin-bottom: 20px;
 }
