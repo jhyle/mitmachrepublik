@@ -18,7 +18,7 @@
 			<p class="pull-right"><a href="#" name="delete-event" title="Löschen" data-target="{{.Id.Hex}}" class="close"><span class="fa fa-times"></span></a></p>
 		{{ end }}
 		<h3 itemprop="name">{{.Title}}</h3>
-		<p class="datetime" itemprop="startDate" content="{{iso8601Format .Start}}">{{datetimeFormat .Start}} Uhr {{if $.organizerNames}} - {{index $.organizerNames .OrganizerId}}{{end}}</p>
+		<p class="datetime" itemprop="startDate" content="{{iso8601Format .Start}}">{{datetimeFormat .Start}} {{if $.organizerNames}}{{if ne (index $.organizerNames .OrganizerId) ("Mitmach-Republik")}} - {{index $.organizerNames .OrganizerId}}{{end}}{{end}}</p>
 		<p itemprop="description">{{strClip .PlainDescription 100}}</p>
 		{{ if not .Addr.IsEmpty }}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
