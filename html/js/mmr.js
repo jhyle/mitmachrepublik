@@ -13,6 +13,17 @@ function zeroFill( number, width )
 	return number + ""; // always return a string
 }
 
+function str2date(s)
+{
+	DateTimePattern.exec(s);
+	var year = RegExp.$3;
+	var month = RegExp.$2;
+	var day = RegExp.$1;
+	var hour = RegExp.$4;
+	var minute = RegExp.$5;
+	return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), 0);
+}
+
 function initProfileForm(id)
 {
 	$('#' + id + '-Descr').summernote({
@@ -183,14 +194,12 @@ function gatherEventForm(id)
 	data["Descr"] = $("#" + id + "-Descr").code();
 	
 	if (data["Start"].length > 0) {
-		DateTimePattern.exec(data["Start"]);
-		data["Start"] = new Date(RegExp.$3, RegExp.$2, RegExp.$1, RegExp.$4, RegExp.$5, 0, 0);
+		data["Start"] = str2date(data["Start"]);
 	} else {
 		delete data["Start"];
 	}
 	if (data["End"].length > 0) {
-		DateTimePattern.exec(data["End"]);
-		data["End"] = new Date(RegExp.$3, RegExp.$2, RegExp.$1, RegExp.$4, RegExp.$5, 0, 0);
+		data["End"] = str2date(data["End"]);
 	} else {
 		delete data["End"];
 	}

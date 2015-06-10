@@ -229,7 +229,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		"Willkommen in der Mitmach-Republik!",
 		"Gemeinsam aktiv werden.",
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
-		"Gemeinsam aktiv werden - hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Finde Nachbarschaftstreffen, Vereine, gemeinnützigen Initiativen und Ehrenämter in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
+		"Gemeinsam aktiv werden - hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Finde Nachbarschaftstreffen, Vereine, gemeinnützige Initiativen und Ehrenämter in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
 		true,
 	}
 

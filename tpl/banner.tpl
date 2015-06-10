@@ -1,6 +1,6 @@
 <div class="row">
 	<div class="col-xs-12 col-banner">
-		<img src="/images/willkommen.jpg" class="img-responsive" />
+		<img src="/images/willkommen.jpg" class="img-responsive" width="1170" height="617" />
 		<h1 class="text-center" style="position:absolute; top: 74%; width: 100%">{{.meta.Title}}</h1>
 		<h2 class="text-center" style="position:absolute; top: 17%; width: 100%; background-color: rgba(255, 255, 255, 0.5)"><span style="color: #ff5200; ">Gemeinsam</span> <span style="color: #2f3030">aktiv werden.</span></h2>
 		<h4 class="text-center" style="padding-left: 5%; padding-right: 5%; position:absolute; top: 85%; width: 100%">{{.meta.FB_Descr}}</h4>
