@@ -229,7 +229,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		"Willkommen in der Mitmach-Republik!",
 		"Gemeinsam aktiv werden.",
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
-		"Gemeinsam aktiv werden - hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Suche nach Nachbarschaftstreffen, Sportvereinen, gemeinnützigen Initiativen, religiösen Gemeinden und anderen Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
+		"Gemeinsam aktiv werden - hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Finde Nachbarschaftstreffen, Vereine, gemeinnützigen Initiativen und Ehrenämter in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
 		true,
 	}
 
@@ -374,16 +374,16 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
-	title := "Veranstaltungen"
+	title := "Aktuelle Veranstaltungen"
 	if !isEmpty(place) {
-		title = "Veranstaltungen in " + place
+		title += " in " + place
 	}
 
 	meta := metaTags{
 		title + " - Mitmach-Republik",
 		title,
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
-		"",
+		"Veranstaltungen zum Mitmachen! Heute, morgen oder am nächsten Wochenende - finde Veranstaltungen in den Kategorien " + strConcat(CategoryOrder) + ".",
 		true,
 	}
 
@@ -469,18 +469,19 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			imageUrl = "http://" + app.hostname + "/bild/" + date.Image
 		}
 
-		location := place
-		if !isEmpty(date.Addr.Name) {
-			location = date.Addr.Name
-			if !isEmpty(place) {
-				location += ", " + place
-			}
+		title := "Veranstaltung " + date.Title
+		if !isEmpty(place) {
+			title += " in " + place
 		}
+		if !isEmpty(date.Addr.Name) {
+			title += " (" + date.Addr.Name + ")"
+		}
+		
 		meta := metaTags{
-			date.Title + " - " + location + " - Mitmach-Republik",
-			date.Title + " - " + location,
+			title + " - Mitmach-Republik",
+			title,
 			imageUrl,
-			strClip(date.PlainDescription(), 300),
+			strClip(date.PlainDescription(), 160),
 			false,
 		}
 
@@ -528,15 +529,15 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	dateIds := []int{FromNow}
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
-	title := "Organisatoren"
+	title := "Gemeinschaftliche Organisatoren"
 	if !isEmpty(place) {
-		title = "Veranstalter in " + place
+		title += " in " + place
 	}
 	meta := metaTags{
 		title + " - Mitmach-Republik",
 		title,
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
-		"",
+		"Mitmacher gesucht! Finde Organisatoren in den Kategorien " + strConcat(CategoryOrder) + ".",
 		false,
 	}
 
@@ -620,15 +621,18 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(organizer.Image) {
 			imageUrl = "http://" + app.hostname + "/bild/" + organizer.Image
 		}
-		name := "Gemeinschaftliche Veranstaltungen von " + organizer.Name
-		if !isEmpty(place) {
-			name += " aus " + place
-		}
+		title := "Gemeinschaftliche Veranstaltungen"
+		if organizer.Name != "Mitmach-Republik" {
+ 			title += " von " + organizer.Name
+			if !isEmpty(place) {
+				title += " aus " + place
+			}
+ 		}
 		meta := metaTags{
-			name + " - Mitmach-Republik",
-			name,
+			title + " - Mitmach-Republik",
+			title,
 			imageUrl,
-			strClip(organizer.PlainDescription(), 300),
+			strClip(organizer.PlainDescription(), 160),
 			true,
 		}
 

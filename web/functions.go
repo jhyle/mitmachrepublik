@@ -108,6 +108,17 @@ func strClip(s string, n int) string {
 	return clipped
 }
 
+func strConcat(s []string) string {
+
+	if len(s) == 0 {
+		return ""
+	} else if len(s) == 1 {
+		return s[0]
+	}
+	
+	return strings.Join(s[:len(s)-1], ", ") + " und " + s[len(s)-1]
+}
+
 func dates2RSSItems(dates []*Date) []rssItem {
 
 	items := make([]rssItem, len(dates))
