@@ -11,7 +11,7 @@
 	{{end}}
 	{{if .Image}}
 		<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
-		<img class="pull-left" itemprop="image" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" title="{{.Title}}">
+		<img class="pull-left" itemprop="image" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
 	{{end}}
 	<div class="tile-text">
 		{{ if $.user }}

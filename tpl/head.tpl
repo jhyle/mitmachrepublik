@@ -69,7 +69,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head"><a href="/" title="Mitmach-Republik"><img src="/images/mitmachrepublik.png" style="max-width:80%" alt="Mitmach-Republik"/></a></div>
+			<div class="col-xs-3 col-head"><a href="/" title="Zur Startseite"><img src="/images/mitmachrepublik.png" style="max-width:80%" alt="Logo Mitmach-Republik"/></a></div>
 			<div class="col-xs-1">&nbsp;</div>
 			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist ein Organisator?</span><br /><a id="head-events" href="/dialog/login" title="Melde Dich an, um Deine Veranstaltungen einzutragen." rel="nofollow" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Trage Deine Veranstaltungen ein.</a></div>
 			<div class="col-xs-1">&nbsp;</div>
