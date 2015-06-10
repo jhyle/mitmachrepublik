@@ -7,7 +7,7 @@
 	    <li><a href="https://www.facebook.com/mitmachrepublik" target="_blank"><span class="fa fa-facebook fa-fw"></span>Facebook</a></li>
 	    <li><a href="https://twitter.com/mitmachrepublik" target="_blank"><span class="fa fa-twitter fa-fw" ></span>twitter</a></li>
 	    <li><h5>Spenden</h5></li>
-	    <li><a href="https://flattr.com/submit/auto?user_id=mitmachrepublik&url={{"http://www.mitmachrepublik.de/"}}&title=Mitmach-Republik&description={{.meta.FB_Descr}}&language=de_DE" target="_blank"><img src="/images/flattr_icon.png"> Flattr</a></li>
+	    <li><a href="https://flattr.com/submit/auto?user_id=mitmachrepublik&url={{"http://www.mitmachrepublik.de/"}}&title=Mitmach-Republik&description={{.meta.FB_Descr}}&language=de_DE" target="_blank"><img src="/images/flattr_icon.png" alt="Flattr"> Flattr</a></li>
 	    <li><h5>Rechtliches</h5></li>
 	    <li><a rel="nofollow" href="/agbs">Allgemeine Geschäftsbedingungen</a></li>
 	    <li><a rel="nofollow" href="/datenschutz">Datenschutz</a></li>
@@ -63,7 +63,7 @@
 		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	{{noescape "<![endif]-->"}}
-	<script src="/js/scripts-6.js"></script>
+	<script src="/js/scripts-7.js"></script>
 	<script src="https://apis.google.com/js/platform.js" async defer>
   		{lang: 'de'}
 	</script>
