@@ -1,5 +1,5 @@
 var PcodePattern = /^[0-9]{5}$/;
-var DateTimePattern = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}).(\d{2})$/;
+var DateTimePattern = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2})\:(\d{2})$/;
 var EmailPattern = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 var WebPattern = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/;
 
@@ -184,13 +184,13 @@ function gatherEventForm(id)
 	
 	if (data["Start"].length > 0) {
 		DateTimePattern.exec(data["Start"]);
-		data["Start"] = new Date(RegExp.$2 + " " + RegExp.$1 + ", " + RegExp.$3 + " " + RegExp.$4 + ":" + RegExp.$5 + ":00");
+		data["Start"] = new Date(RegExp.$3, RegExp.$2, RegExp.$1, RegExp.$4, RegExp.$5, 0, 0);
 	} else {
 		delete data["Start"];
 	}
 	if (data["End"].length > 0) {
 		DateTimePattern.exec(data["End"]);
-		data["End"] = new Date(RegExp.$2 + " " + RegExp.$1 + ", " + RegExp.$3 + " " + RegExp.$4 + ":" + RegExp.$5 + ":00");
+		data["End"] = new Date(RegExp.$3, RegExp.$2, RegExp.$1, RegExp.$4, RegExp.$5, 0, 0);
 	} else {
 		delete data["End"];
 	}
@@ -408,6 +408,7 @@ $(function() {
 		e.preventDefault();
 		if (!validateEventForm("event")) return;
 		var data = gatherEventForm("event");
+		alert(JSON.stringify(data));
 		
 		$.ajax({cache: false, url : "/event", type: "POST", dataType : "json", data : JSON.stringify(data),
 			error : function(result) {
