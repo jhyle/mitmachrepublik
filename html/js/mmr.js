@@ -408,7 +408,6 @@ $(function() {
 		e.preventDefault();
 		if (!validateEventForm("event")) return;
 		var data = gatherEventForm("event");
-		alert(JSON.stringify(data));
 		
 		$.ajax({cache: false, url : "/event", type: "POST", dataType : "json", data : JSON.stringify(data),
 			error : function(result) {
