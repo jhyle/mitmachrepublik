@@ -133,6 +133,7 @@ var (
 		"Berlin Müggelheim":        []string{"12559"},
 		"Berlin Niederschöneweide": []string{"12437", "12439"},
 		"Berlin Oberschöneweide":   []string{"12459"},
+		"Berlin Schöneweide":       []string{"12459", "12437", "12439"},
 		"Berlin Plänterwald":       []string{"12435", "12437"},
 		"Berlin Rahnsdorf":         []string{"12587", "12589"},
 		"Berlin Schmöckwitz":       []string{"12527"},
