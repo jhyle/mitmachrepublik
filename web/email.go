@@ -1,10 +1,8 @@
 package mmr
 
 import (
-	"bytes"
-	"text/template"
-	"net/smtp"
-	"strconv"
+	"gopkg.in/gomail.v1"
+	"errors"
 )
 
 type (
@@ -30,23 +28,25 @@ type (
 	}
 )
 
-const (
-	emailTpl = "Content-Type: text/plain; charset=UTF-8\r\nFrom: {{if not .From.Name}}{{.From.Address}}{{else}}{{.From.Name}} <{{.From.Address}}>{{end}}\r\nTo: {{if not .To.Name}}{{.To.Address}}{{else}}{{.To.Name}} <{{.To.Address}}>{{end}}\r\n{{if .ReplyTo}}Reply-To: {{if not .ReplyTo.Name}}{{.ReplyTO.Address}}{{else}}{{.ReplyTo.Name}} <{{.ReplyTo.Address}}>{{end}}\r\n{{end}}Subject: {{.Subject}}\r\n\r\n{{.Body}}\r\n"
-)
-
 func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, body string) error {
 
-	tpl, err := template.New("email").Parse(emailTpl)
-	if err != nil {
-		return err
+	if account.From == nil {
+		return errors.New("You need to specify a From address.")
 	}
 	
-	var doc bytes.Buffer
-	err =  tpl.Execute(&doc, &emailData{account.From, to, replyTo, subject, body})
-	if err != nil {
-		return err
+	if to == nil {
+		return errors.New("You need to specify a To address.")
 	}
 
-	auth := smtp.PlainAuth("", account.Username, account.Password, account.EmailServer)
-	return smtp.SendMail(account.EmailServer+":"+strconv.Itoa(account.Port), auth, account.Username, []string{to.Address}, doc.Bytes())
+	msg := gomail.NewMessage()
+	msg.SetAddressHeader("From", account.From.Address, account.From.Name)
+	msg.SetAddressHeader("To", to.Address, to.Name)
+	if replyTo != nil {
+		msg.SetAddressHeader("Reply-To", replyTo.Address, replyTo.Name)
+	}
+	msg.SetHeader("Subject", subject)
+	msg.SetBody("text/plain", body)
+
+	mailer := gomail.NewMailer(account.EmailServer, account.Username, account.Password, account.Port)
+	return mailer.Send(msg)
 }

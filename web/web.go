@@ -125,7 +125,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		return nil, errors.New("init of templates failed: " + err.Error())
 	}
 
-	emailAccount := &EmailAccount{"smtp.gmail.com", 587, "mitmachrepublik", "mitmachen", &EmailAddress{"Mitmach-Republik", "mitmachrepublik@gmail.com"}}
+	emailAccount := &EmailAccount{"smtp.gmail.com", 465, "mitmachrepublik", "mitmachen", &EmailAddress{"Mitmach-Republik", "mitmachrepublik@gmail.com"}}
 
 	ga_code := ga_dev
 	hostname := "dev.mitmachrepublik.de"
@@ -762,6 +762,27 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			if event.OrganizerId != user.Id {
 				return resultBadRequest
 			}
+		} else if bson.IsObjectIdHex(r.Param("copy")) {
+			
+			oldEvent, err := app.events.Load(bson.ObjectIdHex(r.Param("copy")))
+			if err != nil {
+				return &appResult{Status: http.StatusNotFound, Error: err}
+			}
+
+			event = new(Event)
+			event.OrganizerId = user.Id
+			event.Title = oldEvent.Title
+			event.Start = oldEvent.Start
+			event.End = oldEvent.End
+			event.Rsvp = oldEvent.Rsvp
+			event.Image = oldEvent.Image
+			event.Categories = oldEvent.Categories
+			event.Descr = oldEvent.Descr
+			event.Addr = oldEvent.Addr
+			event.Web = oldEvent.Web
+			event.Recurrency = oldEvent.Recurrency
+			event.Monthly = oldEvent.Monthly
+			event.Weekly = oldEvent.Weekly
 		} else {
 			event = new(Event)
 		}

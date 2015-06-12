@@ -4,7 +4,7 @@
 		{{template "organizer_box.tpl" .}}
 	</div>
 	<div class="col-xs-7">
-		<h3 style="margin-left: 10px">Profil bearbeiten</h3>
+		<h3 style="margin-left: 10px">Beschreibung ändern</h3>
 		<form role="form" id="profile-upload" class="form-horizontal" action="/upload" method="POST">
 			<div class="form-group">
 				<div class="col-xs-7">

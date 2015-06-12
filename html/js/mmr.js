@@ -333,14 +333,13 @@ $(function() {
 		$("#password-submit").button('loading');
 		var data = {"Email": $("#password-Email").val(), "Pwd": $("#password-Pwd").val()};
 		
-		$.ajax({cache: false, url : "/password", type: "POST", dataType : "json", data : JSON.stringify(data),
-			error : function(result) {
-				if (result.status == 200) {
-					window.location.href = "/veranstalter/verwaltung/0";
-				} else {
-					$("#password-submit").button('reset');
-					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
-				}
+		$.ajax({cache: false, url : "/password", type: "POST", data : JSON.stringify(data),
+			success: function() {
+				window.location.href = "/veranstalter/verwaltung/0";
+			},
+			error: function() {
+				$("#password-submit").button('reset');
+				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 			}
 		});
 	});
@@ -376,13 +375,12 @@ $(function() {
 		if (!validateProfileForm("profile")) return;
 		var data = gatherProfileForm("profile");
 		
-		$.ajax({cache: false, url : "/profile", type: "POST", dataType : "json", data : JSON.stringify(data),
-			error : function(result) {
-				if (result.status == 200) {
-					window.location.href = "/veranstalter/verwaltung/0";
-				} else {
-					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
-				}
+		$.ajax({cache: false, url : "/profile", type: "POST", data : JSON.stringify(data),
+			success: function() {
+				window.location.href = "/veranstalter/verwaltung/0";
+			},
+			error: function() {
+				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 			}
 		});
 	});
@@ -418,13 +416,12 @@ $(function() {
 		if (!validateEventForm("event")) return;
 		var data = gatherEventForm("event");
 		
-		$.ajax({cache: false, url : "/event", type: "POST", dataType : "json", data : JSON.stringify(data),
-			error : function(result) {
-				if (result.status == 200 || result.status == 201) {
-					window.location.href = "/veranstalter/verwaltung/0";
-				} else {
-					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
-				}
+		$.ajax({cache: false, url : "/event", type: "POST", data : JSON.stringify(data),
+			success: function() {
+				window.location.href = "/veranstalter/verwaltung/0";
+			},
+			error: function() {
+				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 			}
 		});
 	});
