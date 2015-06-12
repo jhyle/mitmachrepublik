@@ -477,6 +477,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		title := "Veranstaltung " + date.Title
+		title += " am " + dateFormat(date.Start)
 		if !isEmpty(place) {
 			title += " in " + place
 		}

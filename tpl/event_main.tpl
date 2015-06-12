@@ -28,7 +28,7 @@
 		<p class="date" itemprop="startDate" content="{{iso8601Format .Start}}">{{dateFormat .Start}}</p>
 		{{if ne (timeFormat .Start) ("00:00")}}
 			<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
-			<p class="date">{{timeFormat .Start}}{{if timeFormat .End}} bis{{if eq (dateFormat .Start) (dateFormat .End)}} {{timeFormat .End}}{{end}}{{end}} Uhr</p>
+			<p class="date">{{timeFormat .Start}}{{if timeFormat .End}}{{if eq (dateFormat .Start) (dateFormat .End)}} bis {{timeFormat .End}}{{end}}{{end}} Uhr</p>
 		{{end}}
 		{{if dateFormat .End}}{{if ne (dateFormat .Start) (dateFormat .End)}}
 			<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Enddatum"></span></p>
