@@ -375,6 +375,13 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
 	title := "Aktuelle Veranstaltungen"
+	if len(categoryIds) > 0 {
+		categories := make([]string, len(categoryIds))
+		for i, categoryId := range categoryIds {
+			categories[i] = CategoryIdMap[categoryId]
+		}
+		title += " aus " + strConcat(categories)
+	}
 	if !isEmpty(place) {
 		title += " in " + place
 	}
@@ -476,7 +483,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(date.Addr.Name) {
 			title += " (" + date.Addr.Name + ")"
 		}
-		
+
 		meta := metaTags{
 			title + " - Mitmach-Republik",
 			title,
@@ -530,9 +537,17 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
 	title := "Gemeinschaftliche Organisatoren"
+	if len(categoryIds) > 0 {
+		categories := make([]string, len(categoryIds))
+		for i, categoryId := range categoryIds {
+			categories[i] = CategoryIdMap[categoryId]
+		}
+		title += " aus " + strConcat(categories)
+	}
 	if !isEmpty(place) {
 		title += " in " + place
 	}
+
 	meta := metaTags{
 		title + " - Mitmach-Republik",
 		title,
@@ -623,11 +638,11 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		title := "Gemeinschaftliche Veranstaltungen"
 		if organizer.Name != "Mitmach-Republik" {
- 			title += " von " + organizer.Name
+			title += " von " + organizer.Name
 			if !isEmpty(place) {
 				title += " aus " + place
 			}
- 		}
+		}
 		meta := metaTags{
 			title + " - Mitmach-Republik",
 			title,
@@ -763,7 +778,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 				return resultBadRequest
 			}
 		} else if bson.IsObjectIdHex(r.Param("copy")) {
-			
+
 			oldEvent, err := app.events.Load(bson.ObjectIdHex(r.Param("copy")))
 			if err != nil {
 				return &appResult{Status: http.StatusNotFound, Error: err}

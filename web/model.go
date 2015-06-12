@@ -138,7 +138,7 @@ const (
 
 var (
 	CategoryMap map[string]int = map[string]int{
-		"alle Kategorien":  0,
+		"allen Kategorien": 0,
 		"Kinder & Familie": 1,
 		"Jugendliche":      2,
 		"Studenten":        3,
@@ -160,7 +160,7 @@ var (
 	}
 
 	CategoryIdMap map[int]string = map[int]string{
-		0:  "alle Kategorien",
+		0:  "allen Kategorien",
 		1:  "Kinder & Familie",
 		2:  "Jugendliche",
 		3:  "Studenten",
