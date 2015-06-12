@@ -18,9 +18,9 @@
 			<p class="pull-right"><a href="#" name="delete-event" title="Löschen" data-target="{{.Id.Hex}}" class="close"><span class="fa fa-times"></span></a></p>
 		{{ end }}
 		<h3 itemprop="name">{{.Title}}</h3>
-		<p class="datetime" itemprop="startDate" content="{{iso8601Format .Start}}">{{datetimeFormat .Start}} {{if $.organizerNames}}{{if ne (index $.organizerNames .OrganizerId) ("Mitmach-Republik")}} - {{index $.organizerNames .OrganizerId}}{{end}}{{end}}</p>
+		<p class="datetime" itemprop="startDate" content="{{iso8601Format .Start}}">{{datetimeFormat .Start}}{{if dateFormat .End}}<span itemprop="endDate" content="{{iso8601Format .End}}"> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizerNames}}{{if ne (index $.organizerNames .OrganizerId) ("Mitmach-Republik")}} - {{index $.organizerNames .OrganizerId}}{{end}}{{end}}</p>
 		{{ if $.user }}
-			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung?copy={{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Kopieren</a></p>
+			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung/{{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Bearbeiten</a></p>
 		{{end}}
 		<p itemprop="description">{{strClip .PlainDescription 100}}</p>
 		{{ if not .Addr.IsEmpty }}
@@ -28,7 +28,7 @@
 			<p class="pull-left place" itemprop="location" itemscope itemtype="http://schema.org/Place">{{ if .Addr.Name }}<span itemprop="name">{{.Addr.Name}}</span><br />{{ end }}<span class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">{{ if .Addr.Street }}<span itemprop="streetAddress">{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span itemprop="postalCode">{{.Addr.Pcode}}</span> {{ end }}<span itemprop="addressLocality">{{citypartName .Addr}}</span></span></p>
 		{{ end }}
 		{{ if $.user }}
-			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung/{{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Bearbeiten</a></p>
+			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung?copy={{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Kopieren</a></p>
 		{{ end }}
 	</div>
 	{{if not $.user }}
