@@ -125,6 +125,13 @@ func (events *EventService) SearchDatesOfUser(userId bson.ObjectId, page, pageSi
 	return &result, err
 }
 
+func (events *EventService) FindDatesOfEvent(eventId bson.ObjectId, sort string) ([]Date, error) {
+
+	var result []Date
+	err := events.dateTable().Find(bson.M{"$and": []bson.M{bson.M{"eventid": eventId}, bson.M{"start": bson.M{"$gte": time.Now()}}}}, &result, sort)
+	return result, err
+}
+
 func (events *EventService) FindEventsOfUser(userId bson.ObjectId, sort string) ([]Event, error) {
 
 	var result []Event

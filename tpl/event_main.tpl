@@ -25,29 +25,33 @@
 			<div style="display: inline-block; float: right; line-height: 1"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> E-Mail</a></div>
 		</div>
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
-		<p class="date" itemprop="startDate" content="{{iso8601Format .Start}}">{{dateFormat .Start}}</p>
+		<p class="icon-text date" itemprop="startDate" content="{{iso8601Format .Start}}">{{dateFormat .Start}}</p>
 		{{if ne (timeFormat .Start) ("00:00")}}
 			<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
-			<p class="date">{{timeFormat .Start}}{{if timeFormat .End}}{{if eq (dateFormat .Start) (dateFormat .End)}} bis {{timeFormat .End}}{{end}}{{end}} Uhr</p>
+			<p class="icon-text date">{{timeFormat .Start}}{{if timeFormat .End}}{{if eq (dateFormat .Start) (dateFormat .End)}} bis {{timeFormat .End}}{{end}}{{end}} Uhr</p>
 		{{end}}
 		{{if dateFormat .End}}{{if ne (dateFormat .Start) (dateFormat .End)}}
 			<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Enddatum"></span></p>
-			<p class="date">{{dateFormat .End}}</p>
+			<p class="icon-text date">{{dateFormat .End}}</p>
 			{{if ne (timeFormat .Start) ("23:59")}}
 				<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
-				<p class="date">{{timeFormat .End}} Uhr</p>
+				<p class="icon-text date">{{timeFormat .End}} Uhr</p>
 			{{end}}
 		{{end}}{{end}}
 		{{if .Rsvp}}
 			<p style="margin-bottom: 18px"><a style="padding-left: 44px" href="{{.Web}}" class="highlight" target="_blank"><span class="fa fa-caret-right"></span> Anmeldung erforderlich</a></p>
 		{{end}}
-		{{ if not .Addr.IsEmpty }}
+		{{if not .Addr.IsEmpty}}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
-			<p itemprop="location" itemscope itemtype="http://schema.org/Place">{{ if .Addr.Name }}<span itemprop="name">{{.Addr.Name}}</span><br />{{ end }}<span class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">{{ if .Addr.Street }}<span itemprop="streetAddress">{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span itemprop="postalCode">{{.Addr.Pcode}}</span> {{ end }}<span itemprop="addressLocality">{{.Addr.City}}</span></span></p>
-		{{ end }}
+			<p class="icon-text" itemprop="location" itemscope itemtype="http://schema.org/Place">{{ if .Addr.Name }}<span itemprop="name">{{.Addr.Name}}</span><br />{{ end }}<span class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">{{ if .Addr.Street }}<span itemprop="streetAddress">{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span itemprop="postalCode">{{.Addr.Pcode}}</span> {{ end }}<span itemprop="addressLocality">{{.Addr.City}}</span></span></p>
+		{{end}}
 		{{if len .Categories}}{{with index .Categories 0}}
 			<p class="small-icon pull-left"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></p>{{end}}
-			<p>{{range $i, $category := .Categories}}{{if $i}}, {{end}}{{categoryTitle $category}}{{end}}</p>
+			<p class="icon-text">{{range $i, $category := .Categories}}{{if $i}}, {{end}}{{categoryTitle $category}}{{end}}</p>
+		{{end}}
+		{{if gt (len $.recurrences) 1}}
+			<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
+			<p class="icon-text">{{range $i, $date := $.recurrences}}{{if $i}}, {{end}}<a class="highlight" title="{{$date.Title}} am {{dateFormat $date.Start}} in {{citypartName $date.Addr}}" href="{{$date.Url}}">{{cut (dateFormat $date.Start) 1}}</a>{{end}}</p>
 		{{end}}
 		<div class="description" style="margin: 25px 0 15px 0" itemprop="description">{{.HtmlDescription}}</div>
 		<div class="clearfix"></div>

@@ -213,6 +213,10 @@ div.tile-text p.description {
 	overflow: hidden;
 	margin-bottom: 20px;
 }
+p.icon-text {
+	height: 2.7em;
+	overflow: hidden;
+}
 .big-text {
 	font-size: 17px;
 	padding: 0 10px 15px 10px;

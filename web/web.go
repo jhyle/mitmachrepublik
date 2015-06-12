@@ -454,6 +454,11 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultNotFound
 		}
 
+		recurrences, err := app.events.FindDatesOfEvent(date.EventId, "start")
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
 		organizer, err := app.users.Load(date.OrganizerId)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
@@ -493,7 +498,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			false,
 		}
 
-		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": date, "organizer": organizer})
+		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": date, "organizer": organizer, "recurrences": recurrences})
 	}()
 
 	app.handle(w, result)
