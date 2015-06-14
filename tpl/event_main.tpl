@@ -18,11 +18,11 @@
 			</a>
 			{{end}}
 		</div>
-		<div style="height: 30px; margin-bottom: 10px">
-			<div class="g-plus" style="float: left, padding-right: 10px" data-action="share" data-annotation="none" data-href="http://{{$.hostname}}{{.Url}}"></div>
-			<a class="twitter-share-button" data-count="none" href="https://twitter.com/share" target="_blank">Tweet</a><script>window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return t;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));</script>
-			<div class="fb-share-button" style="float: left; padding-right: 10px" data-href="http://{{$.hostname}}{{.Url}}" data-layout="button"></div>
-			<div style="display: inline-block; float: right; line-height: 1"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> E-Mail</a></div>
+		<div style="margin-bottom: 15px">
+			<a style="margin-right: 10px" href="https://www.facebook.com/sharer/sharer.php?u=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/facebook_share.png"></a>
+			<a style="margin-right: 10px" href="https://plus.google.com/share?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/google_share.png"></a>
+			<a href="http://twitter.com/intent/tweet?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/twitter_share.png"></a>
+			<div style="display: inline-block; float: right;"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> E-Mail</a></div>
 		</div>
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
 		<p class="icon-text date" itemprop="startDate" content="{{iso8601Format .Start}}">{{dateFormat .Start}}</p>

@@ -31,6 +31,7 @@
   ga('send', 'pageview');
 </script>
 <div id="fb-root"></div>
+{{if and (.event) (not .user)}}
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
   if (d.getElementById(id)) return;
@@ -38,6 +39,7 @@
   js.src = "//connect.facebook.net/de_DE/sdk.js#xfbml=1&version=v2.3";
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
+{{end}}
 	<div class="modal fade" id="login" tabindex="-2" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
