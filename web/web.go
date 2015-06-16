@@ -249,7 +249,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		moreEvents := true
 		events := make([]*Date, 0, eventsPerRow*2)
 		for len(events) < eventsPerRow*numberOfRows && moreEvents {
-			result, err := app.events.SearchDates(place, timeSpans(dateIds), nil, page, pageSize, "start")
+			result, err := app.events.SearchDates(place, timeSpans(dateIds), nil, true, page, pageSize, "start")
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
@@ -406,7 +406,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		result, err := app.events.SearchDates(place, timeSpans(dateIds), categoryIds, page, pageSize, "start")
+		result, err := app.events.SearchDates(place, timeSpans(dateIds), categoryIds, false, page, pageSize, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}

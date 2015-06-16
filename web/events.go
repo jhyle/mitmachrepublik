@@ -53,9 +53,9 @@ func (events *EventService) Cities() ([]string, error) {
 	return cities, err
 }
 
-func (events *EventService) buildQuery(place string, dates [][]time.Time, categoryIds []int) bson.M {
+func (events *EventService) buildQuery(place string, dates [][]time.Time, categoryIds []int, withImagesOnly bool) bson.M {
 
-	query := make([]bson.M, 0, 3)
+	query := make([]bson.M, 0, 4)
 
 	if len(place) > 0 {
 		postcodes := Postcodes(place)
@@ -88,12 +88,16 @@ func (events *EventService) buildQuery(place string, dates [][]time.Time, catego
 		query = append(query, bson.M{"$or": categoriesQuery})
 	}
 
+	if withImagesOnly {
+		query = append(query, bson.M{"image" : bson.M{"$exists" : true, "$ne" : ""}})
+	}
+
 	return bson.M{"$and": query}
 }
 
 func (events *EventService) Count(place string, dates [][]time.Time, categoryIds []int) (int, error) {
 
-	return events.dateTable().Count(events.buildQuery(place, dates, categoryIds))
+	return events.dateTable().Count(events.buildQuery(place, dates, categoryIds, false))
 }
 
 func (events *EventService) Load(id bson.ObjectId) (*Event, error) {
@@ -110,10 +114,10 @@ func (events *EventService) LoadDate(id bson.ObjectId) (*Date, error) {
 	return &date, err
 }
 
-func (events *EventService) SearchDates(place string, dates [][]time.Time, categoryIds []int, page, pageSize int, sort string) (DateSearchResult, error) {
+func (events *EventService) SearchDates(place string, dates [][]time.Time, categoryIds []int, withImagesOnly bool, page, pageSize int, sort string) (DateSearchResult, error) {
 
 	var result DateSearchResult
-	err := events.dateTable().Search(events.buildQuery(place, dates, categoryIds), page*pageSize, pageSize, &result, sort)
+	err := events.dateTable().Search(events.buildQuery(place, dates, categoryIds, withImagesOnly), page*pageSize, pageSize, &result, sort)
 	return result, err
 }
 
