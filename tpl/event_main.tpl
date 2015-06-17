@@ -38,9 +38,6 @@
 				<p class="icon-text date">{{timeFormat .End}} Uhr</p>
 			{{end}}
 		{{end}}{{end}}
-		{{if .Rsvp}}
-			<p style="margin-bottom: 18px"><a style="padding-left: 44px" href="{{.Web}}" class="highlight" target="_blank"><span class="fa fa-caret-right"></span> Anmeldung erforderlich</a></p>
-		{{end}}
 		{{if not .Addr.IsEmpty}}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
 			<p class="icon-text" itemprop="location" itemscope itemtype="http://schema.org/Place">{{ if .Addr.Name }}<span itemprop="name">{{.Addr.Name}}</span><br />{{ end }}<span class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">{{ if .Addr.Street }}<span itemprop="streetAddress">{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span itemprop="postalCode">{{.Addr.Pcode}}</span> {{ end }}<span itemprop="addressLocality">{{.Addr.City}}</span></span></p>
@@ -53,11 +50,9 @@
 			<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
 			<p class="icon-text">{{range $i, $date := $.recurrences}}{{if $i}}, {{end}}<a class="highlight" title="{{$date.Title}} am {{dateFormat $date.Start}} in {{citypartName $date.Addr}}" href="{{$date.Url}}">{{cut (dateFormat $date.Start) 1}}</a>{{end}}</p>
 		{{end}}
-		<div class="description" style="margin: 25px 0 15px 0" itemprop="description">{{.HtmlDescription}}</div>
+		<p style="font-weight: bolder">{{if .Web}}<a href="{{.Web}}" class="highlight" title="Webseite von {{.Title}}" target="_blank">{{end}}{{if .Web}}<span class="fa fa-caret-right"></span> {{end}}{{if .Rsvp}}Anmeldung erforderlich!{{if .Web}} Melde Dich auf der Webseite der Veranstaltung an.{{end}}{{else}}Keine Anmeldung erforderlich! Schaue einfach beim Treffen vorbei.{{end}}{{if .Web}}</a>{{end}}</p>
+		<div class="description" style="margin: 15px 0 15px 0" itemprop="description">{{.HtmlDescription}}</div>
 		<div class="clearfix"></div>
-		{{if .Web}}
-			<p><a href="{{.Web}}" title="Webseite der Veranstaltung anzeigen" class="btn btn-mmr" style="margin: 0" target="_blank">Zur Veranstaltungs-Webseite</a></p>
-		{{end}}
 		<div class="fb-comments" data-href="http://{{$.hostname}}{{.Url}}" data-width="100%" data-numposts="5" data-order-by="time" data-colorscheme="light"></div>
 	</div>{{end}}
 	<div class="col-xs-1">&nbsp;</div>
