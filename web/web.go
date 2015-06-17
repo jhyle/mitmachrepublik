@@ -223,7 +223,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	numberOfRows := 4
 	pageSize := eventsPerRow * numberOfRows
 	place := ""
-	dateIds := []int{FromNow}
+	dateIds := []int{TwoWeeks}
 
 	meta := metaTags{
 		"Willkommen in der Mitmach-Republik!",
@@ -441,7 +441,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	radius := 2
-	dateIds := []int{FromNow}
+	dateIds := []int{TwoWeeks}
 
 	result := func() *appResult {
 
