@@ -226,7 +226,7 @@ var (
 	}
 
 	DateIdMap map[int]string = map[int]string{
-		FromNow: "alle",
+		FromNow: "alle ab jetzt",
 		Today: "heute",
 		Tomorrow: "morgen",
 		ThisWeek: "diese Woche",

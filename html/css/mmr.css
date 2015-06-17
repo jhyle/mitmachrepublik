@@ -50,6 +50,7 @@ div.col-banner h2 {
 }
 div.col-banner h4 {
 	color: white;
+	font-weight: bolder;
 }
 .btn-cancel, .btn-mmr, .form-control {
 	font-size: 17px;
