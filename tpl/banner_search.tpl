@@ -2,7 +2,7 @@
 	<div class="col-xs-12 col-banner">
 		<img src="/images/hintergrund.jpg" class="img-responsive" width="1170" height="167" alt="Finde Veranstaltungen zum Mitmachen!"/>
 		<div class="form-inline text-center" style="position: absolute; top: 33%; width: 100%">
-			<input name="place" type="text" class="form-control" value="{{.place}}" placeholder="Wo?" style="width: 50%" autocomplete="off" autofocus />
+			<input name="place" type="text" class="form-control" value="{{.place}}" placeholder="Stadt(-teil) oder Postleitzahl" style="width: 50%" autocomplete="off" />
 			<!--select name="radius" class="form-control">
 				<option value="0" {{if eq .radius 0}}selected{{end}}>kein Umkreis</option>
 				<option value="2" {{if eq .radius 2}}selected{{end}}>2 km</option>

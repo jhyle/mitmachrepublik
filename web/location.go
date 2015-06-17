@@ -11,6 +11,10 @@ type (
 	}
 )
 
+const (
+	MAX_POSTCODE_LENGTH = 5
+)
+
 var (
 	DistrictMap map[string][]string = map[string][]string{
 		"Berlin Charlottenburg-Wilmersdorf": []string{"Berlin Charlottenburg", "Berlin Charlottenburg-Nord", "Berlin Grunewald", "Berlin Halensee", "Berlin Schmargendorf", "Berlin Westend", "Berlin Wilmersdorf"},
@@ -142,32 +146,61 @@ var (
 	pcode2district, pcode2citypart map[string]string
 )
 
+func isPostcode(location string) bool {
+
+	if len(location) == 0 || len(location) > MAX_POSTCODE_LENGTH {
+		return false
+	}
+
+	for i := 0; i < len(location); i++ {
+		if location[i] < '0' || location[i] > '9' {
+			return false
+		}
+	}
+
+	return true
+}
+
 func Postcodes(location string) []string {
 
 	postcodes := make(map[string]string)
-	
-	districts := make([]string, 0)
-	districts = append(districts, location)
-	
-	if _, found := DistrictMap[location]; found {
-		for _, district := range DistrictMap[location] {
-			districts = append(districts, district)
+
+	if isPostcode(location) {
+		if len(location) == MAX_POSTCODE_LENGTH  {
+			postcodes[location] = location
+		} else {
+			for _, districtCodes := range PostcodeMap {
+				for _, districtCode := range districtCodes {
+					if strings.HasPrefix(districtCode, location) {
+						postcodes[districtCode] = districtCode
+					}
+				}
+			}
 		}
-	}
-	
-	for _, district := range districts {
-		if _, found := PostcodeMap[district]; found {
-			for _, postcode := range PostcodeMap[district] {
-				postcodes[postcode] = postcode;
+	} else {
+		districts := make([]string, 0)
+		districts = append(districts, location)
+
+		if _, found := DistrictMap[location]; found {
+			for _, district := range DistrictMap[location] {
+				districts = append(districts, district)
+			}
+		}
+
+		for _, district := range districts {
+			if _, found := PostcodeMap[district]; found {
+				for _, postcode := range PostcodeMap[district] {
+					postcodes[postcode] = postcode
+				}
 			}
 		}
 	}
-	
+
 	result := make([]string, 0, len(postcodes))
 	for postcode := range postcodes {
 		result = append(result, postcode)
 	}
-	
+
 	return result
 }
 
@@ -189,7 +222,7 @@ func (tree *LocationTree) Normalize(location string) string {
 	if !found {
 		return location
 	}
-	
+
 	return value.([]string)[0]
 }
 
@@ -202,7 +235,7 @@ func (tree *LocationTree) insert(word, s string) {
 	} else {
 		places = value.([]string)
 	}
-	
+
 	found = false
 	for _, place := range places {
 		if place == s {
@@ -210,7 +243,7 @@ func (tree *LocationTree) insert(word, s string) {
 			break
 		}
 	}
-	
+
 	if !found {
 		places = append(places, s)
 		tree.Insert(word, places)
@@ -254,8 +287,8 @@ func init() {
 	for district, cityparts := range DistrictMap {
 		for _, citypart := range cityparts {
 			for _, postcode := range PostcodeMap[citypart] {
-				pcode2district[postcode] = district;
-				pcode2citypart[postcode] = citypart;
+				pcode2district[postcode] = district
+				pcode2citypart[postcode] = citypart
 			}
 		}
 	}
