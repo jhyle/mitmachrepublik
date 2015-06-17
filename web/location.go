@@ -139,7 +139,7 @@ var (
 		"Berlin Schmöckwitz":       []string{"12527"},
 	}
 
-	pcode2district, cpart2district map[string]string
+	pcode2district, pcode2citypart map[string]string
 )
 
 func Postcodes(location string) []string {
@@ -181,6 +181,16 @@ func (tree *LocationTree) Autocomplete(prefix string) []string {
 	})
 
 	return result
+}
+
+func (tree *LocationTree) Normalize(location string) string {
+
+	value, found := tree.Get(strings.ToLower(location))
+	if !found {
+		return location
+	}
+	
+	return value.([]string)[0]
 }
 
 func (tree *LocationTree) insert(word, s string) {
@@ -240,12 +250,12 @@ func NewLocationTree(locations []string) *LocationTree {
 func init() {
 
 	pcode2district = make(map[string]string)
-	cpart2district = make(map[string]string)
+	pcode2citypart = make(map[string]string)
 	for district, cityparts := range DistrictMap {
 		for _, citypart := range cityparts {
 			for _, postcode := range PostcodeMap[citypart] {
 				pcode2district[postcode] = district;
-				cpart2district[postcode] = citypart;
+				pcode2citypart[postcode] = citypart;
 			}
 		}
 	}

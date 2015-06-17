@@ -149,7 +149,7 @@ func districtName(addr Address) string {
 
 func citypartName(addr Address) string {
 
-	citypart := cpart2district[addr.Pcode]
+	citypart := pcode2citypart[addr.Pcode]
 	if isEmpty(citypart) {
 		citypart = addr.City
 	}

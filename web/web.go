@@ -827,7 +827,7 @@ func (app *MmrApp) staticPage(w traffic.ResponseWriter, template, headline strin
 
 func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
-	place := strings.Trim(r.PostFormValue("place"), " ")
+	place := app.locations.Normalize(strings.Trim(r.PostFormValue("place"), " "))
 
 	radius, err := strconv.Atoi(r.PostFormValue("radius"))
 	if err != nil {
@@ -1151,12 +1151,13 @@ func (app *MmrApp) locationHandler(w traffic.ResponseWriter, r *traffic.Request)
 
 func (app *MmrApp) eventCountHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
+	dateIds := str2Int(strings.Split(r.Param("dateIds"), ","))
+	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
+	place := app.locations.Normalize(strings.Trim(r.Param("place"), " "))
+
 	result := func() *appResult {
 
-		dateIds := str2Int(strings.Split(r.Param("dateIds"), ","))
-		categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
-
-		cnt, err := app.events.Count(r.Param("place"), timeSpans(dateIds), categoryIds)
+		cnt, err := app.events.Count(place, timeSpans(dateIds), categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -1169,11 +1170,12 @@ func (app *MmrApp) eventCountHandler(w traffic.ResponseWriter, r *traffic.Reques
 
 func (app *MmrApp) organizerCountHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
+	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
+	place := app.locations.Normalize(strings.Trim(r.Param("place"), " "))
+
 	result := func() *appResult {
 
-		categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
-
-		cnt, err := app.users.Count(r.Param("place"), categoryIds)
+		cnt, err := app.users.Count(place, categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
