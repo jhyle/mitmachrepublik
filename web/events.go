@@ -89,7 +89,7 @@ func (events *EventService) buildQuery(place string, dates [][]time.Time, catego
 	}
 
 	if withImagesOnly {
-		query = append(query, bson.M{"image" : bson.M{"$exists" : true, "$ne" : ""}})
+		query = append(query, bson.M{"image": bson.M{"$exists": true, "$ne": ""}})
 	}
 
 	return bson.M{"$and": query}
@@ -212,11 +212,13 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 						day = day.Add(24 * time.Hour)
 					}
 					date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
-					if dateDuration != 0 {
-						date.End = date.Start.Add(dateDuration)
+					if !date.Start.Before(now) {
+						if dateDuration != 0 {
+							date.End = date.Start.Add(dateDuration)
+						}
+						date.Id = bson.NewObjectId()
+						dates = append(dates, date)
 					}
-					date.Id = bson.NewObjectId()
-					dates = append(dates, date)
 				}
 			}
 		}
@@ -239,11 +241,13 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 					day = days[event.Monthly.Week]
 				}
 				date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
-				if dateDuration != 0 {
-					date.End = date.Start.Add(dateDuration)
+				if !date.Start.Before(now) {
+					if dateDuration != 0 {
+						date.End = date.Start.Add(dateDuration)
+					}
+					date.Id = bson.NewObjectId()
+					dates = append(dates, date)
 				}
-				date.Id = bson.NewObjectId()
-				dates = append(dates, date)
 			}
 		}
 	}
@@ -307,7 +311,7 @@ func (events *EventService) UpdateRecurrences() error {
 	if err != nil {
 		return err
 	}
-	
+
 	for _, event := range result {
 		err = events.SyncDates(&event)
 		if err != nil {
@@ -319,14 +323,14 @@ func (events *EventService) UpdateRecurrences() error {
 	if err != nil {
 		return err
 	}
-	
+
 	for _, event := range result {
 		err = events.SyncDates(&event)
 		if err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 

@@ -134,6 +134,7 @@ const (
 	ThisWeek
 	NextWeekend
 	NextWeek
+	TwoWeeks
 )
 
 var (
@@ -225,15 +226,16 @@ var (
 	}
 
 	DateIdMap map[int]string = map[int]string{
-		FromNow: "ab jetzt",
+		FromNow: "alle",
 		Today: "heute",
 		Tomorrow: "morgen",
 		ThisWeek: "diese Woche",
 		NextWeekend: "am Wochenende",
 		NextWeek: "nächste Woche",
+		TwoWeeks: "14 Tage",
 	}
 	
-	DateOrder []int = []int{FromNow, Today, Tomorrow, ThisWeek, NextWeekend, NextWeek}
+	DateOrder []int = []int{TwoWeeks, Today, Tomorrow, ThisWeek, NextWeekend, NextWeek, FromNow}
 )
 
 func (user *User) GetId() bson.ObjectId {

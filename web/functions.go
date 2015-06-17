@@ -251,7 +251,7 @@ func timeSpans(dateIds []int) [][]time.Time {
 			timespan[0] = now
 			timespan[1] = now
 		} else if dateId == Today {
-			timespan[0] = dayStart(now)
+			timespan[0] = now
 			timespan[1] = dayEnd(now)
 		} else if dateId == Tomorrow {
 			now = now.AddDate(0, 0, 1)
@@ -264,10 +264,14 @@ func timeSpans(dateIds []int) [][]time.Time {
 			}
 			timespan[1] = dayEnd(now)
 		} else if dateId == NextWeekend {
-			for now.Weekday() != time.Saturday && now.Weekday() != time.Sunday {
-				now = now.AddDate(0, 0, 1)
+			if now.Weekday() == time.Saturday || now.Weekday() == time.Sunday {
+				timespan[0] = now
+			} else {
+				for now.Weekday() != time.Saturday && now.Weekday() != time.Sunday {
+					now = now.AddDate(0, 0, 1)
+				}
+				timespan[0] = dayStart(now)
 			}
-			timespan[0] = dayStart(now)
 			for now.Weekday() != time.Sunday {
 				now = now.AddDate(0, 0, 1)
 			}
@@ -279,6 +283,12 @@ func timeSpans(dateIds []int) [][]time.Time {
 			now = now.AddDate(0, 0, 1)
 			timespan[0] = dayStart(now)
 			for now.Weekday() != time.Sunday {
+				now = now.AddDate(0, 0, 1)
+			}
+			timespan[1] = dayEnd(now)
+		} else if dateId == TwoWeeks {
+			timespan[0] = now
+			for n := 0; n < 14; n++ {
 				now = now.AddDate(0, 0, 1)
 			}
 			timespan[1] = dayEnd(now)

@@ -10,16 +10,6 @@
 	<div class="col-xs-1">&nbsp;</div>
 	<div class="col-xs-3 col-box">
 		<h3>Filter</h3>
-		<h5>Kategorien</h5>
-		<hr>
-		{{ range .categories }}
-			{{ $id := index $.categoryMap . }}
-			<label class="checkbox"><input type="checkbox" name="category" value="{{$id}}"
-			{{ range $.categoryIds }}
-				{{ if eq $id . }} checked {{ end }}
-			{{ end }}
-			>  {{.}}</label>					
-		{{ end }}
 		<h5>Datum</h5>
 		<hr>
 		{{ range .dates }}
@@ -31,6 +21,16 @@
 				{{ end }}
 				>  {{ index $.dateMap $id }}</label>
 			{{ end }}
+		{{ end }}
+		<h5>Kategorien</h5>
+		<hr>
+		{{ range .categories }}
+			{{ $id := index $.categoryMap . }}
+			<label class="checkbox"><input type="checkbox" name="category" value="{{$id}}"
+			{{ range $.categoryIds }}
+				{{ if eq $id . }} checked {{ end }}
+			{{ end }}
+			>  {{.}}</label>					
 		{{ end }}
 	</div>
 	<div class="col-xs-7">
