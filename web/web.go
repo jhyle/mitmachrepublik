@@ -349,7 +349,7 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	pageSize := 5
+	pageSize := 10
 	page, err := strconv.Atoi(r.Param("page"))
 	if err != nil {
 		page = 0
@@ -527,7 +527,7 @@ func (app *MmrApp) sendEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	pageSize := 5
+	pageSize := 10
 	page, err := strconv.Atoi(r.Param("page"))
 	if err != nil {
 		page = 0
@@ -594,7 +594,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 
 func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	pageSize := 5
+	pageSize := 10
 	page, err := strconv.Atoi(r.Param("page"))
 	if err != nil {
 		page = 0
@@ -690,7 +690,7 @@ func (app *MmrApp) checkSession(r *Request) (*User, error) {
 
 func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	pageSize := 5
+	pageSize := 10
 	page, err := strconv.Atoi(r.Param("page"))
 	if err != nil {
 		page = 0
