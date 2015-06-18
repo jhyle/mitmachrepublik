@@ -14,19 +14,21 @@ type (
 
 func NewUserService(database Database, tablename string) (*UserService, error) {
 
-	err := database.Table(tablename).EnsureIndices("approved", "categories", "addr.city", "addr.pcode")
-	if err == nil {
-		err = database.Table(tablename).EnsureIndices("name")	
-	}
-	if err == nil {
-		err = database.Table(tablename).EnsureIndices("email")	
-	}
-	
+	err := database.Table(tablename).DropIndices()
 	if err != nil {
 		return nil, err
-	} else {
-		return &UserService{database, tablename}, nil
 	}
+
+	err = database.Table(tablename).EnsureIndices([][]string{
+		{"approved", "categories", "addr.city", "addr.pcode"},
+		{"name"},
+		{"email"},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserService{database, tablename}, nil
 }
 
 func (users *UserService) table() Table {

@@ -15,25 +15,26 @@ type (
 
 func NewEventService(database Database, eventTableName, dateTableName string) (*EventService, error) {
 
-	err := database.Table(eventTableName).EnsureIndices("organizerid", "start")
-	if err == nil {
-		err = database.Table(eventTableName).EnsureIndices("recurrency")
-	}
-	if err == nil {
-		err = database.Table(dateTableName).EnsureIndices("start", "categories", "addr.city", "addr.pcode")
-	}
-	if err == nil {
-		err = database.Table(dateTableName).EnsureIndices("eventid", "start")
-	}
-	if err == nil {
-		err = database.Table(dateTableName).EnsureIndices("organizerid", "start")
-	}
-
+	err := database.Table(eventTableName).DropIndices()
 	if err != nil {
 		return nil, err
-	} else {
-		return &EventService{database, eventTableName, dateTableName}, nil
 	}
+
+	err = database.Table(eventTableName).EnsureIndices([][]string{
+		{"organizerid", "start"},
+		{"recurrency"},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = database.Table(dateTableName).EnsureIndices([][]string{
+		{"start", "categories", "addr.city", "addr.pcode"},
+		{"eventid", "start"},
+		{"organizerid", "start"},
+	})
+
+	return &EventService{database, eventTableName, dateTableName}, nil
 }
 
 func (events *EventService) eventTable() Table {

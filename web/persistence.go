@@ -19,7 +19,9 @@ type (
 	}
 
 	Table interface {
-		EnsureIndices(...string) error
+		DropIndices() error
+		EnsureIndex(...string) error
+		EnsureIndices([][]string) error
 		LoadById(bson.ObjectId, Item) error
 		CountById(bson.ObjectId) (int, error)
 		CheckForId(bson.ObjectId) error
@@ -116,9 +118,35 @@ func (db *mongoDb) LoadUserBySessionId(sessionId bson.ObjectId) (*User, error) {
 	return &user, nil
 }
 
-func (table *mongoTable) EnsureIndices(keys ...string) error {
+func (table *mongoTable) DropIndices() error {
+
+	indices, err := table.collection.Indexes()
+	if err != nil {
+		return err
+	}
+	
+	for _, index := range indices {
+		table.collection.DropIndex(index.Key...)
+	}
+	
+	return nil
+}
+
+func (table *mongoTable) EnsureIndex(keys ...string) error {
 
 	return table.collection.EnsureIndexKey(keys...)
+}
+
+func (table *mongoTable) EnsureIndices(indices [][]string) error {
+
+	for _, index := range indices {
+		err := table.EnsureIndex(index...)
+		if err != nil {
+			return err
+		}
+	}
+	
+	return nil
 }
 
 func (table *mongoTable) LoadById(id bson.ObjectId, item Item) error {
