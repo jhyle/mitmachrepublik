@@ -6,6 +6,13 @@
 		<h4 class="text-center" style="padding-left: 5%; padding-right: 5%; position:absolute; top: 85%; width: 100%">{{.meta.FB_Descr}}</h4>
 		<form role="form" action="/suche" method="POST" class="form-inline text-center" style="position: absolute; top: 40%; width: 100%">
 			<input name="place" type="text" class="form-control" placeholder="Stadt(-teil) oder Postleitzahl" autocomplete="off" />
+			<select name="target" class="form-control">
+				<option value="0">alle Zielgruppen</option>
+				{{ range .targets }}
+					{{ $id := index $.targetMap . }}
+					<option value="{{$id}}">{{.}}</option>					
+				{{ end }}
+			</select>
 			<select name="category" class="form-control">
 				<option value="0">alle Kategorien</option>
 				{{ range .categories }}

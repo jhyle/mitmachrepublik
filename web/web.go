@@ -111,7 +111,9 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		"noescape":           noescape,
 		"strClip":            strClip,
 		"categoryIcon":       categoryIcon,
+		"targetTitle":        targetTitle,
 		"categoryTitle":      categoryTitle,
+		"targetSearchUrl":    targetSearchUrl,
 		"categorySearchUrl":  categorySearchUrl,
 		"districtName":       districtName,
 		"citypartName":       citypartName,
@@ -162,6 +164,8 @@ func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, da
 	data["ga_code"] = app.ga_code
 	data["hostname"] = app.hostname
 	data["districts"] = DistrictMap
+	data["targets"] = TargetOrder
+	data["targetMap"] = TargetMap
 	data["categories"] = CategoryOrder
 	data["categoryMap"] = CategoryMap
 	data["googleApiKey"] = google_api_key
@@ -235,7 +239,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *appResult {
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil, nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -249,7 +253,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		moreEvents := true
 		events := make([]*Date, 0, eventsPerRow*2)
 		for len(events) < eventsPerRow*numberOfRows && moreEvents {
-			result, err := app.events.SearchDates(place, timeSpans(dateIds), nil, true, page, pageSize, "start")
+			result, err := app.events.SearchDates(place, timeSpans(dateIds), nil, nil, true, page, pageSize, "start")
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
@@ -372,15 +376,27 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	} else {
 		dateIds = str2Int(strings.Split(r.Param("dates"), ","))
 	}
+	targetIds := str2Int(strings.Split(r.Param("targetIds"), ","))
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
 	title := "Aktuelle Veranstaltungen"
-	if len(categoryIds) > 0 {
+	if len(targetIds) > 0 && targetIds[0] != 0 {
+		targets := make([]string, len(targetIds))
+		for i, targetId := range targetIds {
+			targets[i] = TargetIdMap[targetId]
+		}
+		title += " für " + strConcat(targets)
+	}
+	if len(categoryIds) > 0 && categoryIds[0] != 0 {
 		categories := make([]string, len(categoryIds))
 		for i, categoryId := range categoryIds {
 			categories[i] = CategoryIdMap[categoryId]
 		}
-		title += " aus " + strConcat(categories)
+		if len(categories) == 1 {
+			title += " aus der Kategorie " + strConcat(categories)
+		} else {
+			title += " aus den Kategorien " + strConcat(categories)
+		}
 	}
 	if !isEmpty(place) {
 		title += " in " + place
@@ -390,13 +406,13 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		title + " - Mitmach-Republik",
 		title,
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
-		"Veranstaltungen zum Mitmachen! Heute, morgen oder am nächsten Wochenende - finde Veranstaltungen in den Kategorien " + strConcat(CategoryOrder) + ".",
+		"Veranstaltungen zum Mitmachen! Heute, morgen oder am nächsten Wochenende - finde Veranstaltungen für " + strConcat(TargetOrder) + " in den Kategorien " + strConcat(CategoryOrder) + ".",
 		true,
 	}
 
 	result := func() *appResult {
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateIds), categoryIds)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), targetIds, categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -406,7 +422,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		result, err := app.events.SearchDates(place, timeSpans(dateIds), categoryIds, false, page, pageSize, "start")
+		result, err := app.events.SearchDates(place, timeSpans(dateIds), targetIds, categoryIds, false, page, pageSize, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -431,7 +447,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 				pages[i] = i
 			}
 			maxPage := pageCount - 1
-			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "categoryIds": categoryIds})
+			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "targetIds": targetIds, "categoryIds": categoryIds})
 		}
 	}()
 
@@ -466,7 +482,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		place := citypartName(date.Addr)
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil, nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -564,7 +580,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 
 	result := func() *appResult {
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateIds), categoryIds)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil, categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -621,7 +637,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		place := citypartName(organizer.Addr)
 
-		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil)
+		eventCnt, err := app.events.Count(place, timeSpans(dateIds), nil, nil)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -797,6 +813,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			event.End = oldEvent.End
 			event.Rsvp = oldEvent.Rsvp
 			event.Image = oldEvent.Image
+			event.Targets = oldEvent.Targets
 			event.Categories = oldEvent.Categories
 			event.Descr = oldEvent.Descr
 			event.Addr = oldEvent.Addr
@@ -834,6 +851,11 @@ func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 		radius = 0
 	}
 
+	targetIds := str2Int(r.Form["target"])
+	if len(targetIds) == 0 {
+		targetIds = append(targetIds, 0)
+	}
+
 	categoryIds := str2Int(r.Form["category"])
 	if len(categoryIds) == 0 {
 		categoryIds = append(categoryIds, 0)
@@ -848,7 +870,7 @@ func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 	if path == "organizers" {
 		path = "/veranstalter/" + organizerSearchUrl(place, categoryIds)
 	} else {
-		path = "/veranstaltungen/" + eventSearchUrl(place, categoryIds, dateIds, radius)
+		path = "/veranstaltungen/" + eventSearchUrl(place, targetIds, categoryIds, dateIds, radius)
 	}
 
 	w.Header().Set("Location", path)
@@ -1152,12 +1174,13 @@ func (app *MmrApp) locationHandler(w traffic.ResponseWriter, r *traffic.Request)
 func (app *MmrApp) eventCountHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 	dateIds := str2Int(strings.Split(r.Param("dateIds"), ","))
+	targetIds := str2Int(strings.Split(r.Param("targetIds"), ","))
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 	place := app.locations.Normalize(strings.Trim(r.Param("place"), " "))
 
 	result := func() *appResult {
 
-		cnt, err := app.events.Count(place, timeSpans(dateIds), categoryIds)
+		cnt, err := app.events.Count(place, timeSpans(dateIds), targetIds, categoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -1282,12 +1305,20 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstalter/verwaltung/veranstaltung", app.editEventPage)
 	router.Get("/veranstalter/verwaltung/veranstaltung/:id", app.editEventPage)
 	router.Get("/veranstalter/verwaltung/:page", app.adminPage)
+
+	router.Get("/veranstaltungen/:place/:dates/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
+	router.Get("/veranstaltungen//:dates/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
 	router.Get("/veranstaltungen/:place/:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
 	router.Get("/veranstaltungen//:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
+
+	router.Get("/veranstaltung/:targets/:categories/:date/:id/:title", app.eventPage)
+	router.Get("/veranstaltung//:categories/:date/:id/:title", app.eventPage)
 	router.Get("/veranstaltung/:categories/:date/:id/:title", app.eventPage)
 	router.Get("/veranstaltung//:date/:id/:title", app.eventPage)
+
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
 	router.Get("/veranstalter//:categoryIds/:categories/:page", app.organizersPage)
+
 	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 
 	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "impressum.tpl", "Impressum") })
@@ -1316,11 +1347,13 @@ func (app *MmrApp) Start() {
 	router.Post("/event", app.eventHandler)
 	router.Post("/sendeventmail", app.sendEventMailHandler)
 	router.Post("/sendcontactmail", app.sendContactMailHandler)
+
 	router.Get("/location/:location", app.locationHandler)
-	router.Get("/eventcount/:place/:dateIds/:categoryIds", app.eventCountHandler)
-	router.Get("/eventcount//:dateIds/:categoryIds", app.eventCountHandler)
+	router.Get("/eventcount/:place/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
+	router.Get("/eventcount//:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
 	router.Get("/organizercount/:place/:categoryIds", app.organizerCountHandler)
 	router.Get("/organizercount//:categoryIds", app.organizerCountHandler)
+
 	router.Post("/login", app.loginHandler)
 	router.Post("/logout", app.logoutHandler)
 

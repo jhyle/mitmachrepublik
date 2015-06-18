@@ -36,20 +36,16 @@
 	<div class="col-xs-2 col-foot">
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
 	    <li><h5>In Kategorie..</h5></li>
-	    {{range $category, $id := .categoryMap}}
-	    	{{if $id}}{{if le $id 9}}
-	    		<li><a href="/veranstaltungen/{{categorySearchUrl $id "Berlin"}}">{{$category}}</a></li>
-	    	{{end}}{{end}}
+	    {{range $i, $category := .categories}}
+    		<li><a href="/veranstaltungen/{{categorySearchUrl (index $.categoryMap $category) "Berlin"}}">{{$category}}</a></li>
 	    {{end}}
 	  </ul>
 	</div>
 	<div class="col-xs-2 col-foot">
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
-	    <li><h5>&nbsp;</h5></li>
-	    {{range $category, $id := .categoryMap}}
-	    	{{if $id}}{{if gt $id 9}}
-	    		<li><a href="/veranstaltungen/{{categorySearchUrl $id "Berlin"}}">{{$category}}</a></li>
-	    	{{end}}{{end}}
+	    <li><h5>Für..</h5></li>
+	    {{range $i, $target := .targets}}
+    		<li><a href="/veranstaltungen/{{targetSearchUrl (index $.targetMap $target) "Berlin"}}">{{$target}}</a></li>
 	    {{end}}
 	  </ul>
 	</div>
@@ -63,5 +59,5 @@
 		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	{{noescape "<![endif]-->"}}
-	<script src="/js/scripts-8.js"></script>
+	<script src="/js/scripts-9.js"></script>
 </body> </html>

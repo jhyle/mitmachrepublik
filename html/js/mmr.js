@@ -78,6 +78,8 @@ function initEventForm(id)
 	$("#" + id + "-Start").focus(function () { $("#" + id + "-Start").popover('hide'); });
 	$("#" + id + "-End").popover({content: "Bitte gib ein gültiges Ende an.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-End").focus(function () { $("#" + id + "-End").popover('hide'); });
+	$("#" + id + "-Target").popover({content: "Bitte wähle mindestens eine Zielgruppe aus.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Target").focus(function () { $("#" + id + "-Category").popover('hide'); });
 	$("#" + id + "-Category").popover({content: "Bitte wähle mindestens eine Kategorie aus.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Category").focus(function () { $("#" + id + "-Category").popover('hide'); });
 	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (mit http://) ein.", trigger: "manual", placement: "auto right"});
@@ -143,6 +145,7 @@ function validateEventForm(id)
 	ok &= validate($("#" + id +"-End").val().trim().length == 0 || DateTimePattern.test($("#" + id + "-End").val()), "#" + id + "-End");
 	ok &= validate($("#" + id +"-Web").val().trim().length == 0 || WebPattern.test($("#" + id +"-Web").val()), "#" + id +"-Web");
 	ok &= validate($("#" + id +"-Pcode").val().trim().length == 0 || PcodePattern.test($("#" + id +"-Pcode").val()), "#" + id +"-Pcode");
+	ok &= validate($("input[name=" + id + "-Target]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Target");
 	ok &= validate($("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Category");
 	return ok;
 }
@@ -234,6 +237,11 @@ function gatherEventForm(id)
 		}
 	}
 	
+	data["Targets"] = new Array();
+	targets = $("input[name=" + id + "-Target]:checked").map(function () {return this.value;}).get();
+	for (i = 0; i < targets.length; i++) {
+		data["Targets"][i] = parseInt(targets[i]);
+	}
 	data["Categories"] = new Array();
 	categories = $("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get();
 	for (i = 0; i < categories.length; i++) {
@@ -273,6 +281,19 @@ function gatherSearchForm()
 	place = $("input[name=place]").val().trim();
 	data["place"] = place;
 	
+	var target = "";
+	if ($("select[name=target]").length) {
+		target = $("select[name=target]").val();
+	} else {
+		targts = $("input[name=target]:checked").map(function () {return this.value;}).get();
+		for (i = 0; i < targets.length; i++) {
+			if (i > 0) target += ",";
+			target += targets[i];
+		}
+	}
+	if (target == "") target = "0";
+	data["target"] = target;
+	
 	var category = "";
 	if ($("select[name=category]").length) {
 		category = $("select[name=category]").val();
@@ -305,7 +326,7 @@ function gatherSearchForm()
 function updateEventCount()
 {
 	data = gatherSearchForm();
-	$.ajax({cache: false, url : "/eventcount/" + data["place"] + "/" + data["date"] + "/" + data["category"], type: "GET", dataType: "json",
+	$.ajax({cache: false, url : "/eventcount/" + data["place"] + "/" + data["date"] + "/" + data["target"]+ "/" + data["category"], type: "GET", dataType: "json",
 		success: function(data) {
 			$("button[value=events]").html(data + (data != 1 ? " Veranstaltungen" : " Veranstaltung"));
 		}
@@ -615,6 +636,10 @@ $(function() {
 		updateOrganizerCount();
 	});
 	
+	$("select[name=target]").change(function() {
+		updateEventCount();
+	});
+	
 	$("select[name=category]").change(function() {
 		updateEventCount();
 		updateOrganizerCount();
@@ -622,7 +647,10 @@ $(function() {
 	
 	$("select[name=date]").change(function() {
 		updateEventCount();
-		updateOrganizerCount();
+	});
+	
+	$("input[name=target]").change(function() {
+		$("#events-form").submit();
 	});
 	
 	$("input[name=category]").change(function() {

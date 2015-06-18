@@ -17,7 +17,7 @@
 				<div class="col-xs-4">
 					<a id="event-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
 						<span id="event-spinner" class="fa fa-gear"> </span>
-						<img src="{{if .event.Image}}/bild/{{.event.Image}}?height=200&width=200{{else}}/images/thumbnail.png{{end}}" alt="Bild" id="event-thumbnail" class="img-responsive">
+						<img src="{{if .event.Image}}/bild/{{.event.Image}}?height=165&width=240{{else}}/images/thumbnail.png{{end}}" alt="Bild" id="event-thumbnail" class="img-responsive">
 					</a>
 					<span id="event-thumbnail-message" class="help-block">Wähle ein Bild im Format jpg, jpeg, png oder gif aus.</span>
 					<input type="file" name="file" class="hide">
@@ -88,6 +88,19 @@
 				</div>
 			</div>
 			<hr>
+			<div class="form-group">
+				<div class="col-xs-12" style="margin-left: 10px">
+					<span id="event-Target" class="help-block">Wähle eine oder mehrere Zielgruppen aus:</span>
+				{{ range .targets }}
+					{{ $id := index $.targetMap . }}
+					<label class="checkbox-inline"><input type="checkbox" name="event-Target" value="{{$id}}"
+					{{ range $.event.Targets }}
+						{{ if eq . $id }}checked{{ end }}
+					{{ end }}
+					> {{.}} &nbsp;&nbsp;</label>
+				{{ end }}
+				</div>
+			</div>
 			<div class="form-group">
 				<div class="col-xs-12" style="margin-left: 10px">
 					<span id="event-Category" class="help-block">Wähle eine oder mehrere Kategorien aus:</span>

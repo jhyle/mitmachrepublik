@@ -28,11 +28,65 @@ func NewEventService(database Database, eventTableName, dateTableName string) (*
 		return nil, err
 	}
 
+	err = database.Table(dateTableName).DropIndices()
+	if err != nil {
+		return nil, err
+	}
+	
 	err = database.Table(dateTableName).EnsureIndices([][]string{
-		{"start", "categories", "addr.city", "addr.pcode"},
+		{"start", "addr.city", "addr.pcode"},
 		{"eventid", "start"},
 		{"organizerid", "start"},
 	})
+
+	query := make([]bson.M, 6)
+	for category := range []int{1, 2, 3, 4, 5, 6} {
+		query = append(query, bson.M{"category": category})
+	}
+	
+	var events []*Event
+	err = database.Table(eventTableName).Find(bson.M{"$or": query}, &events, "start")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, event := range events {
+		newCategories := make([]int, 0, len(event.Categories))
+		for _, category := range event.Categories {
+			if category < 7 {
+				event.Targets = append(event.Targets, category)
+			} else {
+				newCategories = append(newCategories, category)
+			}
+		}
+		event.Categories = newCategories
+		_, err = database.Table(eventTableName).UpsertById(event.Id, event)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var dates []*Date
+	err = database.Table(dateTableName).Find(bson.M{"$or": query}, &dates, "start")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, date := range dates {
+		newCategories := make([]int, 0, len(date.Categories))
+		for _, category := range date.Categories {
+			if category < 7 {
+				date.Targets = append(date.Targets, category)
+			} else {
+				newCategories = append(newCategories, category)
+			}
+		}
+		date.Categories = newCategories
+		_, err = database.Table(dateTableName).UpsertById(date.Id, date)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return &EventService{database, eventTableName, dateTableName}, nil
 }
@@ -54,9 +108,9 @@ func (events *EventService) Cities() ([]string, error) {
 	return cities, err
 }
 
-func (events *EventService) buildQuery(place string, dates [][]time.Time, categoryIds []int, withImagesOnly bool) bson.M {
+func (events *EventService) buildQuery(place string, dates [][]time.Time, targetIds, categoryIds []int, withImagesOnly bool) bson.M {
 
-	query := make([]bson.M, 0, 4)
+	query := make([]bson.M, 0, 5)
 
 	if len(place) > 0 {
 		postcodes := Postcodes(place)
@@ -81,6 +135,14 @@ func (events *EventService) buildQuery(place string, dates [][]time.Time, catego
 		query = append(query, bson.M{"$or": datesQuery})
 	}
 
+	if len(targetIds) > 0 && targetIds[0] != 0 {
+		targetsQuery := make([]bson.M, len(targetIds))
+		for i, targetId := range targetIds {
+			targetsQuery[i] = bson.M{"targets": targetId}
+		}
+		query = append(query, bson.M{"$or": targetsQuery})
+	}
+
 	if len(categoryIds) > 0 && categoryIds[0] != 0 {
 		categoriesQuery := make([]bson.M, len(categoryIds))
 		for i, categoryId := range categoryIds {
@@ -96,9 +158,9 @@ func (events *EventService) buildQuery(place string, dates [][]time.Time, catego
 	return bson.M{"$and": query}
 }
 
-func (events *EventService) Count(place string, dates [][]time.Time, categoryIds []int) (int, error) {
+func (events *EventService) Count(place string, dates [][]time.Time, targetIds, categoryIds []int) (int, error) {
 
-	return events.dateTable().Count(events.buildQuery(place, dates, categoryIds, false))
+	return events.dateTable().Count(events.buildQuery(place, dates, targetIds, categoryIds, false))
 }
 
 func (events *EventService) Load(id bson.ObjectId) (*Event, error) {
@@ -115,10 +177,10 @@ func (events *EventService) LoadDate(id bson.ObjectId) (*Date, error) {
 	return &date, err
 }
 
-func (events *EventService) SearchDates(place string, dates [][]time.Time, categoryIds []int, withImagesOnly bool, page, pageSize int, sort string) (DateSearchResult, error) {
+func (events *EventService) SearchDates(place string, dates [][]time.Time, targetIds, categoryIds []int, withImagesOnly bool, page, pageSize int, sort string) (DateSearchResult, error) {
 
 	var result DateSearchResult
-	err := events.dateTable().Search(events.buildQuery(place, dates, categoryIds, withImagesOnly), page*pageSize, pageSize, &result, sort)
+	err := events.dateTable().Search(events.buildQuery(place, dates, targetIds, categoryIds, withImagesOnly), page*pageSize, pageSize, &result, sort)
 	return result, err
 }
 
@@ -168,6 +230,7 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 	date.Start = event.Start.Local()
 	date.End = event.End.Local()
 	date.Image = event.Image
+	date.Targets = event.Targets
 	date.Categories = event.Categories
 	date.Descr = event.Descr
 	date.Rsvp = event.Rsvp

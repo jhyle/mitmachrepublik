@@ -42,8 +42,12 @@
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
 			<p class="icon-text" itemprop="location" itemscope itemtype="http://schema.org/Place">{{ if .Addr.Name }}<span itemprop="name">{{.Addr.Name}}</span><br />{{ end }}<span class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">{{ if .Addr.Street }}<span itemprop="streetAddress">{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span itemprop="postalCode">{{.Addr.Pcode}}</span> {{ end }}<span itemprop="addressLocality">{{.Addr.City}}</span></span></p>
 		{{end}}
+		{{if len .Targets}}
+			<p class="small-icon pull-left"><span class="fa fa-child fa-fw" title="Zielgruppen"></span></p>
+			<p class="icon-text">{{range $i, $target := .Targets}}{{if $i}}, {{end}}{{targetTitle $target}}{{end}}</p>
+		{{end}}
 		{{if len .Categories}}{{with index .Categories 0}}
-			<p class="small-icon pull-left"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></p>{{end}}
+			<p class="small-icon pull-left"><span class="fa fa-{{categoryIcon .}} fa-fw" title="Kategorien"></span></p>{{end}}
 			<p class="icon-text">{{range $i, $category := .Categories}}{{if $i}}, {{end}}{{categoryTitle $category}}{{end}}</p>
 		{{end}}
 		{{if gt (len $.recurrences) 1}}

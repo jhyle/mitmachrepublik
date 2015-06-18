@@ -133,6 +133,11 @@ func categoryIcon(categoryId int) string {
 	return CategoryIconMap[categoryId]
 }
 
+func targetTitle(targetId int) string {
+
+	return TargetIdMap[targetId]
+}
+
 func categoryTitle(categoryId int) string {
 
 	return CategoryIdMap[categoryId]
@@ -161,24 +166,34 @@ func encodePath(path string) string {
 	return (&url.URL{Path: path}).String()
 }
 
-func eventSearchUrl(place string, categoryIds []int, dateIds []int, radius int) string {
+func eventSearchUrl(place string, targetIds, categoryIds []int, dateIds []int, radius int) string {
+
+	targetNames := make([]string, len(targetIds))
+	for i, id := range targetIds {
+		targetNames[i] = TargetIdMap[id]
+	}
 
 	categoryNames := make([]string, len(categoryIds))
 	for i, id := range categoryIds {
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return place + "/" + strings.Join(int2Str(dateIds), ",") + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + strings.Join(categoryNames, ",") + "/0"
+	return place + "/" + strings.Join(int2Str(dateIds), ",") + "/" + strings.Join(int2Str(targetIds), ",")  + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/0"
 }
 
 func simpleEventSearchUrl(place string) string {
 
-	return eventSearchUrl(place, []int{0}, []int{0}, 0)
+	return eventSearchUrl(place, []int{0}, []int{0}, []int{0}, 0)
 }
 
 func categorySearchUrl(category int, place string) string {
 
-	return eventSearchUrl(place, []int{category}, []int{0}, 0)
+	return eventSearchUrl(place, []int{0}, []int{category}, []int{0}, 0)
+}
+
+func targetSearchUrl(target int, place string) string {
+
+	return eventSearchUrl(place, []int{target}, []int{0}, []int{0}, 0)
 }
 
 func organizerSearchUrl(place string, categoryIds []int) string {

@@ -63,6 +63,7 @@ type (
 		Image       string
 		Descr       string
 		Web         string
+		Targets     []int
 		Categories  []int
 		Start       time.Time
 		End         time.Time `json:",omitempty"`
@@ -81,6 +82,7 @@ type (
 		Image       string
 		Descr       string
 		Web         string
+		Targets     []int
 		Categories  []int
 		Start       time.Time
 		End         time.Time
@@ -138,14 +140,46 @@ const (
 )
 
 var (
-	CategoryMap map[string]int = map[string]int{
-		"allen Kategorien": 0,
-		"Kinder & Familie": 1,
+	TargetMap map[string]int = map[string]int{
+		"alle Zielgruppen": 0,
+		"Familien":         1,
 		"Jugendliche":      2,
 		"Studenten":        3,
 		"Erwachsene":       4,
 		"Eltern":           5,
 		"Senioren":         6,
+		"Kleinkinder":      19,
+		"Babies":           20,
+		"Kinder":           21,
+	}
+
+	TargetIdMap map[int]string = map[int]string{
+		0:  "alle Zielgruppen",
+		1:  "Familien",
+		2:  "Jugendliche",
+		3:  "Studenten",
+		4:  "Erwachsene",
+		5:  "Eltern",
+		6:  "Senioren",
+		19: "Kleinkinder",
+		20: "Babies",
+		21: "Kinder",
+	}
+
+	TargetOrder []string = []string{
+		"Babies",
+		"Kleinkinder",
+		"Kinder",
+		"Jugendliche",
+		"Studenten",
+		"Erwachsene",
+		"Eltern",
+		"Familien",
+		"Senioren",
+	}
+
+	CategoryMap map[string]int = map[string]int{
+		"allen Kategorien": 0,
 		"Leute treffen":    7,
 		"Sport":            8,
 		"Gärtnern":         9,
@@ -162,12 +196,6 @@ var (
 
 	CategoryIdMap map[int]string = map[int]string{
 		0:  "allen Kategorien",
-		1:  "Kinder & Familie",
-		2:  "Jugendliche",
-		3:  "Studenten",
-		4:  "Erwachsene",
-		5:  "Eltern",
-		6:  "Senioren",
 		7:  "Leute treffen",
 		8:  "Sport",
 		9:  "Gärtnern",
@@ -184,12 +212,6 @@ var (
 
 	CategoryIconMap map[int]string = map[int]string{
 		0:  "calendar",
-		1:  "child",
-		2:  "child",
-		3:  "group",
-		4:  "group",
-		5:  "group",
-		6:  "group",
 		7:  "glass",
 		8:  "futbol-o",
 		9:  "leaf",
@@ -205,12 +227,6 @@ var (
 	}
 
 	CategoryOrder []string = []string{
-		"Kinder & Familie",
-		"Jugendliche",
-		"Studenten",
-		"Erwachsene",
-		"Eltern",
-		"Senioren",
 		"Leute treffen",
 		"Sport",
 		"Gärtnern",
@@ -226,15 +242,15 @@ var (
 	}
 
 	DateIdMap map[int]string = map[int]string{
-		FromNow: "alle ab jetzt",
-		Today: "heute",
-		Tomorrow: "morgen",
-		ThisWeek: "diese Woche",
+		FromNow:     "alle ab jetzt",
+		Today:       "heute",
+		Tomorrow:    "morgen",
+		ThisWeek:    "diese Woche",
 		NextWeekend: "am Wochenende",
-		NextWeek: "nächste Woche",
-		TwoWeeks: "14 Tage",
+		NextWeek:    "nächste Woche",
+		TwoWeeks:    "14 Tage",
 	}
-	
+
 	DateOrder []int = []int{TwoWeeks, Today, Tomorrow, ThisWeek, NextWeekend, NextWeek, FromNow}
 )
 
@@ -299,12 +315,16 @@ func (date *Date) SetId(id bson.ObjectId) {
 
 func (date *Date) Url() string {
 
+	targetNames := make([]string, len(date.Targets))
+	for i, id := range date.Targets {
+		targetNames[i] = TargetIdMap[id]
+	}
 	categoryNames := make([]string, len(date.Categories))
 	for i, id := range date.Categories {
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return "/veranstaltung/" + strings.Join(categoryNames, ",") + "/" + dateFormat(date.Start) + "/" + date.Id.Hex() + "/" + date.Title
+	return "/veranstaltung/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/" + dateFormat(date.Start) + "/" + date.Id.Hex() + "/" + date.Title
 }
 
 func (date *Date) HtmlDescription() template.HTML {

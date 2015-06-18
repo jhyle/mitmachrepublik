@@ -22,6 +22,16 @@
 				>  {{ index $.dateMap $id }}</label>
 			{{ end }}
 		{{ end }}
+		<h5>Zielgruppen</h5>
+		<hr>
+		{{ range .targets }}
+			{{ $id := index $.targetMap . }}
+			<label class="checkbox"><input type="checkbox" name="target" value="{{$id}}"
+			{{ range $.targetIds }}
+				{{ if eq $id . }} checked {{ end }}
+			{{ end }}
+			>  {{.}}</label>					
+		{{ end }}
 		<h5>Kategorien</h5>
 		<hr>
 		{{ range .categories }}
