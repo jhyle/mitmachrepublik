@@ -9,6 +9,9 @@
 	<meta property="og:site_name" content="Mitmach-Republik">
 	<meta property="og:image" content="{{.meta.FB_Image}}">
 	<meta property="og:description" content="{{.meta.FB_Descr}}">
+{{if .noindex}}
+	<meta name="robots" content="noindex, follow">
+{{end}}
 {{if and (.event) (not .user)}}
 	<link rel="canonical" href="http://{{.hostname}}{{.event.Url}}">
 {{end}}

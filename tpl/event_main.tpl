@@ -52,7 +52,7 @@
 		{{end}}
 		{{if gt (len $.recurrences) 1}}
 			<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
-			<p class="icon-text">{{range $i, $date := $.recurrences}}{{if $i}}, {{end}}<a class="highlight" title="{{$date.Title}} am {{dateFormat $date.Start}} in {{citypartName $date.Addr}}" href="{{$date.Url}}">{{cut (dateFormat $date.Start) 1}}</a>{{end}}</p>
+			<p class="icon-text">{{range $i, $date := $.recurrences}}{{if $i}}, {{end}}<a class="highlight" title="{{$date.Title}} am {{dateFormat $date.Start}} in {{citypartName $date.Addr}}" href="{{$date.Url}}" rel="nofollow">{{cut (dateFormat $date.Start) 1}}</a>{{end}}</p>
 		{{end}}
 		<p style="font-weight: bolder">{{if .Web}}<a href="{{.Web}}" class="highlight" title="Webseite von {{.Title}}" target="_blank">{{end}}{{if .Web}}<span class="fa fa-caret-right"></span> {{end}}{{if .Rsvp}}Anmeldung erforderlich!{{if .Web}} Melde Dich auf der Webseite der Veranstaltung an.{{end}}{{else}}Keine Anmeldung erforderlich! Schaue einfach beim Treffen vorbei.{{end}}{{if .Web}}</a>{{end}}</p>
 		<div class="description" style="margin: 15px 0 15px 0" itemprop="description">{{.HtmlDescription}}</div>
