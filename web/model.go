@@ -234,6 +234,7 @@ var (
 
 	CategoryOrder []string = []string{
 		"Leute treffen",
+		"Basteln & Spielen",
 		"Sport",
 		"Gärtnern",
 		"Natur",
