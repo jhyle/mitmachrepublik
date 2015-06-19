@@ -179,19 +179,21 @@ var (
 	}
 
 	CategoryMap map[string]int = map[string]int{
-		"allen Kategorien": 0,
-		"Leute treffen":    7,
-		"Sport":            8,
-		"Gärtnern":         9,
-		"Kultur":           10,
-		"Bildung":          11,
-		"Religion":         12,
-		"Umweltschutz":     13,
-		"Tierschutz":       14,
-		"Demonstrationen":  15,
-		"Soziales":         16,
-		"Ehrenamt":         17,
-		"Natur":            18,
+		"allen Kategorien":  0,
+		"Leute treffen":     7,
+		"Sport":             8,
+		"Gärtnern":          9,
+		"Kultur":            10,
+		"Bildung":           11,
+		"Religion":          12,
+		"Umweltschutz":      13,
+		"Tierschutz":        14,
+		"Demonstration":     15,
+		"Soziales":          16,
+		"Ehrenamt":          17,
+		"Natur":             18,
+		"Basteln & Spielen": 22,
+		"Politik":           23,
 	}
 
 	CategoryIdMap map[int]string = map[int]string{
@@ -204,10 +206,12 @@ var (
 		12: "Religion",
 		13: "Umweltschutz",
 		14: "Tierschutz",
-		15: "Demonstrationen",
+		15: "Demonstration",
 		16: "Soziales",
 		17: "Ehrenamt",
 		18: "Natur",
+		22: "Basteln & Spielen",
+		23: "Politik",
 	}
 
 	CategoryIconMap map[int]string = map[int]string{
@@ -224,6 +228,8 @@ var (
 		16: "heart",
 		17: "heart",
 		18: "leaf",
+		22: "child",
+		23: "globe",
 	}
 
 	CategoryOrder []string = []string{
@@ -236,7 +242,8 @@ var (
 		"Religion",
 		"Umweltschutz",
 		"Tierschutz",
-		"Demonstrationen",
+		"Politik",
+		"Demonstration",
 		"Soziales",
 		"Ehrenamt",
 	}
