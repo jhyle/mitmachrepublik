@@ -1,14 +1,14 @@
 {{with (or .user .organizer)}}
-<a href="{{.Url}}" itemprop="url" title="Veranstaltungen von {{.Name}} anzeigen">
-	<h3 style="font-weight: normal" itemprop="name">{{.Name}}</h3>
-	{{if .Image}}<p><img itemprop="image" src="/bild/{{.Image}}?width=250" alt="Logo {{.Name}}" class="img-responsive" /></p>{{end}}
+<a href="{{.Url}}" title="Veranstaltungen von {{.Name}} anzeigen">
+	<h3 style="font-weight: normal">{{.Name}}</h3>
+	{{if .Image}}<p><img src="/bild/{{.Image}}?width=250" alt="Logo {{.Name}}" class="img-responsive" /></p>{{end}}
 </a>
 {{ if not .Addr.IsEmpty }}
 	<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
-	<p itemprop="location" itemscope itemtype="http://schema.org/Place">{{ if .Addr.Name }}<span itemprop="name">{{.Addr.Name}}</span><br />{{ end }}<span class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">{{ if .Addr.Street }}<span itemprop="streetAddress">{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span itemprop="postalCode">{{.Addr.Pcode}}</span> {{ end }}<span itemprop="addressLocality">{{.Addr.City}}</span></span></p>
+	<p>{{ if .Addr.Name }}<span>{{.Addr.Name}}</span><br />{{ end }}<span class="address">{{ if .Addr.Street }}<span>{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span>{{.Addr.Pcode}}</span> {{ end }}<span>{{.Addr.City}}</span></span></p>
 {{ end }}
 <a href="{{.Url}}" title="Veranstaltungen von {{.Name}} anzeigen">
-	<p itemprop="description">{{.HtmlDescription}}</p>
+	<p>{{.HtmlDescription}}</p>
 </a>
 	<p><a href="{{.Url}}" title="Veranstaltungen von {{.Name}} anzeigen" class="highlight"><span class="fa fa-caret-right"></span> Alle Veranstaltungen</a></p>
 {{if .Web}}
