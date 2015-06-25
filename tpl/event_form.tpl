@@ -24,6 +24,11 @@
 					<input type="hidden" name="image" id="event-Image" value="{{.event.Image}}">
 				</div>
 			</div>
+			<div class="form-group">
+				<div class="col-xs-12">
+					<input name="credit" type="text" id="event-ImageCredit" class="form-control" placeholder="Bildrechte, falls das Bild nicht von Dir angefertigt wurde" value="{{.event.ImageCredit}}">
+				</div>
+			</div>
 			<hr>
 			<div class="form-group">
 				<div class="col-xs-12" style="margin-left: 10px">

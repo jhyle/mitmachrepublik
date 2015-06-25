@@ -230,6 +230,7 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 	date.Start = event.Start.Local()
 	date.End = event.End.Local()
 	date.Image = event.Image
+	date.ImageCredit = event.ImageCredit
 	date.Targets = event.Targets
 	date.Categories = event.Categories
 	date.Descr = event.Descr

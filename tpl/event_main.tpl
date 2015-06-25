@@ -10,7 +10,12 @@
 	{{with .event}}<div class="col-xs-7">
 		<div class="pull-left" style="margin-right: 5px; margin-bottom: 10px">
 			{{if .Image}}
-				<a href="{{.Web}}" title="Webseite der Veranstaltung aufrufen" target="_blank"><img style="margin-right: 10px; margin-bottom: 15px" src="/bild/{{.Image}}?width=300" alt="Veranstaltung {{.Title}}"></a>
+				<a href="{{.Web}}" title="Webseite der Veranstaltung aufrufen" target="_blank">
+					<img style="margin-right: 10px; margin-bottom: 15px" src="/bild/{{.Image}}?width=300" alt="Veranstaltung {{.Title}}">
+				</a>
+			{{end}}
+			{{if .ImageCredit}}
+				<div class="credits">{{.ImageCredit}}</div>
 			{{end}}
 			{{ if not .Addr.IsEmpty }}
 			<a href="http://maps.google.de/maps?hl=de&q={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&ie=UTF8" target="_blank" title="In Google Maps öffnen">

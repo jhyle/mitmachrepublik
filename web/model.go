@@ -22,17 +22,18 @@ type (
 	}
 
 	User struct {
-		Id         bson.ObjectId `bson:"_id" json:",omitempty"`
-		Name       string
-		Email      string
-		Pwd        string
-		Image      string
-		Categories []int
-		Descr      string
-		Web        string
-		Addr       Address
-		AGBs       bool
-		Approved   bool
+		Id          bson.ObjectId `bson:"_id" json:",omitempty"`
+		Name        string
+		Email       string
+		Pwd         string
+		Image       string
+		ImageCredit string
+		Categories  []int
+		Descr       string
+		Web         string
+		Addr        Address
+		AGBs        bool
+		Approved    bool
 	}
 
 	Session struct {
@@ -61,6 +62,7 @@ type (
 		OrganizerId bson.ObjectId `json:",omitempty"`
 		Title       string
 		Image       string
+		ImageCredit string
 		Descr       string
 		Web         string
 		Targets     []int
@@ -80,6 +82,7 @@ type (
 		OrganizerId bson.ObjectId
 		Title       string
 		Image       string
+		ImageCredit string
 		Descr       string
 		Web         string
 		Targets     []int

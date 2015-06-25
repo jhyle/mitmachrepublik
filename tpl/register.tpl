@@ -21,6 +21,11 @@
 				<input type="hidden" name="image" id="register-Image">
 			</div>
 		</div>
+		<div class="form-group">
+			<div class="col-xs-12">
+				<input name="credit" type="text" id="register-ImageCredit" class="form-control" placeholder="Bildrechte, falls das Bild nicht von Dir angefertigt wurde">
+			</div>
+		</div>
 		<hr>
 		<div class="form-group">
 			<div class="col-xs-12" style="margin-left: 10px">

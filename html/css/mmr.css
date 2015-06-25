@@ -222,6 +222,13 @@ p.icon-text {
 	font-size: 17px;
 	padding: 0 10px 15px 10px;
 }
+.credits {
+	position: relative;
+	top: -10px;
+	font-size: 13px;
+	margin: 0;
+	max-width: 300px;
+}
 .thumbnail .fa-gear {
 	text-align: center;
 	color: white;

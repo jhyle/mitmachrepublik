@@ -20,6 +20,11 @@
 					<input type="hidden" name="image" id="profile-Image" value="{{.user.Image}}">
 				</div>
 			</div>
+			<div class="form-group">
+				<div class="col-xs-12">
+					<input name="credit" type="text" id="profile-ImageCredit" class="form-control" placeholder="Bildrechte, falls das Bild nicht von Dir angefertigt wurde" value="{{.user.ImageCredit}}">
+				</div>
+			</div>
 			<hr>
 			<div class="form-group">
 				<div class="col-xs-12" style="margin-left: 10px">

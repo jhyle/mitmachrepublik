@@ -160,7 +160,7 @@ function validateSendMailForm(id)
 function gatherProfileForm(id)
 {
 	var data = {};
-	var user_fields = ["Name", "Email", "Pwd", "Image", "Web"];
+	var user_fields = ["Name", "Email", "Pwd", "Image", "ImageCredit", "Web"];
 	for (var i = 0, len = user_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + user_fields[i]).length) {
 			data[user_fields[i]] = $("#" + id + "-" + user_fields[i]).val();
@@ -187,7 +187,7 @@ function gatherProfileForm(id)
 function gatherEventForm(id)
 {
 	var data = {};
-	var event_fields = ["Id", "Title", "Start", "End", "Image", "Web"];
+	var event_fields = ["Id", "Title", "Start", "End", "Image", "ImageCredit", "Web"];
 	for (var i = 0, len = event_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + event_fields[i]).length) {
 			data[event_fields[i]] = $("#" + id + "-" + event_fields[i]).val();

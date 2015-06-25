@@ -813,6 +813,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			event.End = oldEvent.End
 			event.Rsvp = oldEvent.Rsvp
 			event.Image = oldEvent.Image
+			event.ImageCredit = oldEvent.ImageCredit
 			event.Targets = oldEvent.Targets
 			event.Categories = oldEvent.Categories
 			event.Descr = oldEvent.Descr
@@ -983,6 +984,7 @@ func (app *MmrApp) profileHandler(w traffic.ResponseWriter, r *traffic.Request) 
 
 		user.Name = data.Name
 		user.Image = data.Image
+		user.ImageCredit = data.ImageCredit
 		user.Categories = data.Categories
 		user.Descr = data.Descr
 		user.Web = data.Web

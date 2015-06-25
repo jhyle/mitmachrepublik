@@ -1,7 +1,12 @@
 {{with (or .user .organizer)}}
 <a href="{{.Url}}" title="Veranstaltungen von {{.Name}} anzeigen">
 	<h3 style="font-weight: normal">{{.Name}}</h3>
-	{{if .Image}}<p><img src="/bild/{{.Image}}?width=250" alt="Logo {{.Name}}" class="img-responsive" /></p>{{end}}
+	{{if .Image}}<p>
+		<img src="/bild/{{.Image}}?width=250" alt="Logo {{.Name}}" class="img-responsive" />
+	</p>{{end}}
+	{{if .ImageCredit}}
+		<p class="credits">{{.ImageCredit}}</p>
+	{{end}}
 </a>
 {{ if not .Addr.IsEmpty }}
 	<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
