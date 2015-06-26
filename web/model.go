@@ -58,22 +58,23 @@ type (
 	}
 
 	Event struct {
-		Id          bson.ObjectId `bson:"_id" json:",omitempty"`
-		OrganizerId bson.ObjectId `json:",omitempty"`
-		Title       string
-		Image       string
-		ImageCredit string
-		Descr       string
-		Web         string
-		Targets     []int
-		Categories  []int
-		Start       time.Time
-		End         time.Time `json:",omitempty"`
-		Recurrency  Recurrence
-		Weekly      WeeklyRecurrence  `json:",omitempty"`
-		Monthly     MonthlyRecurrence `json:",omitempty"`
-		Rsvp        bool
-		Addr        Address
+		Id            bson.ObjectId `bson:"_id" json:",omitempty"`
+		OrganizerId   bson.ObjectId `json:",omitempty"`
+		Title         string
+		Image         string
+		ImageCredit   string
+		Descr         string
+		Web           string
+		Targets       []int
+		Categories    []int
+		Start         time.Time
+		End           time.Time `json:",omitempty"`
+		Recurrency    Recurrence
+		RecurrencyEnd time.Time         `json:",omitempty"`
+		Weekly        WeeklyRecurrence  `json:",omitempty"`
+		Monthly       MonthlyRecurrence `json:",omitempty"`
+		Rsvp          bool
+		Addr          Address
 	}
 
 	Date struct {

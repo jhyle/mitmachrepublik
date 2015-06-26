@@ -244,7 +244,10 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 	}
 
 	if event.Recurrency != NoRecurrence {
-		timeHorizon := now.Add(366 * 24 * time.Hour)
+		timeHorizon := event.RecurrencyEnd
+		if timeHorizon.IsZero() {
+			timeHorizon = now.Add(366 * 24 * time.Hour)
+		}
 
 		var dateDuration time.Duration = 0
 		if !date.End.IsZero() {
@@ -277,7 +280,7 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 						day = day.Add(24 * time.Hour)
 					}
 					date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
-					if !date.Start.Before(now) {
+					if !date.Start.Before(now) && date.Start.Before(timeHorizon) {
 						if dateDuration != 0 {
 							date.End = date.Start.Add(dateDuration)
 						}
@@ -306,7 +309,7 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 					day = days[event.Monthly.Week]
 				}
 				date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
-				if !date.Start.Before(now) {
+				if !date.Start.Before(now) && date.Start.Before(timeHorizon) {
 					if dateDuration != 0 {
 						date.End = date.Start.Add(dateDuration)
 					}

@@ -820,6 +820,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			event.Addr = oldEvent.Addr
 			event.Web = oldEvent.Web
 			event.Recurrency = oldEvent.Recurrency
+			event.RecurrencyEnd = oldEvent.RecurrencyEnd
 			event.Monthly = oldEvent.Monthly
 			event.Weekly = oldEvent.Weekly
 		} else {

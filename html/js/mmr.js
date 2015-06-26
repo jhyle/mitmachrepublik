@@ -187,7 +187,7 @@ function gatherProfileForm(id)
 function gatherEventForm(id)
 {
 	var data = {};
-	var event_fields = ["Id", "Title", "Start", "End", "Image", "ImageCredit", "Web"];
+	var event_fields = ["Id", "Title", "Start", "End", "RecurrencyEnd", "Image", "ImageCredit", "Web"];
 	for (var i = 0, len = event_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + event_fields[i]).length) {
 			data[event_fields[i]] = $("#" + id + "-" + event_fields[i]).val();
@@ -205,6 +205,11 @@ function gatherEventForm(id)
 		data["End"] = str2date(data["End"]);
 	} else {
 		delete data["End"];
+	}
+	if (data["RecurrencyEnd"].length > 0) {
+		data["RecurrencyEnd"] = str2date(data["RecurrencyEnd"]);
+	} else {
+		delete data["RecurrencyEnd"];
 	}
 
 	data["Rsvp"] = $("#" + id + "-Rsvp").is(':checked');	
@@ -676,12 +681,15 @@ $(function() {
 		if (this.value == "weekly") {
 			$("#event-monthly").hide();
 			$("#event-weekly").show();
+			$("#event-recurrencyEnd").show();
 		} else if (this.value == "monthly") {
 			$("#event-weekly").hide();
 			$("#event-monthly").show();
+			$("#event-recurrencyEnd").show();
 		} else {
 			$("#event-weekly").hide();
 			$("#event-monthly").hide();
+			$("#event-recurrencyEnd").hide();
 		}
 	});
 
