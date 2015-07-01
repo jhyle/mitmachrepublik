@@ -1389,6 +1389,7 @@ func (app *MmrApp) Start() {
 	router.Get("/dialog/register", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "register.tpl", "") })
 	router.Get("/dialog/sendevent/:id", app.sendEventPage)
 	router.Get("/dialog/emailalert/:place/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.emailAlertPage)
+	router.Get("/dialog/emailalert//:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.emailAlertPage)
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)
