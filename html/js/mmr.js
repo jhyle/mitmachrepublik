@@ -88,6 +88,14 @@ function initEventForm(id)
 	$("#" + id + "-Pcode").focus(function () { $("#" + id + "-Pcode").popover('hide'); });
 }
 
+function initEmailAlertForm(id)
+{
+	$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto"});
+	$("#" + id + "-Email").focus(function () { $("#" + id + "-Email").popover('hide'); });
+	$("#" + id + "-Weekday").popover({content: "Bitte wähle mindestens einen Wochentag aus.", trigger: "manual", placement: "auto"});
+	$("#" + id + "-Weekday").focus(function () { $("#" + id + "-Weekday").popover('hide'); });
+}
+
 function initSendMailForm(id)
 {
 	$("#" + id + "-Email").popover({content: "Bitte gib eine gültige E-Mail-Adresse ein.", trigger: "manual", placement: "auto"});
@@ -147,6 +155,13 @@ function validateEventForm(id)
 	ok &= validate($("#" + id +"-Pcode").val().trim().length == 0 || PcodePattern.test($("#" + id +"-Pcode").val()), "#" + id +"-Pcode");
 	ok &= validate($("input[name=" + id + "-Target]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Target");
 	ok &= validate($("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Category");
+	return ok;
+}
+
+function validateEmailAlertForm(id)
+{
+	var ok = validate(EmailPattern.test($("#" + id +"-Email").val()), "#" + id +"-Email");
+	ok &= validate($("input[name=" + id + "-Weekday]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Weekday");
 	return ok;
 }
 
@@ -251,6 +266,47 @@ function gatherEventForm(id)
 	categories = $("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get();
 	for (i = 0; i < categories.length; i++) {
 		data["Categories"][i] = parseInt(categories[i]);
+	}
+	
+	return data;
+}
+
+function gatherEmailAlertForm(id) {
+	
+	var data = {};
+	var alert_fields = ["Name", "Email", "Place", "Targets", "Categories", "Dates", "Radius"];
+	for (var i = 0, len = alert_fields.length; i < len; i++) {
+		if ($("#" + id + "-" + alert_fields[i]).length) {
+			data[alert_fields[i]] = $("#" + id + "-" + alert_fields[i]).val();
+		}
+	}
+
+	if (data["Targets"].length > 0) {
+		data["Targets"] = data["Targets"].split(",");
+		for (i = 0; i < data["Targets"].length; i++) {
+			data["Targets"][i] = parseInt(data["Targets"][i]);
+		}
+	}
+	if (data["Categories"].length > 0) {
+		data["Categories"] = data["Categories"].split(",");
+		for (i = 0; i < data["Categories"].length; i++) {
+			data["Categories"][i] = parseInt(data["Categories"][i]);
+		}
+	}
+	if (data["Dates"].length > 0) {
+		data["Dates"] = data["Dates"].split(",");
+		for (i = 0; i < data["Dates"].length; i++) {
+			data["Dates"][i] = parseInt(data["Dates"][i]);
+		}
+	}
+	if (data["Dates"].length > 0) {
+		data["Radius"] = parseInt(data["Radius"]);
+	}
+
+	data["Weekdays"] = new Array();
+	weekdays = $("input[name=" + id + "-Weekday]:checked").map(function () {return this.value;}).get();
+	for (i = 0; i < weekdays.length; i++) {
+		data["Weekdays"][i] = parseInt(weekdays[i]);
 	}
 	
 	return data;
@@ -520,7 +576,7 @@ $(function() {
 					$.cookie("SESSIONID", sessionid, {path: '/'});
 					$("#registered").load("/dialog/registered").modal("show");
 				},
-				error : function(result) {
+				error: function(result) {
 					if (result.status == 409) {
 						alert("Die E-Mail-Adresse ist schon registriert. Bitte wähle eine andere.");
 					} else if (result.status == 400) {
@@ -550,7 +606,7 @@ $(function() {
 					alert("Deine Nachricht wurde verschickt.")
 					$("#mail").modal("hide");
 				},
-				error : function() {
+				error: function() {
 					$("#send-mail-submit").button('reset');
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
@@ -574,7 +630,7 @@ $(function() {
 					alert("Deine Nachricht wurde verschickt.")
 					$("#share").modal("hide");
 				},
-				error : function() {
+				error: function() {
 					$("#send-event-submit").button('reset');
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
@@ -582,6 +638,30 @@ $(function() {
 		});
 		
 	    $("#share input").first().focus();
+	});
+	
+	$("#email-alert").on('shown.bs.modal', function () {
+		initEmailAlertForm("email-alert");
+		
+		$("#email-alert-form").submit(function (e) {
+			e.preventDefault();
+			if (!validateEmailAlertForm("email-alert")) return;
+			$("#email-alert-submit").button('loading');
+			var data = gatherEmailAlertForm("email-alert");
+			$.ajax({cache: false, url : "/emailalert", type: "POST", data : JSON.stringify(data),
+				success: function() {
+					$("#email-alert-submit").button('reset');
+					alert("Danke! Du kannst Dir beliebig viele weitere Suchergebnisse zusenden lassen.")
+					$("#email-alert").modal("hide");
+				},
+				error: function() {
+					$("#email-alert-submit").button('reset');
+					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+				}
+			});
+		});
+		
+	    $("#email-alert input").first().focus();
 	});
 	
 	$("#delete-profile").click(function(e) {
@@ -592,7 +672,7 @@ $(function() {
 					$.removeCookie("SESSIONID", {path: '/'});
 					window.location.href = "/";
 				},
-				error : function() {
+				error: function() {
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
 			});
@@ -607,7 +687,7 @@ $(function() {
 				$("#send-double-opt-in").button('reset');
 				alert("Die E-Mail wurde versendet. Bitte überprüfe Dein Postfach und klicke auf den Link in der Mail.")
 			},
-			error : function() {
+			error: function() {
 				$("#send-double-opt-in").button('reset');
 				alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 			}
@@ -621,7 +701,7 @@ $(function() {
 				success: function() {
 					window.location.reload();
 				},
-				error : function() {
+				error: function() {
 					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 				}
 			});

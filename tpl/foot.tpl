@@ -18,9 +18,9 @@
 	<div class="col-xs-2 col-foot">
 	  <ul>
 	    <li><h5>Veranstaltungen in..</h5></li>
-	    <li><a href="/veranstaltungen/{{eventSearchUrl "Berlin"}}">Berlin</a></li>
+	    <li><a href="/veranstaltungen/{{simpleEventSearchUrl "Berlin"}}">Berlin</a></li>
 	    {{range $district, $quarters := .districts}}
-	    	<li><a href="/veranstaltungen/{{eventSearchUrl $district}}">{{cut $district 1}}</a></li>
+	    	<li><a href="/veranstaltungen/{{simpleEventSearchUrl $district}}">{{cut $district 1}}</a></li>
 	    {{end}}
 	  </ul>
 	</div>
@@ -59,5 +59,5 @@
 		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	{{noescape "<![endif]-->"}}
-	<script src="/js/scripts-11.js"></script>
+	<script src="/js/scripts-12.js"></script>
 </body> </html>

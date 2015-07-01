@@ -1,3 +1,8 @@
+{{if not $.user }}
+<div style="margin-bottom: 10px">
+	<a class="highlight" href="/dialog/emailalert/{{eventSearchUrl .place .targetIds .categoryIds .dateIds .radius}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Lass Dir die Veranstaltungen per E-Mail zusenden."><span class="fa fa-caret-right"></span> Suchergebnisse per E-Mail zusenden</a>
+</div>
+{{end}}
 {{$n := len .events}}
 {{if eq $n 0}}
 <div class="row-tile">
@@ -5,27 +10,27 @@
 </div>
 {{else}}
 {{range .events}}
-<div class="row-tile" itemprop="event" itemscope itemtype="http://schema.org/Event">
+<div class="row-tile">
 	{{if not $.user }}
-		<a href="{{.Url}}" itemprop="url" title="Veranstaltung anzeigen">
+		<a href="{{.Url}}" title="Veranstaltung anzeigen">
 	{{end}}
 	{{if .Image}}
 		<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
-		<img class="pull-left" itemprop="image" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
+		<img class="pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
 	{{end}}
 	<div class="tile-text">
 		{{ if $.user }}
 			<p class="pull-right"><a href="#" name="delete-event" title="Löschen" data-target="{{.Id.Hex}}" class="close"><span class="fa fa-times"></span></a></p>
 		{{ end }}
-		<h3 itemprop="name">{{.Title}}</h3>
-		<p class="datetime" itemprop="startDate" content="{{iso8601Format .Start}}">{{datetimeFormat .Start}}{{if dateFormat .End}}<span itemprop="endDate" content="{{iso8601Format .End}}"> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizerNames}}{{if ne (index $.organizerNames .OrganizerId) ("Mitmach-Republik")}} - {{index $.organizerNames .OrganizerId}}{{end}}{{end}}</p>
+		<h3>{{.Title}}</h3>
+		<p class="datetime">{{datetimeFormat .Start}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizerNames}}{{if ne (index $.organizerNames .OrganizerId) ("Mitmach-Republik")}} - {{index $.organizerNames .OrganizerId}}{{end}}{{end}}</p>
 		{{ if $.user }}
 			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung/{{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Bearbeiten</a></p>
 		{{end}}
-		<p itemprop="description">{{strClip .PlainDescription 100}}</p>
+		<p>{{strClip .PlainDescription 100}}</p>
 		{{ if not .Addr.IsEmpty }}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
-			<p class="pull-left place" itemprop="location" itemscope itemtype="http://schema.org/Place">{{ if .Addr.Name }}<span itemprop="name">{{.Addr.Name}}</span><br />{{ end }}<span class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">{{ if .Addr.Street }}<span itemprop="streetAddress">{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span itemprop="postalCode">{{.Addr.Pcode}}</span> {{ end }}<span itemprop="addressLocality">{{citypartName .Addr}}</span></span></p>
+			<p class="pull-left place">{{ if .Addr.Name }}<span>{{.Addr.Name}}</span><br />{{ end }}<span class="address">{{ if .Addr.Street }}<span>{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span>{{.Addr.Pcode}}</span> {{ end }}<span>{{citypartName .Addr}}</span></span></p>
 		{{ end }}
 		{{ if $.user }}
 			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung?copy={{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Kopieren</a></p>

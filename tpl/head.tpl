@@ -63,8 +63,14 @@
 			</div>
 		</div>
 	</div>
+	<div class="modal fade" id="email-alert" tabindex="-5" role="dialog" aria-labelledby="email-alert-dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+			</div>
+		</div>
+	</div>
 {{if .event}}
-	<div class="modal fade" id="share" tabindex="-5" role="dialog" aria-labelledby="email-dialog" aria-hidden="true">
+	<div class="modal fade" id="share" tabindex="-6" role="dialog" aria-labelledby="email-dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 			</div>
@@ -76,7 +82,7 @@
 			<div class="col-xs-1">&nbsp;</div>
 			<div class="col-xs-3 col-head"><a href="/" title="Zur Startseite"><img src="/images/mitmachrepublik.png" style="max-width:80%" alt="Logo Mitmach-Republik"/></a></div>
 			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist ein Organisator?</span><br /><a id="head-events" href="/dialog/login" title="Melde Dich an, um Deine Veranstaltungen einzutragen." rel="nofollow" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Finde kostenlos Mitmacher.</a></div>
+			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist ein Organisator?</span><br /><a id="head-events" href="/dialog/login" title="Melde Dich an, um Deine Veranstaltungen einzutragen." rel="nofollow" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Finde kostenlos Mitmacher</a></div>
 			<div class="col-xs-1">&nbsp;</div>
 			<div class="col-xs-2 col-head"><!-- a href="#">Über uns</a--><a class="highlight" title="Like uns auf Facebook." href="https://www.facebook.com/mitmachrepublik" target="_blank"><span class="fa fa-facebook"></span></a> <a class="highlight" title="Folge uns auf twitter." href="https://twitter.com/mitmachrepublik" target="_blank"><span class="fa fa-twitter"></span></a> | <a href="/dialog/contact" rel="nofollow" title="Schreibe uns eine Nachricht." data-toggle="modal" data-target="#mail">Kontakt</a><br><a id="head-login" href="/dialog/login" rel="nofollow" data-toggle="modal" data-target="#login" title="Melde Dich an, um Deine Veranstaltungen einzutragen."><span class="fa fa-user highlight"></span> Veranstalter-Login</a></div>
 			<div class="col-xs-1">&nbsp;</div>

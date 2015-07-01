@@ -21,6 +21,7 @@ type (
 		database     Database
 		users        *UserService
 		events       *EventService
+		alerts       *AlertService
 		ga_code      string
 		hostname     string
 		emailAccount *EmailAccount
@@ -100,26 +101,32 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
+	alerts, err := NewAlertService(database, "alert")
+	if err != nil {
+		return nil, errors.New("init of database failed: " + err.Error())
+	}
+
 	funcs := map[string]interface{}{
-		"inc":                inc,
-		"dec":                dec,
-		"cut":                cut,
-		"dateFormat":         dateFormat,
-		"timeFormat":         timeFormat,
-		"datetimeFormat":     datetimeFormat,
-		"iso8601Format":      iso8601Format,
-		"noescape":           noescape,
-		"strClip":            strClip,
-		"categoryIcon":       categoryIcon,
-		"targetTitle":        targetTitle,
-		"categoryTitle":      categoryTitle,
-		"targetSearchUrl":    targetSearchUrl,
-		"categorySearchUrl":  categorySearchUrl,
-		"districtName":       districtName,
-		"citypartName":       citypartName,
-		"encodePath":         encodePath,
-		"eventSearchUrl":     simpleEventSearchUrl,
-		"organizerSearchUrl": simpleOrganizerSearchUrl,
+		"inc":                  inc,
+		"dec":                  dec,
+		"cut":                  cut,
+		"dateFormat":           dateFormat,
+		"timeFormat":           timeFormat,
+		"datetimeFormat":       datetimeFormat,
+		"iso8601Format":        iso8601Format,
+		"noescape":             noescape,
+		"strClip":              strClip,
+		"categoryIcon":         categoryIcon,
+		"targetTitle":          targetTitle,
+		"categoryTitle":        categoryTitle,
+		"targetSearchUrl":      targetSearchUrl,
+		"categorySearchUrl":    categorySearchUrl,
+		"districtName":         districtName,
+		"citypartName":         citypartName,
+		"encodePath":           encodePath,
+		"eventSearchUrl":       eventSearchUrl,
+		"organizerSearchUrl":   simpleOrganizerSearchUrl,
+		"simpleEventSearchUrl": simpleEventSearchUrl,
 	}
 
 	tpls, err := NewTemplates(tplDir+string(os.PathSeparator)+"*.tpl", funcs)
@@ -144,15 +151,16 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
-	services := make([]Service, 0, 3)
-	services = append(services, NewSessionService(60, database))
-	services = append(services, NewUpdateRecurrencesService(3600, events))
-	services = append(services, NewUnusedImgService(3600, database, imgServer))
+	services := make([]Service, 0, 5)
+	services = append(services, NewSessionService(3, database))
+	services = append(services, NewUpdateRecurrencesService(4, events))
+	services = append(services, NewUnusedImgService(4, database, imgServer))
+	services = append(services, NewSendAlertsService(5, alerts))
 	if env == "dev" {
-		services = append(services, NewSpawnEventsService(3600, database, events, imgServer))
+		services = append(services, NewSpawnEventsService(12, database, events, imgServer))
 	}
 
-	return &MmrApp{host, port, tpls, imgServer, database, users, events, ga_code, hostname, emailAccount, NewLocationTree(cities), services}, nil
+	return &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services}, nil
 }
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, data bson.M) *appResult {
@@ -536,6 +544,25 @@ func (app *MmrApp) sendEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		return app.view("sendevent.tpl", w, &meta, bson.M{"event": &event})
+	}()
+
+	app.handle(w, result)
+}
+
+func (app *MmrApp) emailAlertPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	meta := metaTags{"E-Mail-Benachrichtung - Mitmach-Republik", "", "", "", false}
+
+	result := func() *appResult {
+
+		data := bson.M{}
+		for key, value := range r.Params() {
+			if len(value) > 0 {
+				data[key] = value[0]
+			}
+		}
+
+		return app.view("emailalert.tpl", w, &meta, data)
 	}()
 
 	app.handle(w, result)
@@ -1163,6 +1190,28 @@ func (app *MmrApp) sendContactMailHandler(w traffic.ResponseWriter, r *traffic.R
 	app.handle(w, result)
 }
 
+func (app *MmrApp) emailAlertHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	result := func() *appResult {
+
+		var alert Alert
+		err := (&Request{r}).ReadJson(&alert)
+		if err != nil {
+			return resultBadRequest
+		}
+		
+		alert.Id = bson.NewObjectId()
+		err = app.alerts.Store(&alert)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return resultOK
+	}()
+
+	app.handle(w, result)
+}
+
 func (app *MmrApp) locationHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *appResult {
@@ -1339,6 +1388,7 @@ func (app *MmrApp) Start() {
 	router.Get("/dialog/login", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "login.tpl", "") })
 	router.Get("/dialog/register", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "register.tpl", "") })
 	router.Get("/dialog/sendevent/:id", app.sendEventPage)
+	router.Get("/dialog/emailalert/:place/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.emailAlertPage)
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)
@@ -1350,6 +1400,7 @@ func (app *MmrApp) Start() {
 	router.Post("/event", app.eventHandler)
 	router.Post("/sendeventmail", app.sendEventMailHandler)
 	router.Post("/sendcontactmail", app.sendContactMailHandler)
+	router.Post("/emailalert", app.emailAlertHandler)
 
 	router.Get("/location/:location", app.locationHandler)
 	router.Get("/eventcount/:place/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)

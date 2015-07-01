@@ -94,6 +94,18 @@ type (
 		Addr        Address
 	}
 
+	Alert struct {
+		Id         bson.ObjectId `bson:"_id"`
+		Name       string
+		Email      string
+		Place      string
+		Targets    []int
+		Categories []int
+		Dates      []int
+		Radius     int
+		Weekdays   []int
+	}
+
 	SearchResult interface {
 		SetCount(int)
 		SetStart(int)
@@ -355,6 +367,14 @@ func (session *Session) GetId() bson.ObjectId {
 
 func (session *Session) SetId(id bson.ObjectId) {
 	session.Id = id
+}
+
+func (alert *Alert) GetId() bson.ObjectId {
+	return alert.Id
+}
+
+func (alert *Alert) SetId(id bson.ObjectId) {
+	alert.Id = id
 }
 
 func (result *EventSearchResult) SetCount(count int) {

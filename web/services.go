@@ -16,9 +16,9 @@ type (
 	}
 
 	BasicService struct {
-		state    int
-		interval int
-		ticker   *time.Ticker
+		state int
+		hour  int
+		timer *time.Timer
 	}
 
 	SessionService struct {
@@ -37,6 +37,11 @@ type (
 		events *EventService
 	}
 
+	SendAlertsService struct {
+		BasicService
+		alerts *AlertService
+	}
+
 	SpawnEventsService struct {
 		BasicService
 		database  Database
@@ -51,9 +56,9 @@ const (
 	stopping
 )
 
-func NewSessionService(interval int, database Database) Service {
+func NewSessionService(hour int, database Database) Service {
 
-	return &SessionService{BasicService{idle, interval, nil}, database}
+	return &SessionService{NewBasicService(hour), database}
 }
 
 func (service *SessionService) Start() {
@@ -66,9 +71,9 @@ func (service *SessionService) serve() {
 	service.database.RemoveOldSessions(time.Duration(24) * time.Hour)
 }
 
-func NewUnusedImgService(interval int, database Database, imgServer string) Service {
+func NewUnusedImgService(hour int, database Database, imgServer string) Service {
 
-	return &UnusedImgService{BasicService{idle, interval, nil}, database, imgServer}
+	return &UnusedImgService{NewBasicService(hour), database, imgServer}
 }
 
 func (service *UnusedImgService) Start() {
@@ -134,9 +139,9 @@ func (service *UnusedImgService) serve() {
 	}
 }
 
-func NewUpdateRecurrencesService(interval int, events *EventService) Service {
+func NewUpdateRecurrencesService(hour int, events *EventService) Service {
 
-	return &UpdateRecurrencesService{BasicService{idle, interval, nil}, events}
+	return &UpdateRecurrencesService{NewBasicService(hour), events}
 }
 
 func (service *UpdateRecurrencesService) Start() {
@@ -149,9 +154,23 @@ func (service *UpdateRecurrencesService) serve() {
 	service.events.UpdateRecurrences()
 }
 
-func NewSpawnEventsService(interval int, database Database, events *EventService, imgServer string) Service {
+func NewSendAlertsService(hour int, alerts *AlertService) Service {
 
-	return &SpawnEventsService{BasicService{idle, interval, nil}, database, events, imgServer}
+	return &SendAlertsService{NewBasicService(hour), alerts}
+}
+
+func (service *SendAlertsService) Start() {
+
+	service.start(service.serve)
+}
+
+func (service *SendAlertsService) serve() {
+
+}
+
+func NewSpawnEventsService(hour int, database Database, events *EventService, imgServer string) Service {
+
+	return &SpawnEventsService{NewBasicService(hour), database, events, imgServer}
 }
 
 func (service *SpawnEventsService) Start() {
@@ -200,22 +219,40 @@ func (service *SpawnEventsService) serve() {
 	service.events.Store(event, organizer.Approved)
 }
 
+func NewBasicService(hour int) BasicService {
+
+	return BasicService{idle, hour, nil}
+}
+
+func timerDuration(hour int) time.Duration {
+
+	now := time.Now()
+	if now.Hour() >= hour {
+		now.Add(time.Duration(24) * time.Hour)
+	}
+	start := time.Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0, time.Local)
+	return start.Sub(now)
+}
+
 func (service *BasicService) start(serve func()) {
 
 	if service.state == idle {
-		service.ticker = time.NewTicker(time.Duration(service.interval) * time.Second)
+		service.timer = time.NewTimer(timerDuration(service.hour))
 		service.state = running
 	}
 
 	go func() {
-		for _ = range service.ticker.C {
-			if service.state == stopping {
+		for {
+			<-service.timer.C
+			if service.state == running {
+				serve()
+				service.timer.Reset(timerDuration(service.hour))
+			} else {
+				service.timer = nil
+				service.state = idle
 				break
 			}
-			serve()
 		}
-		service.ticker = nil
-		service.state = idle
 	}()
 }
 
