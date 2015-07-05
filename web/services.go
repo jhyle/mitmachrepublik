@@ -2,6 +2,7 @@ package mmr
 
 import (
 	"encoding/json"
+	"github.com/pilu/traffic"
 	"labix.org/v2/mgo/bson"
 	"math/rand"
 	"net/http"
@@ -226,27 +227,32 @@ func NewBasicService(hour int) BasicService {
 
 func timerDuration(hour int) time.Duration {
 
-	now := time.Now()
-	if now.Hour() >= hour {
-		now.Add(time.Duration(24) * time.Hour)
+	day := time.Now()
+	if day.Hour() >= hour {
+		day = day.AddDate(0, 0, 1)
 	}
-	start := time.Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0, time.Local)
-	return start.Sub(now)
+	start := time.Date(day.Year(), day.Month(), day.Day(), hour, 0, 0, 0, time.Local)
+	return start.Sub(time.Now())
 }
 
 func (service *BasicService) start(serve func()) {
 
 	if service.state == idle {
-		service.timer = time.NewTimer(timerDuration(service.hour))
+		duration := timerDuration(service.hour)
+		traffic.Logger().Printf("Starting timer for hour %v with duration %v.\n", service.hour, duration)
+		service.timer = time.NewTimer(duration)
 		service.state = running
 	}
 
 	go func() {
 		for {
 			<-service.timer.C
+			traffic.Logger().Printf("Fired timer for hour %v, running = %v.\n", service.hour, running)
 			if service.state == running {
 				serve()
-				service.timer.Reset(timerDuration(service.hour))
+				duration := timerDuration(service.hour)
+				traffic.Logger().Printf("Reseting timer for hour %v with duration %v.\n", service.hour, duration)
+				service.timer.Reset(duration)
 			} else {
 				service.timer = nil
 				service.state = idle
