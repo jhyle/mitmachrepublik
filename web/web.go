@@ -155,7 +155,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 	services = append(services, NewSessionService(3, database))
 	services = append(services, NewUpdateRecurrencesService(4, events))
 	services = append(services, NewUnusedImgService(4, database, imgServer))
-	services = append(services, NewSendAlertsService(5, alerts))
+	services = append(services, NewSendAlertsService(5, hostname, emailAccount, alerts))
 	if env == "dev" {
 		services = append(services, NewSpawnEventsService(12, database, events, imgServer))
 	}
@@ -359,6 +359,36 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 	app.handle(w, result)
 }
 
+func (app *MmrApp) nlUnsubscribe(w traffic.ResponseWriter, r *traffic.Request) {
+
+	meta := metaTags{
+		"Benachrichtigung abbestellen - Mitmach-Republik",
+		"Benachrichtigung abbestellen",
+		"http://" + app.hostname + "/images/mitmachrepublik.png",
+		"",
+		false,
+	}
+
+	result := func() *appResult {
+
+		var alert *Alert
+		var err error = nil
+
+		if bson.IsObjectIdHex(r.Param("id")) {
+			alert, err = app.alerts.Load(bson.ObjectIdHex(r.Param("id")))
+			if err == nil {
+				err = app.alerts.Delete(alert.Id)
+			}
+		} else {
+			err = errors.New("No email alert id given.")
+		}
+
+		return app.view("nl_unsubscribe.tpl", w, &meta, bson.M{"unsubscribed": err == nil})
+	}()
+
+	app.handle(w, result)
+}
+
 func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	pageSize := 10
@@ -457,6 +487,48 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			maxPage := pageCount - 1
 			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "targetIds": targetIds, "categoryIds": categoryIds, "noindex": true})
 		}
+	}()
+
+	app.handle(w, result)
+}
+
+func (app *MmrApp) nlEventsPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	alertId := r.Param("id")
+	
+	place := r.Param("place")
+	radius, err := strconv.Atoi(r.Param("radius"))
+	if err != nil {
+		radius = 0
+	}
+
+	dateIds := str2Int(strings.Split(r.Param("dateIds"), ","))
+	targetIds := str2Int(strings.Split(r.Param("targetIds"), ","))
+	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
+
+	result := func() *appResult {
+
+		result, err := app.events.SearchDates(place, timeSpans(dateIds), targetIds, categoryIds, false, 0, 1000, "start")
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+		
+		if result.Count == 0 {
+			return resultNotFound
+		}
+
+		organizerNames := make(map[bson.ObjectId]string)
+		for _, date := range result.Dates {
+			if _, found := organizerNames[date.OrganizerId]; !found {
+				user, err := app.users.Load(date.OrganizerId)
+				if err != nil {
+					return &appResult{Status: http.StatusInternalServerError, Error: err}
+				}
+				organizerNames[date.OrganizerId] = user.Name
+			}
+		}
+
+		return app.output("nl_events.tpl", w, "text/html", nil, bson.M{"alertId": alertId, "results": result.Count, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dateIds": dateIds, "targetIds": targetIds, "categoryIds": categoryIds})
 	}()
 
 	app.handle(w, result)
@@ -933,7 +1005,7 @@ func (app *MmrApp) uploadHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) sendEmail(to, replyTo *EmailAddress, subject, body string) error {
 
-	return SendEmail(app.emailAccount, to, replyTo, subject, body)
+	return SendEmail(app.emailAccount, to, replyTo, subject, "text/plain", body)
 }
 
 func (app *MmrApp) registerHandler(w traffic.ResponseWriter, r *traffic.Request) {
@@ -1199,7 +1271,7 @@ func (app *MmrApp) emailAlertHandler(w traffic.ResponseWriter, r *traffic.Reques
 		if err != nil {
 			return resultBadRequest
 		}
-		
+
 		alert.Id = bson.NewObjectId()
 		err = app.alerts.Store(&alert)
 		if err != nil {
@@ -1363,6 +1435,13 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstaltungen/:place/:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
 	router.Get("/veranstaltungen//:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
 
+	router.Get("/newsletter/veranstaltungen/:place/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
+	router.Get("/newsletter/veranstaltungen//:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
+
+	router.Get("/veranstaltung/:place/:targets/:categories/:date/:id/:title", app.eventPage)
+	router.Get("/veranstaltung//:targets/:categories/:date/:id/:title", app.eventPage)
+	router.Get("/veranstaltung/:place//:categories/:date/:id/:title", app.eventPage)
+	router.Get("/veranstaltung///:categories/:date/:id/:title", app.eventPage)
 	router.Get("/veranstaltung/:targets/:categories/:date/:id/:title", app.eventPage)
 	router.Get("/veranstaltung//:categories/:date/:id/:title", app.eventPage)
 	router.Get("/veranstaltung/:categories/:date/:id/:title", app.eventPage)
@@ -1371,6 +1450,8 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
 	router.Get("/veranstalter//:categoryIds/:categories/:page", app.organizersPage)
 
+	router.Get("/veranstalter/:place/:id/:title/:page", app.organizerPage)
+	router.Get("/veranstalter//:id/:title/:page", app.organizerPage)
 	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 
 	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "impressum.tpl", "Impressum") })
@@ -1402,6 +1483,7 @@ func (app *MmrApp) Start() {
 	router.Post("/sendeventmail", app.sendEventMailHandler)
 	router.Post("/sendcontactmail", app.sendContactMailHandler)
 	router.Post("/emailalert", app.emailAlertHandler)
+	router.Get("/newsletter/unsubscribe/:id", app.nlUnsubscribe)
 
 	router.Get("/location/:location", app.locationHandler)
 	router.Get("/eventcount/:place/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)

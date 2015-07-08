@@ -235,6 +235,17 @@ func int2Str(i []int) []string {
 	return a
 }
 
+func inArray(a []int, n int) bool {
+
+	for _, i := range a {
+		if i == n {
+			return true
+		}
+	}
+	
+	return false
+}
+
 func min(m, n int) int {
 
 	if m < n {

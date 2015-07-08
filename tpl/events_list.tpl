@@ -1,6 +1,6 @@
 {{if not $.user }}
 <div style="margin-bottom: 10px">
-	<a class="highlight" href="/dialog/emailalert/{{eventSearchUrl .place .targetIds .categoryIds .dateIds .radius}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Lass Dir die Veranstaltungen per E-Mail zusenden."><span class="fa fa-caret-right"></span> Suchergebnisse per E-Mail zusenden</a>
+	<a class="highlight" href="/dialog/emailalert/{{eventSearchUrl .place .targetIds .categoryIds .dateIds .radius}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Lass Dir die Veranstaltungen per E-Mail zusenden."><span class="fa fa-caret-right"></span> Veranstaltungen per E-Mail zusenden</a>
 </div>
 {{end}}
 {{$n := len .events}}

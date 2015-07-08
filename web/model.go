@@ -103,7 +103,7 @@ type (
 		Categories []int
 		Dates      []int
 		Radius     int
-		Weekdays   []int
+		Weekdays   []time.Weekday
 	}
 
 	SearchResult interface {
@@ -288,7 +288,7 @@ func (user *User) SetId(id bson.ObjectId) {
 
 func (user *User) Url() string {
 
-	return "/veranstalter/" + user.Id.Hex() + "/" + user.Name + "/0"
+	return "/veranstalter/" + citypartName(user.Addr) + "/" + user.Id.Hex() + "/" + user.Name + "/0"
 }
 
 func (user *User) HtmlDescription() template.HTML {
@@ -348,7 +348,7 @@ func (date *Date) Url() string {
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return "/veranstaltung/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/" + dateFormat(date.Start) + "/" + date.Id.Hex() + "/" + date.Title
+	return "/veranstaltung/" + citypartName(date.Addr) + "/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/" + dateFormat(date.Start) + "/" + date.Id.Hex() + "/" + date.Title
 }
 
 func (date *Date) HtmlDescription() template.HTML {

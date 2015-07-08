@@ -28,7 +28,7 @@ type (
 	}
 )
 
-func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, body string) error {
+func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, contentType, body string) error {
 
 	if account.From == nil {
 		return errors.New("You need to specify a From address.")
@@ -45,7 +45,7 @@ func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, body s
 		msg.SetAddressHeader("Reply-To", replyTo.Address, replyTo.Name)
 	}
 	msg.SetHeader("Subject", subject)
-	msg.SetBody("text/plain", body)
+	msg.SetBody(contentType, body)
 
 	mailer := gomail.NewMailer(account.EmailServer, account.Username, account.Password, account.Port)
 	return mailer.Send(msg)

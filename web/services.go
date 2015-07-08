@@ -3,10 +3,12 @@ package mmr
 import (
 	"encoding/json"
 	"github.com/pilu/traffic"
+	"io/ioutil"
 	"labix.org/v2/mgo/bson"
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -40,7 +42,9 @@ type (
 
 	SendAlertsService struct {
 		BasicService
-		alerts *AlertService
+		hostname string
+		from     *EmailAccount
+		alerts   *AlertService
 	}
 
 	SpawnEventsService struct {
@@ -55,6 +59,18 @@ const (
 	idle int = iota
 	running
 	stopping
+)
+
+var (
+	alertSubject map[int]string = map[int]string{
+		FromNow:     "Alle Veranstaltungen",
+		Today:       "heute",
+		Tomorrow:    "morgen",
+		ThisWeek:    "diese Woche",
+		NextWeekend: "am Wochenende",
+		NextWeek:    "nächste Woche",
+		TwoWeeks:    "in den nächsten 14 Tagen",
+	}
 )
 
 func NewSessionService(hour int, database Database) Service {
@@ -102,18 +118,21 @@ func (service *UnusedImgService) serve() {
 
 	images, err := listImages(service.imgServer, 3600*24)
 	if err != nil {
+		traffic.Logger().Print(err)
 		return
 	}
 
 	var eventImages []string
 	err = service.database.Table("event").Distinct(nil, "image", &eventImages)
 	if err != nil {
+		traffic.Logger().Print(err)
 		return
 	}
 
 	var userImages []string
 	err = service.database.Table("user").Distinct(nil, "image", &userImages)
 	if err != nil {
+		traffic.Logger().Print(err)
 		return
 	}
 
@@ -134,9 +153,12 @@ func (service *UnusedImgService) serve() {
 
 		req, err := http.NewRequest("DELETE", service.imgServer+"/"+image, nil)
 		if err != nil {
-			return
+			traffic.Logger().Print(err)
 		}
-		http.DefaultClient.Do(req)
+		_, err = http.DefaultClient.Do(req)
+		if err != nil {
+			traffic.Logger().Print(err)
+		}
 	}
 }
 
@@ -152,12 +174,15 @@ func (service *UpdateRecurrencesService) Start() {
 
 func (service *UpdateRecurrencesService) serve() {
 
-	service.events.UpdateRecurrences()
+	err := service.events.UpdateRecurrences()
+	if err != nil {
+		traffic.Logger().Print(err)
+	}
 }
 
-func NewSendAlertsService(hour int, alerts *AlertService) Service {
+func NewSendAlertsService(hour int, hostname string, from *EmailAccount, alerts *AlertService) Service {
 
-	return &SendAlertsService{NewBasicService(hour), alerts}
+	return &SendAlertsService{NewBasicService(hour), hostname, from, alerts}
 }
 
 func (service *SendAlertsService) Start() {
@@ -165,8 +190,61 @@ func (service *SendAlertsService) Start() {
 	service.start(service.serve)
 }
 
+func getNewsletter(hostname string, alert Alert) (string, error) {
+
+	url := "/newsletter/veranstaltungen/" + eventSearchUrl(alert.Place, alert.Targets, alert.Categories, alert.Dates, alert.Radius)
+	resp, err := http.Get("http://" + hostname + url[0:strings.LastIndex(url, "/")+1] + alert.Id.Hex())
+	if err != nil || resp.StatusCode == 404 {
+		return "", err
+	}
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	return string(bytes), err
+}
+
+func getNewsletterSubject(dates []int) string {
+
+	if len(dates) == 0 {
+		return alertSubject[FromNow]
+	} else if inArray(dates, TwoWeeks) {
+		return "Veranstaltungen " + alertSubject[TwoWeeks]
+	} else {
+		i := 0
+		names := make([]string, len(dates))
+		for _, orderedDate := range DateOrder {
+			if orderedDate != FromNow && orderedDate != TwoWeeks {
+				for _, date := range dates {
+					if orderedDate == date {
+						names[i] = alertSubject[date]
+						i++
+						break
+					}
+				}
+			}
+		}
+		return "Veranstaltungen " + strConcat(names)
+	}
+}
+
 func (service *SendAlertsService) serve() {
 
+	alerts, err := service.alerts.FindAlerts(time.Now().Weekday())
+	if err != nil {
+		traffic.Logger().Print(err)
+		return
+	}
+
+	for _, alert := range alerts {
+		newsletter, err := getNewsletter(service.hostname, alert)
+		if err != nil {
+			traffic.Logger().Print(err)
+		} else if !isEmpty(newsletter) {
+			err = SendEmail(service.from, &EmailAddress{alert.Name, alert.Email}, service.from.From, getNewsletterSubject(alert.Dates), "text/html", newsletter)
+			if err != nil {
+				traffic.Logger().Print(err)
+			}
+		}
+	}
 }
 
 func NewSpawnEventsService(hour int, database Database, events *EventService, imgServer string) Service {
