@@ -194,7 +194,7 @@ func getNewsletter(hostname string, alert Alert) (string, error) {
 
 	url := "/newsletter/veranstaltungen/" + eventSearchUrl(alert.Place, alert.Targets, alert.Categories, alert.Dates, alert.Radius)
 	resp, err := http.Get("http://" + hostname + url[0:strings.LastIndex(url, "/")+1] + alert.Id.Hex())
-	if err != nil || resp.StatusCode == 404 {
+	if err != nil || resp.StatusCode != 200 {
 		return "", err
 	}
 

@@ -651,7 +651,7 @@ $(function() {
 			$.ajax({cache: false, url : "/emailalert", type: "POST", data : JSON.stringify(data),
 				success: function() {
 					$("#email-alert-submit").button('reset');
-					alert("Danke! Du kannst Dir beliebig viele weitere Suchergebnisse zusenden lassen.")
+					alert("Die Benachrichtigung wurde angelegt. Du bekommst jetzt regelmäßig Veranstaltungen für Deine Suche zugesendet.")
 					$("#email-alert").modal("hide");
 				},
 				error: function() {

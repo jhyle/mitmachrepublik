@@ -7,8 +7,11 @@
 </head>
 <body style="font-family: 'Open Sans',sans-serif; font-size: 15px; line-height: 1.42857; width: 650px; margin-left: auto; margin-right: auto">
 {{$n := len .events}}
-<img style="margin: 10px 30px 0 0; float: left !important; vertical-align: middle; border: 0 none; width: 200px" src="http://{{$.hostname}}/images/mitmachrepublik.png" alt="Logo Mitmach-Republik">
-<h1 style="color: #ff5100; font-size: 27px; margin: 10px 0 20px 0; vertical-align: middle; line-height: 2.5em">Deine Veranstaltungen</h1> 
+<a style="float: left !important; text-decoration: none;" href="http://{{$.hostname}}/" title="www.mitmachrepublik.de">
+	<img style="margin: 13px 30px 10px 0; vertical-align: middle; border: 0 none; width: 200px" src="http://{{$.hostname}}/images/mitmachrepublik.png" alt="Logo Mitmach-Republik">
+</a>
+<h1 style="color: #ff5100; font-size: 27px; margin: 10px 0 0 0; line-height: 2em">Deine Veranstaltungen</h1>
+<p style="margin: 0 0 10px 0">Klicke auf die Veranstaltungen für weitere Infos.</p>  
 {{range .events}}
 <div style="border: 1px solid #e6e6e6; margin-bottom: 15px; overflow: hidden; ">
 	<a style="color: #2f3030; text-decoration: none;" href="http://{{$.hostname}}{{.Url}}" title="Veranstaltung anzeigen">
