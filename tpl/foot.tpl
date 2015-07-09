@@ -17,7 +17,7 @@
 	</div>
 	<div class="col-xs-2 col-foot">
 	  <ul>
-	    <li><h5>Veranstaltungen in..</h5></li>
+	    <li><h5><a href="/veranstaltungen/{{simpleEventSearchUrl ""}}">Veranstaltungen</a> in..</h5></li>
 	    <li><a href="/veranstaltungen/{{simpleEventSearchUrl "Berlin"}}">Berlin</a></li>
 	    {{range $district, $quarters := .districts}}
 	    	<li><a href="/veranstaltungen/{{simpleEventSearchUrl $district}}">{{cut $district 1}}</a></li>
@@ -26,7 +26,7 @@
 	</div>
 	<div class="col-xs-2 col-foot">
 	  <ul>
-	    <li><h5>Organisatoren in..</h5></li>
+	    <li><h5><a href="/veranstalter/{{organizerSearchUrl ""}}">Organisatoren</a> in..</h5></li>
 	    <li><a href="/veranstalter/{{organizerSearchUrl "Berlin"}}">Berlin</a></li>
 	    {{range $district, $quarters := .districts}}
 	    	<li><a href="/veranstalter/{{organizerSearchUrl $district}}">{{cut $district 1}}</a></li>
