@@ -92,6 +92,13 @@ func (users *UserService) Load(id bson.ObjectId) (*User, error) {
 	return &user, err
 }
 
+func (users *UserService) FindUsers() ([]User, error) {
+
+	var result []User
+	err := users.table().Find(bson.M{}, &result, "name")
+	return result, err
+}
+
 func (users *UserService) Search(place string, categoryIds []int, page, pageSize int, sort string) (*OrganizerSearchResult, error) {
 
 	var result OrganizerSearchResult

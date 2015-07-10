@@ -12,7 +12,6 @@
 					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Wie heißt die Veranstaltung?" value="{{.event.Title}}" maxlength="40" autofocus></span>
 					<span><input name="start" type="datetime-local" id="event-Start" class="form-control form-datetime" placeholder="Beginnt" value="{{datetimeFormat .event.Start}}"></span>
 					<span><input name="end" type="datetime-local" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{datetimeFormat .event.End}}"></span>
-					<label class="checkbox-inline" style="margin-left: 12px"><input type="checkbox" name="rsvp" id="event-Rsvp" {{if .event.Rsvp}}checked{{end}}> Anmeldung erforderlich</label>
 				</div>
 				<div class="col-xs-4">
 					<a id="event-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
@@ -27,6 +26,14 @@
 			<div class="form-group">
 				<div class="col-xs-12">
 					<input name="credit" type="text" id="event-ImageCredit" class="form-control" placeholder="Bildrechte, falls das Bild nicht von Dir angefertigt wurde" value="{{.event.ImageCredit}}">
+					<label class="checkbox-inline" style="margin-left: 12px; padding-bottom: 9px"><input type="checkbox" name="rsvp" id="event-Rsvp" {{if .event.Rsvp}}checked{{end}}> Anmeldung erforderlich</label>
+					{{if .user.IsAdmin}}<div style="display: inline-block; margin-left: 20px;">
+						Veranstalter <select name="organizer" id="event-OrganizerId">
+						{{range $id, $name := .organizers}}
+						<option value="{{$id.Hex}}" {{if eq $id $.user.Id}}selected{{end}}>{{$name}}</option>
+						{{end}}
+						</select>
+					</div>{{end}}
 				</div>
 			</div>
 			<hr>

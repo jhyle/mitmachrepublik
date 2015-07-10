@@ -202,7 +202,7 @@ function gatherProfileForm(id)
 function gatherEventForm(id)
 {
 	var data = {};
-	var event_fields = ["Id", "Title", "Start", "End", "RecurrencyEnd", "Image", "ImageCredit", "Web"];
+	var event_fields = ["Id", "Title", "Start", "End", "RecurrencyEnd", "Image", "ImageCredit", "OrganizerId", "Web"];
 	for (var i = 0, len = event_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + event_fields[i]).length) {
 			data[event_fields[i]] = $("#" + id + "-" + event_fields[i]).val();

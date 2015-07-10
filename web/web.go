@@ -495,7 +495,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) nlEventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	alertId := r.Param("id")
-	
+
 	place := r.Param("place")
 	radius, err := strconv.Atoi(r.Param("radius"))
 	if err != nil {
@@ -512,7 +512,7 @@ func (app *MmrApp) nlEventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
-		
+
 		if result.Count == 0 {
 			return resultNotFound
 		}
@@ -577,7 +577,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			imageUrl = "http://" + app.hostname + "/bild/" + date.Image
 		}
 
-		title := "Veranstaltung " + date.Title
+		title := date.Title
 		title += " am " + dateFormat(date.Start)
 		if !isEmpty(place) {
 			title += " in " + place
@@ -887,6 +887,17 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultUnauthorized
 		}
 
+		organizers := make(map[bson.ObjectId]string)
+		if user.IsAdmin() {
+			users, err := app.users.FindUsers()
+			if err != nil {
+				return &appResult{Status: http.StatusInternalServerError, Error: err}
+			}
+			for _, user := range users {
+				organizers[user.Id] = user.Name
+			}
+		}
+
 		var event *Event
 		if bson.IsObjectIdHex(r.Param("id")) {
 
@@ -926,7 +937,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			event = new(Event)
 		}
 
-		return app.view("event_edit.tpl", w, &meta, bson.M{"user": user, "event": event})
+		return app.view("event_edit.tpl", w, &meta, bson.M{"user": user, "event": event, "organizers": organizers})
 	}()
 
 	app.handle(w, result)
@@ -1203,9 +1214,20 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 			created = true
 			event.Id = bson.NewObjectId()
 		}
-		event.OrganizerId = user.Id
 
-		err = app.events.Store(event, user.Approved)
+		if !user.IsAdmin() || !event.OrganizerId.Valid() {
+			event.OrganizerId = user.Id
+		}
+
+		organizer := user
+		if organizer.Id != event.OrganizerId {
+			organizer, err = app.users.Load(event.OrganizerId)
+			if err != nil {
+				return &appResult{Status: http.StatusInternalServerError, Error: err}
+			}
+		}
+
+		err = app.events.Store(event, organizer.Approved)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}

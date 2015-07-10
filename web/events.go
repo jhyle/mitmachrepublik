@@ -323,14 +323,30 @@ func (events *EventService) generateDates(event *Event, now time.Time) []Date {
 	return dates
 }
 
-func (events *EventService) Store(event *Event, syncDates bool) error {
+func (events *EventService) Store(event *Event, publish bool) error {
 
 	_, err := events.eventTable().UpsertById(event.Id, event)
 
-	if err == nil && syncDates {
+	if err == nil && publish {
+		var dates []Date
+		dates, err = events.FindDatesOfEvent(event.Id, "id")
+		for _, date := range dates {
+			if date.OrganizerId != event.OrganizerId {
+				date.OrganizerId = event.OrganizerId
+				events.StoreDate(&date)
+			}
+		}
 		err = events.SyncDates(event)
+	} else if !publish {
+		err = events.DeleteDatesOfEvent(event.Id)
 	}
+	
+	return err
+}
 
+func (events *EventService) StoreDate(date *Date) error {
+
+	_, err := events.dateTable().UpsertById(date.Id, date)
 	return err
 }
 
@@ -400,6 +416,12 @@ func (events *EventService) UpdateRecurrences() error {
 	}
 
 	return nil
+}
+
+func (events *EventService) DeleteDatesOfEvent(eventId bson.ObjectId) error {
+
+	query := bson.M{"eventid": eventId}
+	return events.dateTable().Delete(query)
 }
 
 func (events *EventService) DeleteDatesOfUser(userId bson.ObjectId) error {

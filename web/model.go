@@ -303,7 +303,7 @@ func (user *User) PlainDescription() string {
 
 func (user *User) IsAdmin() bool {
 
-	return user.Email == "admin@mitmachrepublik.de"
+	return user.Email == "mitmachrepublik@gmail.com"
 }
 
 func (addr Address) IsEmpty() bool {
