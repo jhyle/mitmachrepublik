@@ -594,7 +594,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			false,
 		}
 
-		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": date, "organizer": organizer, "recurrences": recurrences, "noindex": recurrences[0].Id != date.Id})
+		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": date, "organizer": organizer, "recurrences": recurrences, "noindex": len(recurrences) == 0 || recurrences[0].Id != date.Id})
 	}()
 
 	app.handle(w, result)
