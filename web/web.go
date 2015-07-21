@@ -8,6 +8,7 @@ import (
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -826,6 +827,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
+		sort.Strings(locations)
 
 		result, err := app.events.SearchEventsOfUser(user.Id, search, location, page, pageSize, "-start")
 		if err != nil {
