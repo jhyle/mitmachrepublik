@@ -811,7 +811,8 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		page = 0
 	}
 
-	query := r.Param("q")
+	search := r.Param("query")
+	location := r.Param("location")
 	meta := metaTags{"Verwaltung - Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
@@ -821,7 +822,12 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultUnauthorized
 		}
 
-		result, err := app.events.SearchEventsOfUser(user.Id, query, page, pageSize, "-start")
+		locations, err := app.events.Locations()
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		result, err := app.events.SearchEventsOfUser(user.Id, search, location, page, pageSize, "-start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -836,7 +842,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		return app.view("admin.tpl", w, &meta, bson.M{"user": user, "query": query, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events})
+		return app.view("admin.tpl", w, &meta, bson.M{"user": user, "query": search, "location": location, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "locations": locations})
 	}()
 
 	app.handle(w, result)

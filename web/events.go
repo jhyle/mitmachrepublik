@@ -108,6 +108,13 @@ func (events *EventService) Cities() ([]string, error) {
 	return cities, err
 }
 
+func (events *EventService) Locations() ([]string, error) {
+
+	var locations []string
+	err := events.eventTable().Distinct(bson.M{}, "addr.name", &locations)
+	return locations, err
+}
+
 func (events *EventService) buildQuery(place string, dates [][]time.Time, targetIds, categoryIds []int, withImagesOnly bool) bson.M {
 
 	query := make([]bson.M, 0, 5)
@@ -206,14 +213,21 @@ func (events *EventService) FindEventsOfUser(userId bson.ObjectId, sort string) 
 	return result, err
 }
 
-func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, search string, page, pageSize int, sort string) (*EventSearchResult, error) {
+func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, search, location string, page, pageSize int, sort string) (*EventSearchResult, error) {
 
 	var result EventSearchResult
 	var query bson.M
-	if isEmpty(search) {
+	if isEmpty(search) && isEmpty(location) {
 		query = bson.M{"organizerid": userId}
 	} else {
-		query = bson.M{"$and": []bson.M{bson.M{"organizerid": userId}, bson.M{"$text": bson.M{"$search": search, "$language": "de"}}}}
+		descr := []bson.M{bson.M{"organizerid": userId}}
+		if !isEmpty(search) {
+			descr = append(descr, bson.M{"$text": bson.M{"$search": search, "$language": "de"}})
+		}
+		if !isEmpty(location) {
+			descr = append(descr, bson.M{"addr.name": location})
+		}
+		query = bson.M{"$and": descr}
 	}
 	err := events.eventTable().Search(query, page*pageSize, pageSize, &result, sort)
 	return &result, err
