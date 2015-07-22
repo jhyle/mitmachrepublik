@@ -98,7 +98,12 @@ func strClip(s string, n int) string {
 		if runes == n {
 			clipped = s[:index]
 			if !strings.HasSuffix(clipped, ".") {
-				clipped = clipped[:strings.LastIndexAny(clipped, " ,\t\r\n")] + ".."
+				lastWhitespace := strings.LastIndexAny(clipped, " ,\t\r\n")
+				if lastWhitespace > 0 {
+					clipped = clipped[:lastWhitespace] + ".."
+				} else {
+					clipped += ".."
+				}
 			}
 			break
 		}
