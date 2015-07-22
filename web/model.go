@@ -3,7 +3,7 @@ package mmr
 import (
 	"github.com/kennygrant/sanitize"
 	"html/template"
-	"labix.org/v2/mgo/bson"
+	"gopkg.in/mgo.v2/bson"
 	"strings"
 	"time"
 )

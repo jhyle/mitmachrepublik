@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/pilu/traffic"
 	"io/ioutil"
-	"labix.org/v2/mgo/bson"
+	"gopkg.in/mgo.v2/bson"
 	"math/rand"
 	"net/http"
 	"strconv"

@@ -8,7 +8,7 @@
 		{{template "organizer_box.tpl" .}}
 	</div>
 	{{with .event}}<div class="col-xs-7">
-		<div class="pull-left" style="margin-right: 5px; margin-bottom: 10px">
+		<div class="pull-left" style="margin-right: 10px; margin-bottom: 10px">
 			{{if .Image}}
 				<a href="{{.Web}}" title="Webseite der Veranstaltung aufrufen" target="_blank">
 					<img style="margin-right: 10px; margin-bottom: 15px" src="/bild/{{.Image}}?width=300" alt="Veranstaltung {{.Title}}">
@@ -27,7 +27,7 @@
 			<a style="margin-right: 10px" href="https://www.facebook.com/sharer/sharer.php?u=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/facebook_share.png"></a>
 			<a style="margin-right: 10px" href="https://plus.google.com/share?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/google_share.png"></a>
 			<a href="http://twitter.com/intent/tweet?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/twitter_share.png"></a>
-			<div style="display: inline-block; float: right;"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> E-Mail</a></div>
+			<div style="display: inline-block; float: right;"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
 		</div>
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
 		<p class="icon-text date">{{dateFormat .Start}}</p>
@@ -59,7 +59,11 @@
 			<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
 			<p class="icon-text">{{range $i, $date := $.recurrences}}{{if $i}}, {{end}}<a class="highlight" title="{{$date.Title}} am {{dateFormat $date.Start}} in {{citypartName $date.Addr}}" href="{{$date.Url}}" rel="nofollow">{{cut (dateFormat $date.Start) 1}}</a>{{end}}</p>
 		{{end}}
-		<p style="font-weight: bolder">{{if .Web}}<a href="{{.Web}}" class="highlight" title="Webseite von {{.Title}}" target="_blank">{{end}}{{if .Web}}<span class="fa fa-caret-right"></span> {{end}}{{if .Rsvp}}Anmeldung erforderlich!{{if .Web}} Melde Dich auf der Webseite der Veranstaltung an.{{end}}{{else}}Keine Anmeldung erforderlich! Schaue einfach beim Treffen vorbei.{{end}}{{if .Web}}</a>{{end}}</p>
+		{{if .Web}}
+			<p class="small-icon pull-left"><span class="fa fa-external-link fa-fw" title="Webseite"></span></p>
+			<p class="icon-text date"><a href="{{.Web}}" class="highlight" title="Webseite von {{.Title}}" target="_blank">{{strClip .Web 30}}</a></p>
+		{{end}}
+		<p style="font-weight: bolder">{{if .Rsvp}}Anmeldung erforderlich!{{if .Web}} Melde Dich auf der Webseite der Veranstaltung an.{{end}}{{else}}Keine Anmeldung erforderlich! Schaue einfach beim Treffen vorbei.{{end}}</p>
 		<div class="description" style="margin: 15px 0 15px 0">{{.HtmlDescription}}</div>
 		<div class="clearfix"></div>
 		<div class="fb-comments" data-href="http://{{$.hostname}}{{.Url}}" data-width="100%" data-numposts="5" data-order-by="time" data-colorscheme="light"></div>

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pilu/traffic"
-	"labix.org/v2/mgo/bson"
+	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"os"
 	"sort"

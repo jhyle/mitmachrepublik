@@ -11,7 +11,7 @@
 	<div class="col-xs-7">
 		<form class="form-inline pull-left" role="form" action="0?">
 			<input type="text" name="query" class="form-control" style="margin-left: 0" placeholder="Veranstaltungen" value="{{.query}}">
-			von
+			in
 			<select name="location" style="margin-left: 10px; width: 230px">
 				<option value="">allen<option>
 				{{range $.locations}}
