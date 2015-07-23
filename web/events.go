@@ -392,6 +392,10 @@ func (events *EventService) Store(event *Event, publish bool) error {
 		err = events.DeleteDatesOfEvent(event.Id)
 	}
 
+	if err == nil {
+		err = events.index.Index(event.Id.Hex(), bson.M{"title": event.Title})
+	}
+
 	return err
 }
 
@@ -496,6 +500,9 @@ func (events *EventService) Delete(id bson.ObjectId) error {
 	err := events.dateTable().Delete(bson.M{"eventid": id})
 	if err == nil {
 		err = events.eventTable().DeleteById(id)
+	}
+	if err == nil {
+		err = events.index.Delete(id.Hex())
 	}
 	return err
 }
