@@ -11,7 +11,7 @@
 				<button name="login" type="submit" class="btn btn-mmr" style="width: 90%">Anmelden</button>
 			</div>
 			<div class="col-sm-5">
-			<div class="big-text">Ich bin neu hier und suche Mitmacher für meine nichtkommerziellen und gemeinschaftlichen Veranstaltungen.</div>						
+			<div class="big-text">Ich bin neu hier und suche Mitmacher für meine gemeinschaftlichen Veranstaltungen oder Projekte.</div>						
 				<button name="register" type="button" data-dismiss="modal" data-toggle="modal" data-target="#register" data-remote="/dialog/register" class="btn btn-mmr" style="margin-top: 18px; width: 90%">Kostenlos registrieren</button>
 			</div>
 		</div>
