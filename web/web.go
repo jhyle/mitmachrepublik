@@ -85,7 +85,7 @@ var (
 	resultConflict     = &appResult{Status: http.StatusConflict}
 )
 
-func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, dbName string) (*MmrApp, error) {
+func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName string) (*MmrApp, error) {
 
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
@@ -97,7 +97,7 @@ func NewMmrApp(env string, host string, port int, tplDir, imgServer, mongoUrl, d
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
-	events, err := NewEventService(database, "event", "date")
+	events, err := NewEventService(database, "event", "date", indexDir)
 	if err != nil {
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
@@ -1528,4 +1528,8 @@ func (app *MmrApp) Start() {
 	router.Delete("/event/:id", app.deleteEventHandler)
 
 	router.Run()
+}
+
+func (app *MmrApp) Stop() error {
+	return app.events.Stop()
 }

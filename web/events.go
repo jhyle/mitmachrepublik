@@ -1,7 +1,9 @@
 package mmr
 
 import (
+	"github.com/blevesearch/bleve"
 	"gopkg.in/mgo.v2/bson"
+	"os"
 	"time"
 )
 
@@ -10,10 +12,11 @@ type (
 		database       Database
 		eventTableName string
 		dateTableName  string
+		index          bleve.Index
 	}
 )
 
-func NewEventService(database Database, eventTableName, dateTableName string) (*EventService, error) {
+func NewEventService(database Database, eventTableName, dateTableName, indexDir string) (*EventService, error) {
 
 	err := database.Table(eventTableName).DropIndices()
 	if err != nil {
@@ -32,7 +35,7 @@ func NewEventService(database Database, eventTableName, dateTableName string) (*
 	if err != nil {
 		return nil, err
 	}
-	
+
 	err = database.Table(dateTableName).EnsureIndices([][]string{
 		{"start", "addr.city", "addr.pcode"},
 		{"eventid", "start"},
@@ -43,7 +46,7 @@ func NewEventService(database Database, eventTableName, dateTableName string) (*
 	for category := range []int{1, 2, 3, 4, 5, 6} {
 		query = append(query, bson.M{"category": category})
 	}
-	
+
 	var events []*Event
 	err = database.Table(eventTableName).Find(bson.M{"$or": query}, &events, "start")
 	if err != nil {
@@ -88,7 +91,28 @@ func NewEventService(database Database, eventTableName, dateTableName string) (*
 		}
 	}
 
-	return &EventService{database, eventTableName, dateTableName}, nil
+	os.RemoveAll(indexDir+string(os.PathSeparator)+"events.bleve")
+
+	mapping := bleve.NewIndexMapping()
+	mapping.DefaultAnalyzer = "de"
+	index, err := bleve.New(indexDir+string(os.PathSeparator)+"events.bleve", mapping)
+	if err != nil {
+		return nil, err
+	}
+
+	err = database.Table(eventTableName).Find(bson.M{}, &events, "start")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, event := range events {
+		err := index.Index(event.Id.Hex(), bson.M{"title": event.Title})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &EventService{database, eventTableName, dateTableName, index}, nil
 }
 
 func (events *EventService) eventTable() Table {
@@ -222,7 +246,20 @@ func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, search, loc
 	} else {
 		descr := []bson.M{bson.M{"organizerid": userId}}
 		if !isEmpty(search) {
-			descr = append(descr, bson.M{"$text": bson.M{"$search": search, "$language": "de"}})
+			fullTextSearch := bleve.NewSearchRequest(bleve.NewMatchQuery(search))
+			results, err := events.index.Search(fullTextSearch)
+			if err != nil {
+				return nil, err
+			}
+			if results.Total > 0 {
+				ids := make([]bson.ObjectId, results.Hits.Len())
+				for i, hit := range results.Hits {
+					ids[i] = bson.ObjectIdHex(hit.ID)
+				}
+				descr = append(descr, bson.M{"_id": bson.M{"$in": ids}})
+			} else {
+				return &result, err
+			}
 		}
 		if !isEmpty(location) {
 			descr = append(descr, bson.M{"addr.name": location})
@@ -354,7 +391,7 @@ func (events *EventService) Store(event *Event, publish bool) error {
 	} else if !publish {
 		err = events.DeleteDatesOfEvent(event.Id)
 	}
-	
+
 	return err
 }
 
@@ -461,4 +498,9 @@ func (events *EventService) Delete(id bson.ObjectId) error {
 		err = events.eventTable().DeleteById(id)
 	}
 	return err
+}
+
+func (events *EventService) Stop() error {
+
+	return events.index.Close()
 }
