@@ -10,8 +10,8 @@
 			<div class="form-group">
 				<div class="col-xs-7">
 					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Wie heißt die Veranstaltung?" value="{{.event.Title}}" maxlength="40" autofocus></span>
-					<span><input name="start" type="datetime-local" id="event-Start" class="form-control form-datetime" placeholder="Beginnt" value="{{datetimeFormat .event.Start}}"></span>
-					<span><input name="end" type="datetime-local" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{datetimeFormat .event.End}}"></span>
+					<span><input name="start" type="text" id="event-Start" class="form-control form-datetime" placeholder="Beginnt" value="{{datetimeFormat .event.Start}}"></span>
+					<span><input name="end" type="text" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{datetimeFormat .event.End}}"></span>
 				</div>
 				<div class="col-xs-4">
 					<a id="event-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
@@ -101,7 +101,7 @@
 			</div>
 			<div id="event-recurrencyEnd" class="form-group" style="{{if not (eq .event.Recurrency 1)}}display: none{{end}}">
 				<div class="col-xs-7">
-					<span><input name="recurrencyEnd" type="date" id="event-RecurrencyEnd" class="form-control form-datetime" placeholder="Wiederholung endet" value="{{datetimeFormat .event.RecurrencyEnd}}"></span>
+					<span><input name="recurrencyEnd" type="text" id="event-RecurrencyEnd" class="form-control form-datetime" placeholder="Wiederholung endet" value="{{datetimeFormat .event.RecurrencyEnd}}"></span>
 				</div>
 			</div>
 			<hr>
