@@ -7,26 +7,27 @@
 		<h3 style="margin-left: 10px">Veranstaltung {{ if .event.Id }}bearbeiten{{ else }}eintragen{{ end }}</h3>
 		<form role="form" id="event-upload" class="form-horizontal" action="/upload" method="POST">
 			{{if .event.Id }}<input type="hidden" id="event-Id" value="{{.event.Id.Hex}}">{{ end }}
-			<div class="form-group">
+			<div class="form-group" style="margin-bottom: 0">
 				<div class="col-xs-7">
 					<span><input name="title" type="text" id="event-Title" class="form-control" placeholder="Wie heißt die Veranstaltung?" value="{{.event.Title}}" maxlength="40" autofocus></span>
 					<span><input name="start" type="text" id="event-Start" class="form-control form-datetime" placeholder="Beginnt" value="{{datetimeFormat .event.Start}}"></span>
 					<span><input name="end" type="text" id="event-End" class="form-control form-datetime" placeholder="Endet" value="{{datetimeFormat .event.End}}"></span>
+					<label class="checkbox-inline" style="margin-left: 12px; padding-bottom: 9px"><input type="checkbox" name="rsvp" id="event-Rsvp" {{if .event.Rsvp}}checked{{end}}> Anmeldung erforderlich</label>
 				</div>
 				<div class="col-xs-4">
-					<a id="event-dropzone" class="thumbnail" style="margin: 10px; cursor: pointer">
+					<span id="event-thumbnail-message" class="help-block" style="text-align: center">Wähle ein Bild im Format jpg, jpeg, png oder gif aus.</span>
+					<a id="event-dropzone" class="thumbnail" style="cursor: pointer">
 						<span id="event-spinner" class="fa fa-gear"> </span>
 						<img src="{{if .event.Image}}/bild/{{.event.Image}}?height=165&width=240{{else}}/images/thumbnail.png{{end}}" alt="Bild" id="event-thumbnail" class="img-responsive">
 					</a>
-					<span id="event-thumbnail-message" class="help-block">Wähle ein Bild im Format jpg, jpeg, png oder gif aus.</span>
 					<input type="file" name="file" class="hide">
 					<input type="hidden" name="image" id="event-Image" value="{{.event.Image}}">
 				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-xs-12">
+					<span class="help-block" style="margin-left: 10px; margin-top: 0;">Hinweis: Auf der Startseite werden nur Veranstaltungen mit Bild angezeigt.</span>
 					<input name="credit" type="text" id="event-ImageCredit" class="form-control" placeholder="Bildrechte, falls das Bild nicht von Dir angefertigt wurde" value="{{.event.ImageCredit}}">
-					<label class="checkbox-inline" style="margin-left: 12px; padding-bottom: 9px"><input type="checkbox" name="rsvp" id="event-Rsvp" {{if .event.Rsvp}}checked{{end}}> Anmeldung erforderlich</label>
 					{{if .user.IsAdmin}}<div style="display: inline-block; margin-left: 20px;">
 						Veranstalter <select name="organizer" id="event-OrganizerId">
 						{{range $id, $name := .organizers}}
