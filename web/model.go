@@ -288,7 +288,7 @@ func (user *User) SetId(id bson.ObjectId) {
 
 func (user *User) Url() string {
 
-	return "/veranstalter/" + citypartName(user.Addr) + "/" + user.Id.Hex() + "/" + user.Name + "/0"
+	return "/veranstalter/" + user.Id.Hex() + "/" + user.Name + "/0"
 }
 
 func (user *User) HtmlDescription() template.HTML {

@@ -1,8 +1,8 @@
-{{if not $.user }}
+{{if not $.user }}{{if not $.organizer}}
 <div style="margin-bottom: 10px; font-weight: bolder">
-	<a class="highlight" href="/dialog/emailalert/{{eventSearchUrl .place .targetIds .categoryIds .dateIds .radius}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Wir senden Dir die Ergebnisse dieser Suche per E-Mail."><span class="fa fa-caret-right"></span> Lass Dich per E-Mail über passende Veranstaltungen informieren</a>
+	<a class="highlight" href="/dialog/emailalert/{{eventSearchUrl .place .targetIds .categoryIds .dateIds .radius}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Wir senden Dir die Ergebnisse dieser Suche per E-Mail."><span class="fa fa-caret-right"></span> Lass Dich per E-Mail über diese Suche informieren.</a>
 </div>
-{{end}}
+{{end}}{{end}}
 {{$n := len .events}}
 {{if eq $n 0}}
 <div class="row-tile">

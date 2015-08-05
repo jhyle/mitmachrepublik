@@ -1479,9 +1479,6 @@ func (app *MmrApp) Start() {
 
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
 	router.Get("/veranstalter//:categoryIds/:categories/:page", app.organizersPage)
-
-	router.Get("/veranstalter/:place/:id/:title/:page", app.organizerPage)
-	router.Get("/veranstalter//:id/:title/:page", app.organizerPage)
 	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 
 	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "impressum.tpl", "Impressum") })
