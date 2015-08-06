@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jhyle/mmr/web"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -101,6 +103,11 @@ func main() {
 		<-c
 		app.Stop()
 		os.Exit(1)
+	}()
+
+	// start debugging server
+	go func() {
+		http.ListenAndServe("localhost:6060", nil)
 	}()
 
 	app.Start()
