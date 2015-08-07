@@ -210,6 +210,7 @@ var (
 		"Natur":             18,
 		"Basteln & Spielen": 22,
 		"Politik":           23,
+		"Gesundheit & Wohlbefinden": 24,
 	}
 
 	CategoryIdMap map[int]string = map[int]string{
@@ -228,6 +229,7 @@ var (
 		18: "Natur",
 		22: "Basteln & Spielen",
 		23: "Politik",
+		24: "Gesundheit & Wohlbefinden",
 	}
 
 	CategoryIconMap map[int]string = map[int]string{
@@ -246,12 +248,14 @@ var (
 		18: "leaf",
 		22: "child",
 		23: "globe",
+		24: "heart",
 	}
 
 	CategoryOrder []string = []string{
 		"Leute treffen",
 		"Basteln & Spielen",
 		"Sport",
+		"Gesundheit & Wohlbefinden",
 		"Gärtnern",
 		"Natur",
 		"Kultur",
