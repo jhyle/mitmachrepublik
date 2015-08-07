@@ -60,7 +60,7 @@
 						<option value="9" {{if eq .event.Weekly.Interval 9}}selected{{end}}>9. Woche</option>
 						<option value="10" {{if eq .event.Weekly.Interval 10}}selected{{end}}>10. Woche</option>
 					</select>&nbsp;&nbsp;am&nbsp;&nbsp;</span>
-					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="1" {{range .event.Weekly.Weekdays}}{{if eq . 1}}checked{{end}}{{end}}> Mo&nbsp;&nbsp;</label>
+					<label id="event-Recurrency-Weekly-Weekday" class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="1" {{range .event.Weekly.Weekdays}}{{if eq . 1}}checked{{end}}{{end}}> Mo&nbsp;&nbsp;</label>
 					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="2" {{range .event.Weekly.Weekdays}}{{if eq . 2}}checked{{end}}{{end}}> Di&nbsp;&nbsp;</label>
 					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="3" {{range .event.Weekly.Weekdays}}{{if eq . 3}}checked{{end}}{{end}}> Mi&nbsp;&nbsp;</label>
 					<label class="checkbox-inline"><input type="checkbox" name="event-Recurrency-Weekly-Weekday" value="4" {{range .event.Weekly.Weekdays}}{{if eq . 4}}checked{{end}}{{end}}> Do&nbsp;&nbsp;</label>

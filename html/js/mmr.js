@@ -79,9 +79,12 @@ function initEventForm(id)
 	$("#" + id + "-End").popover({content: "Bitte gib ein gültiges Ende an.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-End").focus(function () { $("#" + id + "-End").popover('hide'); });
 	$("#" + id + "-Target").popover({content: "Bitte wähle mindestens eine Zielgruppe aus.", trigger: "manual", placement: "auto right"});
-	$("#" + id + "-Target").focus(function () { $("#" + id + "-Category").popover('hide'); });
+	$("#" + id + "-Target").focus(function () { $("#" + id + "-Target").popover('hide'); });
+	$("#" + id + "-Recurrency-Weekly-Weekday").popover({content: "Bitte wähle mindestens einen Wochentag aus.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Recurrency-Weekly-Weekday").focus(function () { $("#" + id + "--Recurrency-Weekly-Weekday").popover('hide'); });
 	$("#" + id + "-Category").popover({content: "Bitte wähle mindestens eine Kategorie aus.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Category").focus(function () { $("#" + id + "-Category").popover('hide'); });
+
 	$("#" + id + "-Web").popover({content: "Bitte gib eine gültige Web-Adresse (mit http://) ein.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Web").focus(function () { $("#" + id + "-Web").popover('hide'); });
 	$("#" + id + "-Pcode").popover({content: "Bitte gib eine vollständige Postleitzahl ein.", trigger: "manual", placement: "auto top"});	
@@ -153,6 +156,7 @@ function validateEventForm(id)
 	ok &= validate($("#" + id +"-End").val().trim().length == 0 || DateTimePattern.test($("#" + id + "-End").val()), "#" + id + "-End");
 	ok &= validate($("#" + id +"-Web").val().trim().length == 0 || WebPattern.test($("#" + id +"-Web").val()), "#" + id +"-Web");
 	ok &= validate($("#" + id +"-Pcode").val().trim().length == 0 || PcodePattern.test($("#" + id +"-Pcode").val()), "#" + id +"-Pcode");
+	ok &= validate(!$("#" + id + "-Recurrency-Weekly").is(":checked") || $("input[name=" + id + "-Recurrency-Weekly-Weekday]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Recurrency-Weekly-Weekday");
 	ok &= validate($("input[name=" + id + "-Target]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Target");
 	ok &= validate($("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get().length > 0, "#" + id + "-Category");
 	return ok;
