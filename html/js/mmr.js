@@ -72,8 +72,10 @@ function initEventForm(id)
 		$(this).parent().find("input").click();
 	});
 
-	$("#" + id + "-Title").popover({content: "Bitte gib der Veranstaltung einen Titel.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Title").popover({content: "Bitte gib der Veranstaltung einen Namen.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Title").focus(function () { $("#" + id + "-Title").popover('hide'); });
+	$("#" + id + "-Title-Too-Long").popover({content: "Der Veranstaltungsname ist zu lang. Bitte kürze ihn auf 40 Zeichen.", trigger: "manual", placement: "auto right"});
+	$("#" + id + "-Title-Too-Long").focus(function () { $("#" + id + "-Title-Too-Long").popover('hide'); });
 	$("#" + id + "-Start").popover({content: "Bitte gib den Veranstaltungsbeginn an.", trigger: "manual", placement: "auto right"});
 	$("#" + id + "-Start").focus(function () { $("#" + id + "-Start").popover('hide'); });
 	$("#" + id + "-End").popover({content: "Bitte gib ein gültiges Ende an.", trigger: "manual", placement: "auto right"});
@@ -152,6 +154,7 @@ function validateEmailAndPwdForm(id)
 function validateEventForm(id)
 {
 	var ok = validate($("#" + id + "-Title").val().trim().length > 0, "#" + id +"-Title");
+	var ok = validate($("#" + id + "-Title").val().trim().length <= 40, "#" + id +"-Title-Too-Long");
 	ok &= validate(DateTimePattern.test($("#" + id + "-Start").val()), "#" + id + "-Start");
 	ok &= validate($("#" + id +"-End").val().trim().length == 0 || DateTimePattern.test($("#" + id + "-End").val()), "#" + id + "-End");
 	ok &= validate($("#" + id +"-Web").val().trim().length == 0 || WebPattern.test($("#" + id +"-Web").val()), "#" + id +"-Web");

@@ -13,7 +13,7 @@
 			<input type="text" name="query" class="form-control" style="margin-left: 0" placeholder="Veranstaltungen" value="{{.query}}">
 			in
 			<select name="location" style="margin-left: 10px; width: 230px">
-				<option value="">allen<option>
+				<option value="">überall<option>
 				{{range $.locations}}
 				<option value="{{.}}"{{if eq . $.location}} selected{{end}}>{{.}}</option>
 				{{end}}
