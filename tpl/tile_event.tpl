@@ -1,5 +1,5 @@
 <div class="col-xs-2 col-tile">
-	<a href="{{.Url}}" style="display:block" title="Veranstaltung anzeigen">
+	<a href="{{.Url}}" style="display:block" title="Infos zu {{.Title}} anschauen">
 		{{ if .Image }}
 			<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
 			<div style="min-height: 140px">

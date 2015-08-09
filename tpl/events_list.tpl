@@ -12,7 +12,7 @@
 {{range .events}}
 <div class="row-tile">
 	{{if not $.user }}
-		<a href="{{.Url}}" title="Veranstaltung anzeigen">
+		<a href="{{.Url}}" title="Infos zu {{.Title}} anschauen">
 	{{end}}
 	{{if .Image}}
 		<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
