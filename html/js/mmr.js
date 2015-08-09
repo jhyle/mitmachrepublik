@@ -396,7 +396,7 @@ function gatherSearchForm()
 function updateEventCount()
 {
 	var data = gatherSearchForm();
-	$.ajax({cache: false, url : "/eventcount/" + data["query"] + "/" + data["place"] + "/" + data["date"] + "/" + data["target"]+ "/" + data["category"], type: "GET", dataType: "json",
+	$.ajax({cache: false, url : "/eventcount/" + (data["query"] ? date["query"] : "") + "/" + data["place"] + "/" + data["date"] + "/" + data["target"]+ "/" + data["category"], type: "GET", dataType: "json",
 		success: function(data) {
 			$("button[value=events]").html(data + (data != 1 ? " Veranstaltungen" : " Veranstaltung"));
 		}
