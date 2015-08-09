@@ -59,11 +59,16 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 		return nil, err
 	}
 
+	batch := eventIndex.NewBatch()
 	for _, event := range events {
-		err := eventIndex.Index(event.Id.Hex(), bson.M{"title": event.Title})
+		err := batch.Index(event.Id.Hex(), bson.M{"title": event.Title})
 		if err != nil {
 			return nil, err
 		}
+	}
+	err = eventIndex.Batch(batch)
+	if err != nil {
+		return nil, err
 	}
 
 	os.RemoveAll(indexDir + string(os.PathSeparator) + "dates.bleve")
@@ -78,11 +83,16 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 		return nil, err
 	}
 
+	batch = dateIndex.NewBatch()
 	for _, date := range dates {
-		err := dateIndex.Index(date.Id.Hex(), bson.M{"title": date.Title, "location": date.Addr.Name})
+		err := batch.Index(date.Id.Hex(), bson.M{"title": date.Title, "location": date.Addr.Name})
 		if err != nil {
 			return nil, err
 		}
+	}
+	err = dateIndex.Batch(batch)
+	if err != nil {
+		return nil, err
 	}
 
 	return &EventService{database, eventTableName, dateTableName, eventIndex, dateIndex}, nil
