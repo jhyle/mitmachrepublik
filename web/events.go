@@ -435,7 +435,9 @@ func (events *EventService) Store(event *Event, publish bool) error {
 	}
 
 	if err == nil {
-		err = events.eventIndex.Index(event.Id.Hex(), bson.M{"title": event.Title})
+		go func() {
+			events.eventIndex.Index(event.Id.Hex(), bson.M{"title": event.Title})
+		} ()
 	}
 
 	return err
@@ -445,7 +447,9 @@ func (events *EventService) StoreDate(date *Date) error {
 
 	_, err := events.dateTable().UpsertById(date.Id, date)
 	if err == nil {
-		err = events.dateIndex.Index(date.Id.Hex(), bson.M{"title": date.Title, "location": date.Addr.Name})
+		go func() {
+			events.dateIndex.Index(date.Id.Hex(), bson.M{"title": date.Title, "location": date.Addr.Name})
+		} ()
 	}
 	return err
 }
@@ -558,7 +562,9 @@ func (events *EventService) DeleteDate(id bson.ObjectId) error {
 
 	err := events.dateTable().DeleteById(id)
 	if err == nil {
-		err = events.dateIndex.Delete(id.Hex())
+		go func() {
+			events.dateIndex.Delete(id.Hex())
+		} ()
 	}
 	return err
 }
@@ -580,7 +586,9 @@ func (events *EventService) Delete(id bson.ObjectId) error {
 		err = events.eventTable().DeleteById(id)
 	}
 	if err == nil {
-		err = events.eventIndex.Delete(id.Hex())
+		go func() {
+			events.eventIndex.Delete(id.Hex())
+		} ()
 	}
 	return err
 }
