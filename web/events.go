@@ -53,23 +53,29 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 		return nil, err
 	}
 
-	var events []*Event
-	err = database.Table(eventTableName).Find(bson.M{}, &events, "start")
-	if err != nil {
-		return nil, err
-	}
+	go func() {
 
-	batch := eventIndex.NewBatch()
-	for _, event := range events {
-		err := batch.Index(event.Id.Hex(), bson.M{"title": event.Title})
+		var events []*Event
+		err = database.Table(eventTableName).Find(bson.M{}, &events, "start")
 		if err != nil {
-			return nil, err
+			traffic.Logger().Print(err.Error())
+			return
 		}
-	}
-	err = eventIndex.Batch(batch)
-	if err != nil {
-		return nil, err
-	}
+
+		batch := eventIndex.NewBatch()
+		for _, event := range events {
+			err := batch.Index(event.Id.Hex(), bson.M{"title": event.Title})
+			if err != nil {
+				traffic.Logger().Print(err.Error())
+				return
+			}
+		}
+		err = eventIndex.Batch(batch)
+		if err != nil {
+			traffic.Logger().Print(err.Error())
+			return
+		}
+	}()
 
 	os.RemoveAll(indexDir + string(os.PathSeparator) + "dates.bleve")
 	dateIndex, err := bleve.New(indexDir+string(os.PathSeparator)+"dates.bleve", mapping)
@@ -77,23 +83,30 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 		return nil, err
 	}
 
-	var dates []*Date
-	err = database.Table(dateTableName).Find(bson.M{"start": bson.M{"$gte": time.Now()}}, &dates, "start")
-	if err != nil {
-		return nil, err
-	}
+	go func() {
 
-	batch = dateIndex.NewBatch()
-	for _, date := range dates {
-		err := batch.Index(date.Id.Hex(), bson.M{"title": date.Title, "location": date.Addr.Name})
+		var dates []*Date
+		err := database.Table(dateTableName).Find(bson.M{"start": bson.M{"$gte": time.Now()}}, &dates, "start")
 		if err != nil {
-			return nil, err
+			traffic.Logger().Print(err.Error())
+			return
 		}
-	}
-	err = dateIndex.Batch(batch)
-	if err != nil {
-		return nil, err
-	}
+
+		batch := dateIndex.NewBatch()
+		for _, date := range dates {
+			err := batch.Index(date.Id.Hex(), bson.M{"title": date.Title, "location": date.Addr.Name})
+			if err != nil {
+				traffic.Logger().Print(err.Error())
+				return
+			}
+		}
+
+		err = dateIndex.Batch(batch)
+		if err != nil {
+			traffic.Logger().Print(err.Error())
+			return
+		}
+	}()
 
 	return &EventService{database, eventTableName, dateTableName, eventIndex, dateIndex}, nil
 }
@@ -155,7 +168,7 @@ func (events *EventService) Dates(query string) ([]string, error) {
 			}
 		}
 	}
-	
+
 	i := 0
 	result := make([]string, len(dates))
 	for date := range dates {
@@ -171,7 +184,7 @@ func (events *EventService) buildQuery(search, place string, dates [][]time.Time
 	query := make([]bson.M, 0, 6)
 
 	if !isEmpty(search) {
-		fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewMatchQuery(search), 1000, 0, false)
+		fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewMatchPhraseQuery(search), 1000, 0, false)
 		results, err := events.dateIndex.Search(fullTextSearch)
 		if err != nil {
 			traffic.Logger().Print(err.Error())
@@ -437,7 +450,7 @@ func (events *EventService) Store(event *Event, publish bool) error {
 	if err == nil {
 		go func() {
 			events.eventIndex.Index(event.Id.Hex(), bson.M{"title": event.Title})
-		} ()
+		}()
 	}
 
 	return err
@@ -449,7 +462,7 @@ func (events *EventService) StoreDate(date *Date) error {
 	if err == nil {
 		go func() {
 			events.dateIndex.Index(date.Id.Hex(), bson.M{"title": date.Title, "location": date.Addr.Name})
-		} ()
+		}()
 	}
 	return err
 }
@@ -564,7 +577,7 @@ func (events *EventService) DeleteDate(id bson.ObjectId) error {
 	if err == nil {
 		go func() {
 			events.dateIndex.Delete(id.Hex())
-		} ()
+		}()
 	}
 	return err
 }
@@ -588,7 +601,7 @@ func (events *EventService) Delete(id bson.ObjectId) error {
 	if err == nil {
 		go func() {
 			events.eventIndex.Delete(id.Hex())
-		} ()
+		}()
 	}
 	return err
 }
