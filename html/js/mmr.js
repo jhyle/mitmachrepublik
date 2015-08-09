@@ -199,7 +199,7 @@ function gatherProfileForm(id)
 		}
 	}
 	data["Categories"] = new Array();
-	categories = $("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get();
+	var categories = $("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get();
 	for (i = 0; i < categories.length; i++) {
 		data["Categories"][i] = parseInt(categories[i]);
 	}
@@ -243,7 +243,7 @@ function gatherEventForm(id)
 			"Interval": parseInt($("#" + id + "-Recurrency-Weekly-Interval").val()),
 			"Weekdays": []
 		};
-		weekdays = $("input[name=" + id + "-Recurrency-Weekly-Weekday]:checked").map(function () {return this.value;}).get();
+		var weekdays = $("input[name=" + id + "-Recurrency-Weekly-Weekday]:checked").map(function () {return this.value;}).get();
 		for (i = 0; i < weekdays.length; i++) {
 			data["Weekly"]["Weekdays"][i] = parseInt(weekdays[i]);
 		}
@@ -265,12 +265,12 @@ function gatherEventForm(id)
 	}
 	
 	data["Targets"] = new Array();
-	targets = $("input[name=" + id + "-Target]:checked").map(function () {return this.value;}).get();
+	var targets = $("input[name=" + id + "-Target]:checked").map(function () {return this.value;}).get();
 	for (i = 0; i < targets.length; i++) {
 		data["Targets"][i] = parseInt(targets[i]);
 	}
 	data["Categories"] = new Array();
-	categories = $("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get();
+	var categories = $("input[name=" + id + "-Category]:checked").map(function () {return this.value;}).get();
 	for (i = 0; i < categories.length; i++) {
 		data["Categories"][i] = parseInt(categories[i]);
 	}
@@ -281,7 +281,7 @@ function gatherEventForm(id)
 function gatherEmailAlertForm(id) {
 	
 	var data = {};
-	var alert_fields = ["Name", "Email", "Place", "Targets", "Categories", "Dates", "Radius"];
+	var alert_fields = ["Name", "Email", "Query", "Place", "Targets", "Categories", "Dates", "Radius"];
 	for (var i = 0, len = alert_fields.length; i < len; i++) {
 		if ($("#" + id + "-" + alert_fields[i]).length) {
 			data[alert_fields[i]] = $("#" + id + "-" + alert_fields[i]).val();
@@ -311,7 +311,7 @@ function gatherEmailAlertForm(id) {
 	}
 
 	data["Weekdays"] = new Array();
-	weekdays = $("input[name=" + id + "-Weekday]:checked").map(function () {return this.value;}).get();
+	var weekdays = $("input[name=" + id + "-Weekday]:checked").map(function () {return this.value;}).get();
 	for (i = 0; i < weekdays.length; i++) {
 		data["Weekdays"][i] = parseInt(weekdays[i]);
 	}
@@ -346,14 +346,16 @@ function removeErrorMessage(id)
 function gatherSearchForm()
 {
 	var data = {};
-	place = $("input[name=place]").val().trim();
-	data["place"] = place;
+	if ($("input[name=query]").length) {
+		data["query"] = $("input[name=query]").val().trim();
+	}
+	data["place"] = $("input[name=place]").val().trim();
 	
 	var target = "";
 	if ($("select[name=target]").length) {
 		target = $("select[name=target]").val();
 	} else {
-		targts = $("input[name=target]:checked").map(function () {return this.value;}).get();
+		var targets = $("input[name=target]:checked").map(function () {return this.value;}).get();
 		for (i = 0; i < targets.length; i++) {
 			if (i > 0) target += ",";
 			target += targets[i];
@@ -366,7 +368,7 @@ function gatherSearchForm()
 	if ($("select[name=category]").length) {
 		category = $("select[name=category]").val();
 	} else {
-		categories = $("input[name=category]:checked").map(function () {return this.value;}).get();
+		var categories = $("input[name=category]:checked").map(function () {return this.value;}).get();
 		for (i = 0; i < categories.length; i++) {
 			if (i > 0) category += ",";
 			category += categories[i];
@@ -379,7 +381,7 @@ function gatherSearchForm()
 	if ($("select[name=date]").length) {
 		date = $("select[name=date]").val();
 	} else {
-		dates = $("input[name=date]:checked").map(function () {return this.value;}).get();
+		var dates = $("input[name=date]:checked").map(function () {return this.value;}).get();
 		for (i = 0; i < dates.length; i++) {
 			if (i > 0) date += ",";
 			date += dates[i];
@@ -393,8 +395,8 @@ function gatherSearchForm()
 
 function updateEventCount()
 {
-	data = gatherSearchForm();
-	$.ajax({cache: false, url : "/eventcount/" + data["place"] + "/" + data["date"] + "/" + data["target"]+ "/" + data["category"], type: "GET", dataType: "json",
+	var data = gatherSearchForm();
+	$.ajax({cache: false, url : "/eventcount/" + data["query"] + "/" + data["place"] + "/" + data["date"] + "/" + data["target"]+ "/" + data["category"], type: "GET", dataType: "json",
 		success: function(data) {
 			$("button[value=events]").html(data + (data != 1 ? " Veranstaltungen" : " Veranstaltung"));
 		}
@@ -403,7 +405,7 @@ function updateEventCount()
 
 function updateOrganizerCount()
 {
-	data = gatherSearchForm();
+	var data = gatherSearchForm();
 	$.ajax({cache: false, url : "/organizercount/" + data["place"] + "/" + data["category"], type: "GET", dataType: "json",
 		success: function(data) {
 			$("button[value=organizers]").html(data + (data != 1 ? " Organisatoren" : " Organisator"));
@@ -713,6 +715,27 @@ $(function() {
 				}
 			});
 		}
+	});
+
+	$("input[name=fulltextsearch]").typeahead({ source: function(query, process) {
+		$.ajax({cache: false, url : "/typeahead/" + query, type: "GET", dataType: "json",
+			success: function(data) {
+				process(data);
+			}
+		});
+	}});
+
+	$("input[name=query]").typeahead({ source: function(query, process) {
+		$.ajax({cache: false, url : "/typeahead/" + query, type: "GET", dataType: "json",
+			success: function(data) {
+				process(data);
+			}
+		});
+	}});
+
+	$("input[name=query]").change(function() {
+		updateEventCount();
+		updateOrganizerCount();
 	});
 
 	$("input[name=place]").typeahead({ source: function(query, process) {

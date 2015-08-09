@@ -98,6 +98,7 @@ type (
 		Id         bson.ObjectId `bson:"_id"`
 		Name       string
 		Email      string
+		Query      string
 		Place      string
 		Targets    []int
 		Categories []int

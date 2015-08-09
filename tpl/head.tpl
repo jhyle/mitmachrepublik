@@ -21,7 +21,7 @@
 		<link rel="alternate" type="application/rss+xml" title="RSS" href="?fmt=RSS">
 	{{end}}
 	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
-	<link href="/css/styles-9.css" rel="stylesheet">
+	<link href="/css/styles-10.css" rel="stylesheet">
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
@@ -80,10 +80,20 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head"><a href="/" title="Zur Startseite"><img src="/images/mitmachrepublik.png" style="max-width:80%" alt="Logo Mitmach-Republik"></a></div>
+			<div class="col-xs-3 col-head">
+				<a href="/" title="Zur Startseite"><img src="/images/mitmachrepublik.png" style="max-width:80%" alt="Logo Mitmach-Republik"></a>
+			</div>
 			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head"><span id="head-organizer">Du bist ein Organisator?</span><br /><a id="head-events" href="/dialog/login" title="Melde Dich an, um Deine Veranstaltungen einzutragen." rel="nofollow" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Finde kostenlos Mitmacher</a></div>
+			<div class="col-xs-3 col-head">
+				<span id="head-organizer">Du bist ein Organisator?</span><br>
+				<a id="head-events" href="/dialog/login" title="Melde Dich an, um Deine Veranstaltungen einzutragen." rel="nofollow" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Finde kostenlos Mitmacher</a>
+			</div>
 			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-2 col-head"><a class="highlight" title="Like uns auf Facebook." href="https://www.facebook.com/mitmachrepublik" target="_blank"><span class="fa fa-facebook"></span></a> <a class="highlight" title="Folge uns auf twitter." href="https://twitter.com/mitmachrepublik" target="_blank"><span class="fa fa-twitter"></span></a> | <a href="/dialog/contact" rel="nofollow" title="Schreibe uns eine Nachricht." data-toggle="modal" data-target="#mail">Kontakt</a><br><a id="head-login" href="/dialog/login" rel="nofollow" data-toggle="modal" data-target="#login" title="Melde Dich an, um Deine Veranstaltungen einzutragen."><span class="fa fa-user highlight"></span> Veranstalter-Login</a></div>
-			<div class="col-xs-1">&nbsp;</div>
+			<div class="col-xs-3 col-head">
+				<a class="highlight" title="Like uns auf Facebook." href="https://www.facebook.com/mitmachrepublik" target="_blank"><span class="fa fa-facebook"></span></a>
+				<a class="highlight" title="Folge uns auf twitter." href="https://twitter.com/mitmachrepublik" target="_blank"><span class="fa fa-twitter"></span></a>
+				| <a href="/dialog/contact" rel="nofollow" title="Schreibe uns eine Nachricht." data-toggle="modal" data-target="#mail">Kontakt</a>
+				| <a id="head-login" href="/dialog/login" rel="nofollow" data-toggle="modal" data-target="#login" title="Melde Dich an, um Deine Veranstaltungen einzutragen."><span class="fa fa-user highlight"></span> Veranstalter-Login</a><br>
+				<form role="form" action="/suche" method="POST" class="form-inline"><input class="form-control form-search" style="width: 83%" name="fulltextsearch" placeholder="Veranstaltungen suchen" autocomplete="off"> <button type="submit" class="btn btn-mmr form-search" name="search" title="Veranstaltungen suchen" value="query"><span class="fa fa-search"></span></button></form>
+			</div>
 		</div>

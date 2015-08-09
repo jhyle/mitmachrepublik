@@ -186,6 +186,11 @@ func eventSearchUrl(place string, targetIds, categoryIds []int, dateIds []int, r
 	return place + "/" + strings.Join(int2Str(dateIds), ",") + "/" + strings.Join(int2Str(targetIds), ",")  + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/0"
 }
 
+func eventSearchUrlWithQuery(place string, targetIds, categoryIds []int, dateIds []int, radius int, query string) string {
+
+	return eventSearchUrl(place, targetIds, categoryIds, dateIds, radius) + "?query=" + query;
+}
+
 func simpleEventSearchUrl(place string) string {
 
 	return eventSearchUrl(place, []int{0}, []int{0}, []int{0}, 0)

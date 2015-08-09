@@ -8,6 +8,7 @@
 			<div class="col-sm-12">
 				<input name="name" type="text" id="email-alert-Name" class="form-control" placeholder="Dein Name">
 				<span><input name="email" type="email" id="email-alert-Email" class="form-control" placeholder="Deine E-Mail-Adresse"></span>
+				<input type="hidden" name="query" id="email-alert-Query" value="{{.query}}">
 				<input type="hidden" name="place" id="email-alert-Place" value="{{.place}}">
 				<input type="hidden" name="targets" id="email-alert-Targets" value="{{.targetIds}}">
 				<input type="hidden" name="categories" id="email-alert-Categories" value="{{.categoryIds}}">

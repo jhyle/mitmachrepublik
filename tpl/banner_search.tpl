@@ -1,8 +1,9 @@
 <div class="row">
 	<div class="col-xs-12 col-banner">
 		<img src="/images/hintergrund.jpg" width="1170" height="167" alt="Finde Veranstaltungen zum Mitmachen!">
-		<div class="form-inline text-center" style="position: absolute; top: 33%; width: 100%">
-			<input name="place" type="text" class="form-control" value="{{.place}}" placeholder="Stadt(-teil) oder Postleitzahl" style="width: 50%" autocomplete="off" />
+		<div class="form-inline text-center" style="position: absolute; top: 33%; width: 90%; margin-left: 50px">
+			<input name="query" type="text" class="form-control" value="{{.query}}" placeholder="Veranstaltungsname oder -ort" style="width: 33%" autocomplete="off">
+			<input name="place" type="text" class="form-control" value="{{.place}}" placeholder="Stadt(-teil) oder Postleitzahl" style="width: 33%" autocomplete="off">
 			<!--select name="radius" class="form-control">
 				<option value="0" {{if eq .radius 0}}selected{{end}}>kein Umkreis</option>
 				<option value="2" {{if eq .radius 2}}selected{{end}}>2 km</option>
