@@ -793,9 +793,12 @@ $(function() {
 		$("#head-events").attr("data-toggle", "");
 		$("#head-events").attr("data-target", "");
 		$("#head-events").attr("href", "/veranstalter/verwaltung/0");
+		$("#head-events").attr("title", "Verwalte Deine Veranstaltungen und Profileinstellungen.");
 		$("#head-login").html("<span class='fa fa-user highlight'></span> Abmelden");
 		$("#head-login").attr("data-toggle", "");
 		$("#head-login").attr("data-target", "");
+		$("#head-login").attr("href", "#");
+		$("#head-login").attr("title", "Abmelden");
 		$("#head-login").click(function() {
 			$.ajax({cache: false, url : "/logout", type: "POST",
 				success: function() {
