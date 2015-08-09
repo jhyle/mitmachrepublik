@@ -83,6 +83,8 @@ var (
 	resultBadRequest   = &appResult{Status: http.StatusBadRequest}
 	resultNotFound     = &appResult{Status: http.StatusNotFound}
 	resultConflict     = &appResult{Status: http.StatusConflict}
+
+	sendAlertsService *SendAlertsService
 )
 
 func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName string) (*MmrApp, error) {
@@ -156,7 +158,8 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 	services = append(services, NewSessionService(3, database))
 	services = append(services, NewUpdateRecurrencesService(4, events))
 	services = append(services, NewUnusedImgService(4, database, imgServer))
-	services = append(services, NewSendAlertsService(5, hostname, emailAccount, alerts))
+	sendAlertsService = NewSendAlertsService(5, hostname, emailAccount, alerts)
+	services = append(services, sendAlertsService)
 	if env == "dev" {
 		services = append(services, NewSpawnEventsService(12, database, events, imgServer))
 	}

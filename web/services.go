@@ -180,7 +180,7 @@ func (service *UpdateRecurrencesService) serve() {
 	}
 }
 
-func NewSendAlertsService(hour int, hostname string, from *EmailAccount, alerts *AlertService) Service {
+func NewSendAlertsService(hour int, hostname string, from *EmailAccount, alerts *AlertService) *SendAlertsService {
 
 	return &SendAlertsService{NewBasicService(hour), hostname, from, alerts}
 }
@@ -202,12 +202,13 @@ func getNewsletter(hostname string, alert Alert) (string, error) {
 	return string(bytes), err
 }
 
-func getNewsletterSubject(dates []int) string {
+func getNewsletterSubject(place string, dates []int) string {
 
+	var subject string
 	if len(dates) == 0 {
-		return alertSubject[FromNow]
+		subject = alertSubject[FromNow]
 	} else if inArray(dates, TwoWeeks) {
-		return "Veranstaltungen " + alertSubject[TwoWeeks]
+		subject = "Veranstaltungen " + alertSubject[TwoWeeks]
 	} else {
 		i := 0
 		names := make([]string, len(dates))
@@ -222,8 +223,14 @@ func getNewsletterSubject(dates []int) string {
 				}
 			}
 		}
-		return "Veranstaltungen " + strConcat(names)
+		subject = "Veranstaltungen " + strConcat(names)
 	}
+
+	if len(place) > 0 {
+		subject += " in " + place
+	}
+
+	return subject
 }
 
 func (service *SendAlertsService) serve() {
@@ -239,7 +246,7 @@ func (service *SendAlertsService) serve() {
 		if err != nil {
 			traffic.Logger().Print(err)
 		} else if !isEmpty(newsletter) {
-			err = SendEmail(service.from, &EmailAddress{alert.Name, alert.Email}, service.from.From, getNewsletterSubject(alert.Dates), "text/html", newsletter)
+			err = SendEmail(service.from, &EmailAddress{alert.Name, alert.Email}, service.from.From, getNewsletterSubject(alert.Place, alert.Dates), "text/html", newsletter)
 			if err != nil {
 				traffic.Logger().Print(err)
 			}
