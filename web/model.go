@@ -2,8 +2,8 @@ package mmr
 
 import (
 	"github.com/kennygrant/sanitize"
-	"html/template"
 	"gopkg.in/mgo.v2/bson"
+	"html/template"
 	"strings"
 	"time"
 )
@@ -195,22 +195,23 @@ var (
 	}
 
 	CategoryMap map[string]int = map[string]int{
-		"allen Kategorien":  0,
-		"Leute treffen":     7,
-		"Sport":             8,
-		"Gärtnern":          9,
-		"Kultur":            10,
-		"Bildung":           11,
-		"Religion":          12,
-		"Umweltschutz":      13,
-		"Tierschutz":        14,
-		"Demonstration":     15,
-		"Soziales":          16,
-		"Ehrenamt":          17,
-		"Natur":             18,
-		"Basteln & Spielen": 22,
-		"Politik":           23,
+		"allen Kategorien":          0,
+		"Leute treffen":             7,
+		"Sport":                     8,
+		"Gärtnern":                  9,
+		"Kultur":                    10,
+		"Bildung":                   11,
+		"Religion":                  12,
+		"Umweltschutz":              13,
+		"Tierschutz":                14,
+		"Demonstration":             15,
+		"Soziales":                  16,
+		"Ehrenamt":                  17,
+		"Natur":                     18,
+		"Basteln & Spielen":         22,
+		"Politik":                   23,
 		"Gesundheit & Wohlbefinden": 24,
+		"Handwerk & Kreatives":      25,
 	}
 
 	CategoryIdMap map[int]string = map[int]string{
@@ -230,6 +231,7 @@ var (
 		22: "Basteln & Spielen",
 		23: "Politik",
 		24: "Gesundheit & Wohlbefinden",
+		25: "Handwerk & Kreatives",
 	}
 
 	CategoryIconMap map[int]string = map[int]string{
@@ -249,13 +251,15 @@ var (
 		22: "child",
 		23: "globe",
 		24: "heart",
+		25: "paint-brush",
 	}
 
 	CategoryOrder []string = []string{
 		"Leute treffen",
 		"Basteln & Spielen",
-		"Sport",
+		"Handwerk & Kreatives",
 		"Gesundheit & Wohlbefinden",
+		"Sport",
 		"Gärtnern",
 		"Natur",
 		"Kultur",
