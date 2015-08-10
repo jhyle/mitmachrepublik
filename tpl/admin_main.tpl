@@ -2,7 +2,7 @@
 	<div class="col-xs-1">&nbsp;</div>
 	<div class="col-xs-3 col-box">
 		{{template "organizer_box.tpl" .}}
-		<p><a href="/veranstalter/verwaltung/veranstaltung" class="btn btn-mmr" style="width: 90%">Veranstaltung eintragen</a></p>
+		<p></p>
 		<p><a href="/veranstalter/verwaltung/profil" class="btn btn-mmr" style="width: 90%">Beschreibung ändern</a></p>
 		<p><a href="/veranstalter/verwaltung/kennwort" class="btn btn-mmr" style="width: 90%">Kennwort ändern</a></p>
 		<p><a href="/veranstalter/verwaltung/kennwort" class="btn btn-mmr" style="width: 90%">E-Mail-Adresse ändern</a></p>
@@ -10,17 +10,10 @@
 	</div>
 	<div class="col-xs-7">
 		<form class="form-inline pull-left" role="form" action="0?">
-			<input type="text" name="query" class="form-control" style="margin-left: 0" placeholder="Veranstaltungen" value="{{.query}}">
-			in
-			<select name="location" style="margin-left: 10px; width: 230px">
-				<option value="">überall<option>
-				{{range $.locations}}
-				<option value="{{.}}"{{if eq . $.location}} selected{{end}}>{{.}}</option>
-				{{end}}
-			</select>
-			<button type="submit" class="btn btn-mmr" style="padding-left: 20px; padding-right: 20px">Suchen</button>
+			<input type="text" name="query" class="form-control" style="margin-left: 0; width: 300px" placeholder="Veranstaltungen" value="{{.query}}" autocomplete="off">
+			<button type="submit" class="btn btn-mmr" style="padding-left: 10px; padding-right: 10px; margin-left: 0"><span class="fa fa-search"></span></button>
 		</form>
-		<p class="pull-right"></p>
+		<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung" class="btn btn-mmr">Veranstaltung eintragen</a></p>
 		<p class="clearfix"></p>
 		{{if not .user.Approved}}
 		<div class="row-tile">

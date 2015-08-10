@@ -349,7 +349,9 @@ function gatherSearchForm()
 	if ($("input[name=query]").length) {
 		data["query"] = $("input[name=query]").val().trim();
 	}
-	data["place"] = $("input[name=place]").val().trim();
+	if ($("input[name=place]").length) {
+		data["place"] = $("input[name=place]").val().trim();
+	}
 	
 	var target = "";
 	if ($("select[name=target]").length) {

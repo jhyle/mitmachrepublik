@@ -64,7 +64,7 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 
 		batch := eventIndex.NewBatch()
 		for _, event := range events {
-			err := batch.Index(event.Id.Hex(), bson.M{"title": event.Title})
+			err := batch.Index(event.Id.Hex(), bson.M{"title": event.Title, "location": event.Addr.Name})
 			if err != nil {
 				traffic.Logger().Print(err.Error())
 				return
@@ -291,32 +291,25 @@ func (events *EventService) FindEventsOfUser(userId bson.ObjectId, sort string) 
 	return result, err
 }
 
-func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, search, location string, page, pageSize int, sort string) (*EventSearchResult, error) {
+func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, search string, page, pageSize int, sort string) (*EventSearchResult, error) {
 
 	var result EventSearchResult
 	var query bson.M
-	if isEmpty(search) && isEmpty(location) {
+	if isEmpty(search) {
 		query = bson.M{"organizerid": userId}
 	} else {
 		descr := []bson.M{bson.M{"organizerid": userId}}
 		if !isEmpty(search) {
-			fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewMatchQuery(search), 1000, 0, false)
+			fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewMatchPhraseQuery(search), 1000, 0, false)
 			results, err := events.eventIndex.Search(fullTextSearch)
 			if err != nil {
 				return nil, err
 			}
-			if results.Total > 0 {
-				ids := make([]bson.ObjectId, results.Hits.Len())
-				for i, hit := range results.Hits {
-					ids[i] = bson.ObjectIdHex(hit.ID)
-				}
-				descr = append(descr, bson.M{"_id": bson.M{"$in": ids}})
-			} else {
-				return &result, err
+			ids := make([]bson.ObjectId, results.Hits.Len())
+			for i, hit := range results.Hits {
+				ids[i] = bson.ObjectIdHex(hit.ID)
 			}
-		}
-		if !isEmpty(location) {
-			descr = append(descr, bson.M{"addr.name": location})
+			descr = append(descr, bson.M{"_id": bson.M{"$in": ids}})
 		}
 		query = bson.M{"$and": descr}
 	}
