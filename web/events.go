@@ -435,7 +435,7 @@ func (events *EventService) Store(event *Event, publish bool) error {
 				events.StoreDate(&date)
 			}
 		}
-		err = events.SyncDates(event)
+		_, err = events.SyncDates(event)
 	} else if !publish {
 		err = events.DeleteDatesOfEvent(event.Id)
 	}
@@ -460,7 +460,7 @@ func (events *EventService) StoreDate(date *Date) error {
 	return err
 }
 
-func (events *EventService) SyncDates(event *Event) error {
+func (events *EventService) SyncDates(event *Event) ([]bson.ObjectId, error) {
 
 	now := time.Now()
 	genDates := events.generateDates(event, now)
@@ -469,7 +469,7 @@ func (events *EventService) SyncDates(event *Event) error {
 	query := bson.M{"$and": []bson.M{bson.M{"eventid": event.Id}, bson.M{"start": bson.M{"$gte": now}}}}
 	err := events.dateTable().Find(query, &dates, "start")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	n := min(len(genDates), len(dates))
@@ -477,55 +477,60 @@ func (events *EventService) SyncDates(event *Event) error {
 		genDates[i].Id = dates[i].Id
 		err := events.StoreDate(&genDates[i])
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
+	newDates := make([]bson.ObjectId, 0)
 	for i := n; i < len(genDates); i++ {
 		err := events.StoreDate(&genDates[i])
 		if err != nil {
-			return err
+			return nil, err
 		}
+		newDates = append(newDates, genDates[i].Id)
 	}
 
 	for i := n; i < len(dates); i++ {
 		err := events.DeleteDate(dates[i].Id)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return newDates, nil
 }
 
-func (events *EventService) UpdateRecurrences() error {
+func (events *EventService) UpdateRecurrences() ([]bson.ObjectId, error) {
 
 	var result []Event
 	err := events.eventTable().Find(bson.M{"recurrency": Weekly}, &result, "start")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	dates := make([]bson.ObjectId, 0)
 	for _, event := range result {
-		err = events.SyncDates(&event)
+		newDates, err := events.SyncDates(&event)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		dates = append(dates, newDates...)
 	}
 
 	err = events.eventTable().Find(bson.M{"recurrency": Monthly}, &result, "start")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, event := range result {
-		err = events.SyncDates(&event)
+		newDates, err := events.SyncDates(&event)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		dates = append(dates, newDates...)
 	}
 
-	return nil
+	return dates, nil
 }
 
 func (events *EventService) DeleteDatesOfEvent(eventId bson.ObjectId) error {

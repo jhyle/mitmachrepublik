@@ -38,6 +38,7 @@ type (
 	UpdateRecurrencesService struct {
 		BasicService
 		events *EventService
+		account *EmailAccount
 	}
 
 	SendAlertsService struct {
@@ -162,9 +163,9 @@ func (service *UnusedImgService) serve() {
 	}
 }
 
-func NewUpdateRecurrencesService(hour int, events *EventService) Service {
+func NewUpdateRecurrencesService(hour int, events *EventService, account *EmailAccount) Service {
 
-	return &UpdateRecurrencesService{NewBasicService(hour), events}
+	return &UpdateRecurrencesService{NewBasicService(hour), events, account}
 }
 
 func (service *UpdateRecurrencesService) Start() {
@@ -174,9 +175,20 @@ func (service *UpdateRecurrencesService) Start() {
 
 func (service *UpdateRecurrencesService) serve() {
 
-	err := service.events.UpdateRecurrences()
+	dates, err := service.events.UpdateRecurrences()
 	if err != nil {
 		traffic.Logger().Print(err)
+	}
+	
+	if dates != nil {
+		message := ""
+		for _, dateId := range dates {
+			date, err := service.events.LoadDate(dateId)
+			if err == nil {
+				message += date.Url() + "\n"
+			}
+		}
+		SendEmail(service.account, service.account.From, nil, "Generierte Veranstaltungen", "text/plain", message)  
 	}
 }
 
