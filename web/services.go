@@ -39,6 +39,7 @@ type (
 		BasicService
 		events *EventService
 		account *EmailAccount
+		hostname string
 	}
 
 	SendAlertsService struct {
@@ -163,9 +164,9 @@ func (service *UnusedImgService) serve() {
 	}
 }
 
-func NewUpdateRecurrencesService(hour int, events *EventService, account *EmailAccount) Service {
+func NewUpdateRecurrencesService(hour int, events *EventService, account *EmailAccount, hostname string) Service {
 
-	return &UpdateRecurrencesService{NewBasicService(hour), events, account}
+	return &UpdateRecurrencesService{NewBasicService(hour), events, account, hostname}
 }
 
 func (service *UpdateRecurrencesService) Start() {
@@ -185,7 +186,7 @@ func (service *UpdateRecurrencesService) serve() {
 		for _, dateId := range dates {
 			date, err := service.events.LoadDate(dateId)
 			if err == nil {
-				message += date.Url() + "\n"
+				message += "http://" + service.hostname + date.Url() + "\n"
 			}
 		}
 		SendEmail(service.account, service.account.From, nil, "Generierte Veranstaltungen", "text/plain", message)  

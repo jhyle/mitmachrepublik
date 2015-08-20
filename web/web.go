@@ -156,7 +156,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 
 	services := make([]Service, 0, 5)
 	services = append(services, NewSessionService(3, database))
-	services = append(services, NewUpdateRecurrencesService(4, events, emailAccount))
+	services = append(services, NewUpdateRecurrencesService(4, events, emailAccount, hostname))
 	services = append(services, NewUnusedImgService(4, database, imgServer))
 	sendAlertsService = NewSendAlertsService(5, hostname, emailAccount, alerts)
 	services = append(services, sendAlertsService)
