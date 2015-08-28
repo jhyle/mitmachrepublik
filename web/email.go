@@ -2,6 +2,7 @@ package mmr
 
 import (
 	"gopkg.in/gomail.v1"
+	"strings"
 	"errors"
 )
 
@@ -28,6 +29,11 @@ type (
 	}
 )
 
+func quote(name string) string {
+
+	return "\"" + strings.Replace(name, "\"", "'", -1) + "\""
+} 
+
 func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, contentType, body string) error {
 
 	if account.From == nil {
@@ -39,10 +45,10 @@ func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, conten
 	}
 
 	msg := gomail.NewMessage()
-	msg.SetAddressHeader("From", account.From.Address, account.From.Name)
-	msg.SetAddressHeader("To", to.Address, to.Name)
+	msg.SetAddressHeader("From", account.From.Address, quote(account.From.Name))
+	msg.SetAddressHeader("To", to.Address, quote(to.Name))
 	if replyTo != nil {
-		msg.SetAddressHeader("Reply-To", replyTo.Address, replyTo.Name)
+		msg.SetAddressHeader("Reply-To", replyTo.Address, quote(replyTo.Name))
 	}
 	msg.SetHeader("Subject", subject)
 	msg.SetBody(contentType, body)
