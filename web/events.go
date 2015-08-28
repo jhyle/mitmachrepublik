@@ -277,6 +277,28 @@ func (events *EventService) SearchDatesOfUser(userId bson.ObjectId, page, pageSi
 	return &result, err
 }
 
+func (events *EventService) FindNextDates() ([]Date, error) {
+
+	var allEvents []Event
+	err := events.eventTable().Find(bson.M{}, &allEvents, "start")
+	if err != nil {
+		return nil, err
+	}
+
+	dates := make([]Date, 0)
+	for _, event := range allEvents {
+		datesOfEvent, err := events.FindDatesOfEvent(event.Id, "start")
+		if err != nil {
+			return nil, err
+		}
+		if len(datesOfEvent) > 0 {
+			dates = append(dates, datesOfEvent[0])
+		}
+	}
+	
+	return dates, nil
+}
+
 func (events *EventService) FindDatesOfEvent(eventId bson.ObjectId, sort string) ([]Date, error) {
 
 	var result []Date

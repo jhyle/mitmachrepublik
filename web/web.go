@@ -233,6 +233,20 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 	}
 }
 
+func (app *MmrApp) sitemapPage(w traffic.ResponseWriter, r *traffic.Request) {
+
+	result := func() *appResult {
+
+		dates, err := app.events.FindNextDates()
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+		return app.output("sitemap.tpl", w, "text/xml", nil, bson.M{"dates": dates})
+	}()
+
+	app.handle(w, result)
+}
+
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	eventsPerRow := 4
@@ -1503,6 +1517,7 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstalter//:categoryIds/:categories/:page", app.organizersPage)
 	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 
+	router.Get("/sitemap.xml", app.sitemapPage)
 	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "impressum.tpl", "Impressum") })
 	router.Get("/disclaimer", func(w traffic.ResponseWriter, r *traffic.Request) {
 		app.staticPage(w, "disclaimer.tpl", "Haftungsausschluss (Disclaimer)")

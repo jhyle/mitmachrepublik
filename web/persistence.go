@@ -52,6 +52,7 @@ func NewMongoDb(mongoUrl string, dbName string) (Database, error) {
 
 func (db *mongoDb) Table(name string) Table {
 
+	db.session.Refresh()
 	return &mongoTable{db.session.DB(db.name).C(name)}
 }
 
