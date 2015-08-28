@@ -29,11 +29,6 @@ type (
 	}
 )
 
-func quote(name string) string {
-
-	return "\"" + strings.Replace(name, "\"", "'", -1) + "\""
-} 
-
 func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, contentType, body string) error {
 
 	if account.From == nil {
@@ -45,10 +40,22 @@ func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, conten
 	}
 
 	msg := gomail.NewMessage()
-	msg.SetAddressHeader("From", account.From.Address, quote(account.From.Name))
-	msg.SetAddressHeader("To", to.Address, quote(to.Name))
+	if strings.Contains(account.From.Name, ",") {
+		msg.SetHeader("From", account.From.Address)
+	} else {
+		msg.SetAddressHeader("From", account.From.Address, account.From.Name)
+	}
+	if strings.Contains(to.Name, ",") {
+		msg.SetHeader("To", to.Address)
+	} else {
+		msg.SetAddressHeader("To", to.Address, to.Name)
+	}
 	if replyTo != nil {
-		msg.SetAddressHeader("Reply-To", replyTo.Address, quote(replyTo.Name))
+		if strings.Contains(replyTo.Name, ",") {
+			msg.SetHeader("Reply-To", replyTo.Address)
+		} else {
+			msg.SetAddressHeader("Reply-To", replyTo.Address, replyTo.Name)
+		}
 	}
 	msg.SetHeader("Subject", subject)
 	msg.SetBody(contentType, body)
