@@ -171,7 +171,7 @@ func encodePath(path string) string {
 	return (&url.URL{Path: path}).String()
 }
 
-func eventSearchUrl(place string, targetIds, categoryIds []int, dateIds []int, radius int) string {
+func eventSearchUrl(place string, targetIds, categoryIds, dateIds []int, radius int) string {
 
 	targetNames := make([]string, len(targetIds))
 	for i, id := range targetIds {
@@ -346,4 +346,9 @@ func pageCount(results, pageSize int) int {
 func isEmpty(s string) bool {
 
 	return len(strings.TrimSpace(s)) == 0
+}
+
+func intSlice(args ...int) []int {
+
+    return args
 }

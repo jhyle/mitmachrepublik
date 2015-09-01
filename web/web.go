@@ -112,6 +112,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		"inc":                     inc,
 		"dec":                     dec,
 		"cut":                     cut,
+		"intSlice":                intSlice,
 		"dateFormat":              dateFormat,
 		"timeFormat":              timeFormat,
 		"datetimeFormat":          datetimeFormat,
@@ -241,7 +242,13 @@ func (app *MmrApp) sitemapPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
-		return app.output("sitemap.tpl", w, "text/xml", nil, bson.M{"dates": dates})
+		
+		organizers, err := app.users.FindUsers()
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+		
+		return app.output("sitemap.tpl", w, "text/xml", nil, bson.M{"dates": dates, "organizers": organizers})
 	}()
 
 	app.handle(w, result)
@@ -721,7 +728,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 		}
 		maxPage := pageCount - 1
 
-		return app.view("organizers.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "organizers": result.Organizers, "place": place, "radius": radius, "categoryIds": categoryIds, "noindex": true})
+		return app.view("organizers.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "organizers": result.Organizers, "place": place, "radius": radius, "categoryIds": categoryIds})
 	}()
 
 	app.handle(w, result)
