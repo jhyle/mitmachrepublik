@@ -17,19 +17,19 @@
 	</div>
 	<div class="col-xs-2 col-foot">
 	  <ul>
-	    <li><h5><a href="/veranstaltungen/{{simpleEventSearchUrl ""}}">Veranstaltungen</a> in..</h5></li>
-	    <li><a href="/veranstaltungen/{{simpleEventSearchUrl "Berlin"}}">Berlin</a></li>
+	    <li><h5><a href="/veranstaltungen/{{simpleEventSearchUrl ""}}" title="Alle Veranstaltungen">Veranstaltungen</a> in..</h5></li>
+	    <li><a href="/veranstaltungen/{{simpleEventSearchUrl "Berlin"}}" title="Veranstaltungen in Berlin">Berlin</a></li>
 	    {{range $district, $quarters := .districts}}
-	    	<li><a href="/veranstaltungen/{{simpleEventSearchUrl $district}}">{{cut $district 1}}</a></li>
+	    	<li><a href="/veranstaltungen/{{simpleEventSearchUrl $district}}" title="Veranstaltungen in {{cut $district 1}}">{{cut $district 1}}</a></li>
 	    {{end}}
 	  </ul>
 	</div>
 	<div class="col-xs-2 col-foot">
 	  <ul>
-	    <li><h5><a href="/veranstalter/{{organizerSearchUrl ""}}">Organisatoren</a> in..</h5></li>
-	    <li><a href="/veranstalter/{{organizerSearchUrl "Berlin"}}">Berlin</a></li>
+	    <li><h5><a href="/veranstalter/{{organizerSearchUrl ""}}" title="Alle Veranstalter">Organisatoren</a> in..</h5></li>
+	    <li><a href="/veranstalter/{{organizerSearchUrl "Berlin"}}" title="Veranstalter in Berlin">Berlin</a></li>
 	    {{range $district, $quarters := .districts}}
-	    	<li><a href="/veranstalter/{{organizerSearchUrl $district}}">{{cut $district 1}}</a></li>
+	    	<li><a href="/veranstalter/{{organizerSearchUrl $district}}" title="Veranstalter in {{cut $district 1}}">{{cut $district 1}}</a></li>
 	    {{end}}
 	  </ul>
 	</div>
@@ -37,7 +37,7 @@
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
 	    <li><h5>In Kategorie..</h5></li>
 	    {{range $i, $category := .categories}}
-    		<li><a href="/veranstaltungen/{{categorySearchUrl (index $.categoryMap $category) "Berlin"}}">{{$category}}</a></li>
+    		<li><a href="/veranstaltungen/{{categorySearchUrl (index $.categoryMap $category) "Berlin"}}" title="{{$category}} in Berlin">{{$category}}</a></li>
 	    {{end}}
 	  </ul>
 	</div>
@@ -45,7 +45,7 @@
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
 	    <li><h5>Für..</h5></li>
 	    {{range $i, $target := .targets}}
-    		<li><a href="/veranstaltungen/{{targetSearchUrl (index $.targetMap $target) "Berlin"}}">{{$target}}</a></li>
+    		<li><a href="/veranstaltungen/{{targetSearchUrl (index $.targetMap $target) "Berlin"}}" title="Veranstaltungen für {{$target}} in Berlin">{{$target}}</a></li>
 	    {{end}}
 	    <li><h5><a href="/veranstaltungen/{{simpleEventSearchUrl "Berlin"}}">Berlin</a></h5></li>
 		<li><a href="/veranstaltungen/{{eventSearchUrl "Berlin" (intSlice 0) (intSlice 0) (intSlice 1) 0}}" title="Veranstaltungen in Berlin heute">Heute in Berlin</a></li> 
