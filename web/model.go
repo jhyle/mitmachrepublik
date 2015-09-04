@@ -4,6 +4,7 @@ import (
 	"github.com/kennygrant/sanitize"
 	"gopkg.in/mgo.v2/bson"
 	"html/template"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -285,6 +286,8 @@ var (
 	}
 
 	DateOrder []int = []int{TwoWeeks, Today, Tomorrow, ThisWeek, NextWeekend, NextWeek, FromNow}
+
+	whiteSpace = regexp.MustCompile(`\s+`)
 )
 
 func (user *User) GetId() bson.ObjectId {
@@ -307,7 +310,7 @@ func (user *User) HtmlDescription() template.HTML {
 
 func (user *User) PlainDescription() string {
 
-	return sanitize.HTML(user.Descr)
+	return whiteSpace.ReplaceAllString(sanitize.HTML(user.Descr), " ")
 }
 
 func (user *User) IsAdmin() bool {
@@ -335,7 +338,7 @@ func (event *Event) HtmlDescription() template.HTML {
 
 func (event *Event) PlainDescription() string {
 
-	return sanitize.HTML(event.Descr)
+	return whiteSpace.ReplaceAllString(sanitize.HTML(event.Descr), " ")
 }
 
 func (date *Date) GetId() bson.ObjectId {
@@ -367,7 +370,7 @@ func (date *Date) HtmlDescription() template.HTML {
 
 func (date *Date) PlainDescription() string {
 
-	return sanitize.HTML(date.Descr)
+	return whiteSpace.ReplaceAllString(sanitize.HTML(date.Descr), " ")
 }
 
 func (session *Session) GetId() bson.ObjectId {
