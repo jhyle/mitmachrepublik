@@ -30,6 +30,8 @@
 			<a href="http://twitter.com/intent/tweet?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/twitter_share.png"></a>
 			<div style="display: inline-block; float: right;"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
 		</div>
+		{{end}}
+		{{with (or $.date $.event)}}
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
 		<p class="icon-text date">{{dateFormat .Start}}</p>
 		{{if ne (timeFormat .Start) ("00:00")}}
