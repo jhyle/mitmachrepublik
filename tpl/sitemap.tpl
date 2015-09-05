@@ -21,7 +21,7 @@
     <changefreq>daily</changefreq> 
     <priority>0.9</priority> 
   </url>
-{{range .dates}}
+{{range .events}}
   <url>
     <loc>http://{{$.hostname}}{{.Url}}</loc>
     <priority>0.7</priority> 

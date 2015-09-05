@@ -23,6 +23,7 @@
 			</a>
 			{{end}}
 		</div>
+		{{with $.date}}
 		<div style="margin-bottom: 15px">
 			<a style="margin-right: 10px" href="https://www.facebook.com/sharer/sharer.php?u=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/facebook_share.png"></a>
 			<a style="margin-right: 10px" href="https://plus.google.com/share?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/google_share.png"></a>
@@ -43,6 +44,7 @@
 				<p class="icon-text date">{{timeFormat .End}} Uhr</p>
 			{{end}}
 		{{end}}{{end}}
+		{{end}}
 		{{if not .Addr.IsEmpty}}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
 			<p class="icon-text">{{ if .Addr.Name }}<span>{{.Addr.Name}}</span><br />{{ end }}<span class="address">{{ if .Addr.Street }}<span>{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span>{{.Addr.Pcode}}</span> {{ end }}<span>{{.Addr.City}}</span></span></p>
@@ -63,7 +65,9 @@
 			<p class="small-icon pull-left"><span class="fa fa-external-link fa-fw" title="Webseite"></span></p>
 			<p class="icon-text date"><a href="{{.Web}}" class="highlight" title="Webseite von {{.Title}}" target="_blank">{{strClip .Web 30}}</a></p>
 		{{end}}
-		<p style="font-weight: bolder">{{if .Rsvp}}Anmeldung erforderlich!{{if .Web}} Melde Dich auf der Webseite der Veranstaltung an.{{end}}{{else}}Keine Anmeldung erforderlich! Schaue einfach beim Treffen vorbei.{{end}}</p>
+		{{if $.date}}
+			<p style="font-weight: bolder">{{if .Rsvp}}Anmeldung erforderlich!{{if .Web}} Melde Dich auf der Webseite der Veranstaltung an.{{end}}{{else}}Keine Anmeldung erforderlich! Schaue einfach beim Treffen vorbei.{{end}}</p>
+		{{end}}
 		<div class="description" style="margin: 15px 0 15px 0">{{.HtmlDescription}}</div>
 		<div class="clearfix"></div>
 		<div class="fb-comments" data-href="http://{{$.hostname}}{{.Url}}" data-width="100%" data-numposts="5" data-order-by="time" data-colorscheme="light"></div>

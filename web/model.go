@@ -331,6 +331,20 @@ func (event *Event) SetId(id bson.ObjectId) {
 	event.Id = id
 }
 
+func (event *Event) Url() string {
+
+	targetNames := make([]string, len(event.Targets))
+	for i, id := range event.Targets {
+		targetNames[i] = TargetIdMap[id]
+	}
+	categoryNames := make([]string, len(event.Categories))
+	for i, id := range event.Categories {
+		categoryNames[i] = CategoryIdMap[id]
+	}
+
+	return "/veranstaltung/" + citypartName(event.Addr) + "/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/" + event.Id.Hex() + "/" + event.Title
+}
+
 func (event *Event) HtmlDescription() template.HTML {
 
 	return noescape(sanitizeHtml(event.Descr))
@@ -360,7 +374,7 @@ func (date *Date) Url() string {
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return "/veranstaltung/" + citypartName(date.Addr) + "/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/" + dateFormat(date.Start) + "/" + date.Id.Hex() + "/" + date.Title
+	return "/veranstaltung/" + citypartName(date.Addr) + "/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/" + date.Id.Hex() + "/" + date.EventId.Hex() + "/" + date.Title
 }
 
 func (date *Date) HtmlDescription() template.HTML {

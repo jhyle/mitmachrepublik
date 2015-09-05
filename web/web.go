@@ -50,10 +50,11 @@ type (
 	}
 
 	appResult struct {
-		Status int
-		Error  error
-		XML    string
-		JSON   interface{}
+		Status      int
+		Error       error
+		RedirectUrl string
+		XML         string
+		JSON        interface{}
 	}
 
 	rssItem struct {
@@ -221,6 +222,9 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 		if result == resultUnauthorized {
 			w.Header().Set("Location", "/#login")
 			w.WriteHeader(http.StatusFound)
+		} else if !isEmpty(result.RedirectUrl) {
+			w.Header().Set("Location", result.RedirectUrl)
+			w.WriteHeader(http.StatusMovedPermanently)
 		} else {
 			w.WriteHeader(result.Status)
 			if result == resultNotFound {
@@ -238,17 +242,17 @@ func (app *MmrApp) sitemapPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *appResult {
 
-		dates, err := app.events.FindNextDates()
+		events, err := app.events.FindEvents()
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
-		
+
 		organizers, err := app.users.FindUsers()
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
-		
-		return app.output("sitemap.tpl", w, "text/xml", nil, bson.M{"dates": dates, "organizers": organizers})
+
+		return app.output("sitemap.tpl", w, "text/xml", nil, bson.M{"events": events, "organizers": organizers})
 	}()
 
 	app.handle(w, result)
@@ -563,6 +567,7 @@ func (app *MmrApp) nlEventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
+	var date *Date = nil
 	radius := 2
 	dateIds := []int{TwoWeeks}
 
@@ -572,22 +577,36 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultNotFound
 		}
 
-		date, err := app.events.LoadDate(bson.ObjectIdHex(r.Param("id")))
+		if strings.Contains(r.Param("dateId"), ", ") {
+			date, _ = app.events.LoadDate(bson.ObjectIdHex(r.Param("id")))
+			if date != nil {
+				return &appResult{RedirectUrl: date.Url()}
+			}
+		}
+
+		event, err := app.events.Load(bson.ObjectIdHex(r.Param("id")))
 		if err != nil {
 			return resultNotFound
 		}
 
-		recurrences, err := app.events.FindDatesOfEvent(date.EventId, "start")
+		recurrences, err := app.events.FindDatesOfEvent(event.Id, "start")
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizer, err := app.users.Load(date.OrganizerId)
+		if bson.IsObjectIdHex(r.Param("dateId")) {
+			date, _ = app.events.LoadDate(bson.ObjectIdHex(r.Param("dateId")))
+		}
+		if date == nil && len(recurrences) > 0 {
+			date = &recurrences[0]
+		}
+
+		organizer, err := app.users.Load(event.OrganizerId)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		place := citypartName(date.Addr)
+		place := citypartName(event.Addr)
 
 		eventCnt, err := app.events.Count("", place, timeSpans(dateIds), nil, nil)
 		if err != nil {
@@ -600,28 +619,30 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		imageUrl := ""
-		if !isEmpty(date.Image) {
-			imageUrl = "http://" + app.hostname + "/bild/" + date.Image
+		if !isEmpty(event.Image) {
+			imageUrl = "http://" + app.hostname + "/bild/" + event.Image
 		}
 
-		title := date.Title
-		title += " am " + dateFormat(date.Start)
+		title := event.Title
+		if date != nil {
+			title += " am " + dateFormat(date.Start)
+		}
 		if !isEmpty(place) {
 			title += " in " + place
 		}
-		if !isEmpty(date.Addr.Name) {
-			title += " (" + date.Addr.Name + ")"
+		if !isEmpty(event.Addr.Name) {
+			title += " (" + event.Addr.Name + ")"
 		}
 
 		meta := metaTags{
 			title + " - Mitmach-Republik",
 			title,
 			imageUrl,
-			strClip(date.PlainDescription(), 160),
+			strClip(event.PlainDescription(), 160),
 			false,
 		}
 
-		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": date, "organizer": organizer, "recurrences": recurrences, "noindex": len(recurrences) == 0 || recurrences[0].Id != date.Id})
+		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "date": date, "organizer": organizer, "recurrences": recurrences, "noindex": bson.IsObjectIdHex(r.Param("dateId"))})
 	}()
 
 	app.handle(w, result)
@@ -1511,14 +1532,15 @@ func (app *MmrApp) Start() {
 	router.Get("/newsletter/veranstaltungen/:place/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
 	router.Get("/newsletter/veranstaltungen//:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
 
-	router.Get("/veranstaltung/:place/:targets/:categories/:date/:id/:title", app.eventPage)
-	router.Get("/veranstaltung//:targets/:categories/:date/:id/:title", app.eventPage)
-	router.Get("/veranstaltung/:place//:categories/:date/:id/:title", app.eventPage)
-	router.Get("/veranstaltung///:categories/:date/:id/:title", app.eventPage)
-	router.Get("/veranstaltung/:targets/:categories/:date/:id/:title", app.eventPage)
-	router.Get("/veranstaltung//:categories/:date/:id/:title", app.eventPage)
-	router.Get("/veranstaltung/:categories/:date/:id/:title", app.eventPage)
-	router.Get("/veranstaltung//:date/:id/:title", app.eventPage)
+	router.Get("/veranstaltung/:place/:targets/:categories/:dateId/:id/:title", app.eventPage)
+	router.Get("/veranstaltung//:targets/:categories/:dateId/:id/:title", app.eventPage)
+	router.Get("/veranstaltung/:place//:categories/:dateId/:id/:title", app.eventPage)
+	router.Get("/veranstaltung///:categories/:dateId/:id/:title", app.eventPage)
+
+	router.Get("/veranstaltung/:place/:targets/:categories/:id/:title", app.eventPage)
+	router.Get("/veranstaltung//:targets/:categories/:id/:title", app.eventPage)
+	router.Get("/veranstaltung/:place//:categories/:id/:title", app.eventPage)
+	router.Get("/veranstaltung///:categories/:id/:title", app.eventPage)
 
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
 	router.Get("/veranstalter//:categoryIds/:categories/:page", app.organizersPage)

@@ -13,6 +13,7 @@
 	<meta name="robots" content="noindex, follow">
 {{end}}
 {{if and (.event) (not .user)}}
+	<meta property="og:url" content="http://{{.hostname}}{{.event.Url}}">
 	<link rel="canonical" href="http://{{.hostname}}{{.event.Url}}">
 {{end}}
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
