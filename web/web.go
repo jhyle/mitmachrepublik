@@ -597,9 +597,6 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if bson.IsObjectIdHex(r.Param("dateId")) {
 			date, _ = app.events.LoadDate(bson.ObjectIdHex(r.Param("dateId")))
 		}
-		if date == nil && len(recurrences) > 0 {
-			date = &recurrences[0]
-		}
 
 		organizer, err := app.users.Load(event.OrganizerId)
 		if err != nil {
@@ -640,6 +637,10 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			imageUrl,
 			strClip(event.PlainDescription(), 160),
 			false,
+		}
+
+		if date == nil && len(recurrences) > 0 {
+			date = &recurrences[0]
 		}
 
 		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "date": date, "organizer": organizer, "recurrences": recurrences, "noindex": bson.IsObjectIdHex(r.Param("dateId"))})
