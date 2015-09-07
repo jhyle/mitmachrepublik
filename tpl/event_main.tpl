@@ -76,6 +76,19 @@
 	</div>{{end}}
 	<div class="col-xs-1">&nbsp;</div>
 </div>
+{{if len .similiars}}
+<div class="row tiles" style="padding-bottom: 0">
+	<div class="col-xs-1">&nbsp;</div>
+	<div class="col-xs-11"><h2 style="color: #ff5100; margin: 0; font-weight: lighter">Weitere interessante Veranstaltungen{{if .event.Addr.City}} in {{.event.Addr.City}}{{end}}</h2></div>
+</div>
+<div class="row tiles">
+	<div class="col-xs-1 hidden-xs">&nbsp;</div>
+	{{range .similiars}}
+		{{template "tile_event.tpl" .}}
+	{{end}}
+	<div class="col-xs-1 hidden-xs">&nbsp;</div>
+</div>
+{{end}}
 {{if not .noindex}}{{range $i, $date := $.recurrences}}
 <script type="application/ld+json">
 	{

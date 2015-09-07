@@ -305,6 +305,50 @@ func (events *EventService) FindNextDates() ([]Date, error) {
 	return dates, nil
 }
 
+func (events *EventService) FindSimilarDates(event *Event, count int) ([]Date, error) {
+
+	categories := make([]bson.M, 0)
+	for _, category := range event.Categories {
+		categories = append(categories, bson.M{"categories": category})
+	}
+	categoryQuery := bson.M{"$or": categories}
+
+	targets := make([]bson.M, 0)
+	for _, target := range event.Targets {
+		targets = append(targets, bson.M{"targets": target})
+	}
+	targetQuery := bson.M{"$or": targets}
+
+	dates := make([]Date, 0)
+	query := bson.M{"$and": []bson.M{categoryQuery, targetQuery, bson.M{"eventid": bson.M{"$ne": event.Id}}, bson.M{"addr.city": event.Addr.City}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
+
+	page := 0
+	pageSize := 10
+	var err error
+	var result DateSearchResult
+
+	for len(dates) < count {
+		err = events.dateTable().Search(query, page*pageSize, pageSize, &result, "start")
+		if err != nil || len(result.Dates) == 0 {
+			break
+		}
+		for _, date := range result.Dates {
+			found := false
+			for _, have := range dates {
+				if date.EventId == have.EventId {
+					found = true
+					break
+				}
+			}
+			if !found {
+				dates = append(dates, *date)
+			}
+		}
+		page++
+	}
+	return dates, err
+}
+
 func (events *EventService) FindDatesOfEvent(eventId bson.ObjectId, sort string) ([]Date, error) {
 
 	var result []Date

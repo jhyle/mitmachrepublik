@@ -603,6 +603,11 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
+		similars, err := app.events.FindSimilarDates(event, 4)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
 		place := citypartName(event.Addr)
 
 		eventCnt, err := app.events.Count("", place, timeSpans(dateIds), nil, nil)
@@ -642,8 +647,8 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if date == nil && len(recurrences) > 0 {
 			date = &recurrences[0]
 		}
-
-		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "date": date, "organizer": organizer, "recurrences": recurrences, "noindex": bson.IsObjectIdHex(r.Param("dateId"))})
+		
+		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "date": date, "organizer": organizer, "recurrences": recurrences, "similiars": similars, "noindex": bson.IsObjectIdHex(r.Param("dateId"))})
 	}()
 
 	app.handle(w, result)
