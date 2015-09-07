@@ -106,19 +106,19 @@
 		"location": {
 			"@type": "Place",
 			"address": {
-				"@type": "PostalAddress",
+				"@type": "PostalAddress"
 {{if $date.Addr.City}}
-				"addressLocality": {{$date.Addr.City}},
+				, "addressLocality": {{$date.Addr.City}}
 {{end}}
 {{if $date.Addr.Pcode}}
-				"postalCode": {{$date.Addr.Pcode}},
+				, "postalCode": {{$date.Addr.Pcode}}
 {{end}}
 {{if $date.Addr.Street}}
-				"streetAddress": {{$date.Addr.Street}}
+				, "streetAddress": {{$date.Addr.Street}}
 {{end}}
-			},
+			}
 {{if $date.Addr.Name}}
-			"name": {{$date.Addr.Name}}
+			, "name": {{$date.Addr.Name}}
 {{end}}
 		},
 		"organizer": {
@@ -126,19 +126,19 @@
 			"location": {
 				"@type": "Place",
 				"address": {
-					"@type": "PostalAddress",
+					"@type": "PostalAddress"
 {{if $.organizer.Addr.City}}
-					"addressLocality": {{$.organizer.Addr.City}},
+					, "addressLocality": {{$.organizer.Addr.City}}
 {{end}}
 {{if $.organizer.Addr.Pcode}}
-					"postalCode": {{$.organizer.Addr.Pcode}},
+					, "postalCode": {{$.organizer.Addr.Pcode}}
 {{end}}
 {{if $.organizer.Addr.Street}}
-					"streetAddress": {{$.organizer.Addr.Street}}
+					, "streetAddress": {{$.organizer.Addr.Street}}
 {{end}}
-				},
+				}
 {{if $.organizer.Addr.Name}}
-				"name": {{$.organizer.Addr.Name}}
+				, "name": {{$.organizer.Addr.Name}}
 {{end}}
 			},
 			"name": {{$.organizer.Name}},
