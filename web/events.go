@@ -342,6 +342,9 @@ func (events *EventService) FindSimilarDates(event *Event, count int) ([]Date, e
 			}
 			if !found {
 				dates = append(dates, *date)
+				if len(dates) == count {
+					break
+				}
 			}
 		}
 		page++

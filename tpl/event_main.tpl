@@ -88,6 +88,15 @@
 	{{end}}
 	<div class="col-xs-1 hidden-xs">&nbsp;</div>
 </div>
+<div class="row tiles">
+	<div class="col-xs-1 hidden-xs">&nbsp;</div>
+	<div class="col-xs-2">&nbsp;</div>
+	<div class="col-xs-6">
+		<a href="/veranstaltungen/{{eventSearchUrl .event.Addr.City .event.Targets .event.Categories (intSlice 0) 0}}" class="btn btn-mmr" style="width: 100%">Weitere Veranstaltungen</a>
+	</div>
+	<div class="col-xs-2">&nbsp;</div>
+	<div class="col-xs-1 hidden-xs">&nbsp;</div>
+</div>
 {{end}}
 {{if not .noindex}}{{range $i, $date := $.recurrences}}
 <script type="application/ld+json">
