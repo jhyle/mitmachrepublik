@@ -307,20 +307,26 @@ func (events *EventService) FindNextDates() ([]Date, error) {
 
 func (events *EventService) FindSimilarDates(event *Event, count int) ([]Date, error) {
 
+	query := []bson.M{bson.M{"eventid": bson.M{"$ne": event.Id}}, bson.M{"addr.city": event.Addr.City}, bson.M{"start": bson.M{"$gte": time.Now()}}}
+	
 	categories := make([]bson.M, 0)
 	for _, category := range event.Categories {
 		categories = append(categories, bson.M{"categories": category})
 	}
-	categoryQuery := bson.M{"$or": categories}
+	if len(categories) > 0 {
+		query = append(query, bson.M{"$or": categories})
+	}
 
 	targets := make([]bson.M, 0)
 	for _, target := range event.Targets {
 		targets = append(targets, bson.M{"targets": target})
 	}
-	targetQuery := bson.M{"$or": targets}
+	if len(targets) > 0 {
+		query = append(query, bson.M{"$or": targets})
+	}
 
 	dates := make([]Date, 0)
-	query := bson.M{"$and": []bson.M{categoryQuery, targetQuery, bson.M{"eventid": bson.M{"$ne": event.Id}}, bson.M{"addr.city": event.Addr.City}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
+	query1 := bson.M{"$and": query}
 
 	page := 0
 	pageSize := 10
@@ -328,7 +334,7 @@ func (events *EventService) FindSimilarDates(event *Event, count int) ([]Date, e
 	var result DateSearchResult
 
 	for len(dates) < count {
-		err = events.dateTable().Search(query, page*pageSize, pageSize, &result, "start")
+		err = events.dateTable().Search(query1, page*pageSize, pageSize, &result, "start")
 		if err != nil || len(result.Dates) == 0 {
 			break
 		}
