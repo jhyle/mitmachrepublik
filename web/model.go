@@ -155,6 +155,7 @@ const (
 	NextWeekend
 	NextWeek
 	TwoWeeks
+	AfterTomorrow
 )
 
 var (
@@ -276,16 +277,17 @@ var (
 	}
 
 	DateIdMap map[int]string = map[int]string{
-		FromNow:     "alle ab jetzt",
-		Today:       "heute",
-		Tomorrow:    "morgen",
-		ThisWeek:    "diese Woche",
-		NextWeekend: "am Wochenende",
-		NextWeek:    "nächste Woche",
-		TwoWeeks:    "14 Tage",
+		FromNow:       "alle ab jetzt",
+		Today:         "heute",
+		Tomorrow:      "morgen",
+		AfterTomorrow: "übermorgen",
+		ThisWeek:      "diese Woche",
+		NextWeekend:   "am Wochenende",
+		NextWeek:      "nächste Woche",
+		TwoWeeks:      "14 Tage",
 	}
 
-	DateOrder []int = []int{TwoWeeks, Today, Tomorrow, ThisWeek, NextWeekend, NextWeek, FromNow}
+	DateOrder []int = []int{TwoWeeks, Today, Tomorrow, AfterTomorrow, ThisWeek, NextWeekend, NextWeek, FromNow}
 
 	whiteSpace = regexp.MustCompile(`\s+`)
 )

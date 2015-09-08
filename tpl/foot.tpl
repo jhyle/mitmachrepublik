@@ -50,6 +50,7 @@
 	    <li><h5><a href="/veranstaltungen/{{simpleEventSearchUrl "Berlin"}}">Berlin</a></h5></li>
 		<li><a href="/veranstaltungen/{{eventSearchUrl "Berlin" (intSlice 0) (intSlice 0) (intSlice 1) 0}}" title="Veranstaltungen in Berlin heute">Heute in Berlin</a></li> 
 		<li><a href="/veranstaltungen/{{eventSearchUrl "Berlin" (intSlice 0) (intSlice 0) (intSlice 2) 0}}" title="Veranstaltungen in Berlin morgen">Morgen in Berlin</a></li>
+		<li><a href="/veranstaltungen/{{eventSearchUrl "Berlin" (intSlice 0) (intSlice 0) (intSlice 7) 0}}" title="Veranstaltungen in Berlin übermorgen">Übermorgen in Berlin</a></li>
 		<li><a href="/veranstaltungen/{{eventSearchUrl "Berlin" (intSlice 0) (intSlice 0) (intSlice 4) 0}}" title="Veranstaltungen in Berlin am nächsten Wochenende">Berlin am nächsten Wochenende</a></li> 
 	  </ul>
 	</div>

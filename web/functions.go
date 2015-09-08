@@ -293,6 +293,11 @@ func timeSpans(dateIds []int) [][]time.Time {
 			now = now.AddDate(0, 0, 1)
 			timespan[0] = dayStart(now)
 			timespan[1] = dayEnd(now)
+		} else if dateId == AfterTomorrow {
+			now = now.AddDate(0, 0, 1)
+			now = now.AddDate(0, 0, 1)
+			timespan[0] = dayStart(now)
+			timespan[1] = dayEnd(now)
 		} else if dateId == ThisWeek {
 			timespan[0] = now
 			for now.Weekday() != time.Sunday {
