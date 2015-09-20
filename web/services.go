@@ -3,8 +3,8 @@ package mmr
 import (
 	"encoding/json"
 	"github.com/pilu/traffic"
-	"io/ioutil"
 	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -15,6 +15,7 @@ import (
 type (
 	Service interface {
 		Start()
+		Run() error
 		Stop()
 	}
 
@@ -37,8 +38,8 @@ type (
 
 	UpdateRecurrencesService struct {
 		BasicService
-		events *EventService
-		account *EmailAccount
+		events   *EventService
+		account  *EmailAccount
 		hostname string
 	}
 
@@ -82,12 +83,12 @@ func NewSessionService(hour int, database Database) Service {
 
 func (service *SessionService) Start() {
 
-	service.start(service.serve)
+	service.start(service.Run)
 }
 
-func (service *SessionService) serve() {
+func (service *SessionService) Run() error {
 
-	service.database.RemoveOldSessions(time.Duration(24) * time.Hour)
+	return service.database.RemoveOldSessions(time.Duration(24) * time.Hour)
 }
 
 func NewUnusedImgService(hour int, database Database, imgServer string) Service {
@@ -97,7 +98,7 @@ func NewUnusedImgService(hour int, database Database, imgServer string) Service 
 
 func (service *UnusedImgService) Start() {
 
-	service.start(service.serve)
+	service.start(service.Run)
 }
 
 func listImages(imgServer string, age int) ([]string, error) {
@@ -116,26 +117,23 @@ func listImages(imgServer string, age int) ([]string, error) {
 	return images, nil
 }
 
-func (service *UnusedImgService) serve() {
+func (service *UnusedImgService) Run() error {
 
 	images, err := listImages(service.imgServer, 3600*24)
 	if err != nil {
-		traffic.Logger().Print(err)
-		return
+		return err
 	}
 
 	var eventImages []string
 	err = service.database.Table("event").Distinct(nil, "image", &eventImages)
 	if err != nil {
-		traffic.Logger().Print(err)
-		return
+		return err
 	}
 
 	var userImages []string
 	err = service.database.Table("user").Distinct(nil, "image", &userImages)
 	if err != nil {
-		traffic.Logger().Print(err)
-		return
+		return err
 	}
 
 	unusedImages := make(map[string]string)
@@ -155,13 +153,15 @@ func (service *UnusedImgService) serve() {
 
 		req, err := http.NewRequest("DELETE", service.imgServer+"/"+image, nil)
 		if err != nil {
-			traffic.Logger().Print(err)
+			return err
 		}
 		_, err = http.DefaultClient.Do(req)
 		if err != nil {
-			traffic.Logger().Print(err)
+			return err
 		}
 	}
+
+	return nil
 }
 
 func NewUpdateRecurrencesService(hour int, events *EventService, account *EmailAccount, hostname string) Service {
@@ -171,16 +171,16 @@ func NewUpdateRecurrencesService(hour int, events *EventService, account *EmailA
 
 func (service *UpdateRecurrencesService) Start() {
 
-	service.start(service.serve)
+	service.start(service.Run)
 }
 
-func (service *UpdateRecurrencesService) serve() {
+func (service *UpdateRecurrencesService) Run() error {
 
 	dates, err := service.events.UpdateRecurrences()
 	if err != nil {
-		traffic.Logger().Print(err)
+		return err
 	}
-	
+
 	if dates != nil {
 		message := ""
 		for _, dateId := range dates {
@@ -189,7 +189,9 @@ func (service *UpdateRecurrencesService) serve() {
 				message += "http://" + service.hostname + date.Url() + "\n"
 			}
 		}
-		SendEmail(service.account, service.account.From, nil, "Generierte Veranstaltungen", "text/plain", message)  
+		return SendEmail(service.account, service.account.From, nil, "Generierte Veranstaltungen", "text/plain", message)
+	} else {
+		return nil
 	}
 }
 
@@ -200,7 +202,7 @@ func NewSendAlertsService(hour int, hostname string, from *EmailAccount, alerts 
 
 func (service *SendAlertsService) Start() {
 
-	service.start(service.serve)
+	service.start(service.Run)
 }
 
 func getNewsletter(hostname string, alert Alert) (string, error) {
@@ -246,25 +248,26 @@ func getNewsletterSubject(place string, dates []int) string {
 	return subject
 }
 
-func (service *SendAlertsService) serve() {
+func (service *SendAlertsService) Run() error {
 
 	alerts, err := service.alerts.FindAlerts(time.Now().Weekday())
 	if err != nil {
-		traffic.Logger().Print(err)
-		return
+		return err
 	}
 
 	for _, alert := range alerts {
 		newsletter, err := getNewsletter(service.hostname, alert)
 		if err != nil {
-			traffic.Logger().Print(err)
+			return err
 		} else if !isEmpty(newsletter) {
 			err = SendEmail(service.from, &EmailAddress{alert.Name, alert.Email}, service.from.From, getNewsletterSubject(alert.Place, alert.Dates), "text/html", newsletter)
 			if err != nil {
-				traffic.Logger().Print(err)
+				return err
 			}
 		}
 	}
+
+	return nil
 }
 
 func NewSpawnEventsService(hour int, database Database, events *EventService, imgServer string) Service {
@@ -275,22 +278,22 @@ func NewSpawnEventsService(hour int, database Database, events *EventService, im
 func (service *SpawnEventsService) Start() {
 
 	rand.Seed(time.Now().Unix())
-	service.start(service.serve)
+	service.start(service.Run)
 }
 
-func (service *SpawnEventsService) serve() {
+func (service *SpawnEventsService) Run() error {
 
 	titles := []string{"Volleyballtunier", "Wir haben es satt!", "Chor Open Stage Open Air", "Kinderbastelgruppe", "Jüdische Kulturtage", "Fit, Fun, Family im FEZ"}
 	locations := []string{"Sportzentrum", "Brandenburger Tor", "Heiligengeistkirche", "Kindercafé", "Gemeindezentrum", "FEZ"}
 
 	images, err := listImages(service.imgServer, 0)
 	if err != nil {
-		return
+		return err
 	}
 
 	organizer, err := service.database.LoadUserByEmailAndPassword("leonhard.holz@web.de", "julius21")
 	if err != nil {
-		return
+		return err
 	}
 
 	districts := make([]string, 0, len(PostcodeMap))
@@ -315,7 +318,7 @@ func (service *SpawnEventsService) serve() {
 	district := districts[rand.Intn(len(districts))]
 	event.Addr.Pcode = PostcodeMap[district][rand.Intn(len(PostcodeMap[district]))]
 	event.Addr.City = "Berlin"
-	service.events.Store(event, organizer.Approved)
+	return service.events.Store(event, organizer.Approved)
 }
 
 func NewBasicService(hour int) BasicService {
@@ -333,7 +336,7 @@ func timerDuration(hour int) time.Duration {
 	return start.Sub(time.Now())
 }
 
-func (service *BasicService) start(serve func()) {
+func (service *BasicService) start(serve func() error) {
 
 	if service.state == idle {
 		duration := timerDuration(service.hour)

@@ -26,6 +26,7 @@ var (
 	imageServerFlag *string = flag.String("imageServer", "", "url of image server")
 	mongoServerFlag *string = flag.String("mongoServer", "localhost", "url of mongoDb server")
 	databaseFlag    *string = flag.String("database", "mitmachrepublik", "name of the database")
+	scrapersFlag    *bool   = flag.Bool("s", false, "run scrapers")
 )
 
 func IsFolder(path string) bool {
@@ -96,19 +97,27 @@ func main() {
 		os.Exit(2)
 	}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, syscall.SIGTERM)
-	go func() {
-		<-c
+	if *scrapersFlag == false {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		signal.Notify(c, syscall.SIGTERM)
+		go func() {
+			<-c
+			app.Stop()
+			os.Exit(1)
+		}()
+
+		// start debugging server
+		go func() {
+			http.ListenAndServe("localhost:6060", nil)
+		}()
+
+		app.Start()
+	} else {
+		err = app.RunScrapers()
+		if err != nil  {
+			fmt.Println(err)
+		}
 		app.Stop()
-		os.Exit(1)
-	}()
-
-	// start debugging server
-	go func() {
-		http.ListenAndServe("localhost:6060", nil)
-	}()
-
-	app.Start()
+	}
 }

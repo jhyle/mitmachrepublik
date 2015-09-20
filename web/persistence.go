@@ -22,6 +22,7 @@ type (
 		DropIndices() error
 		EnsureIndex(...string) error
 		EnsureIndices([][]string) error
+		Load(interface{}, Item) error
 		LoadById(bson.ObjectId, Item) error
 		CountById(bson.ObjectId) (int, error)
 		CheckForId(bson.ObjectId) error
@@ -172,6 +173,11 @@ func (table *mongoTable) CheckForId(id bson.ObjectId) error {
 	} else {
 		return errors.New(table.collection.Name + " " + id.Hex() + " not found.")
 	}
+}
+
+func (table *mongoTable) Load(query interface{}, item Item) error {
+
+	return table.collection.Find(query).One(item)
 }
 
 func (table *mongoTable) Find(query interface{}, result interface{}, orderBy ...string) error {

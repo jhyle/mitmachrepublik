@@ -156,12 +156,17 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
-	services := make([]Service, 0, 5)
+	admin, err := users.LoadByEmail(ADMIN_EMAIL)
+	if err != nil {
+		return nil, errors.New(ADMIN_EMAIL + " " + err.Error())
+	}
+
+	services := make([]Service, 0, 6)
 	services = append(services, NewSessionService(3, database))
+	services = append(services, NewScrapersService(3, events, admin.Id))
 	services = append(services, NewUpdateRecurrencesService(4, events, emailAccount, hostname))
 	services = append(services, NewUnusedImgService(4, database, imgServer))
-	sendAlertsService = NewSendAlertsService(5, hostname, emailAccount, alerts)
-	services = append(services, sendAlertsService)
+	services = append(services, NewSendAlertsService(5, hostname, emailAccount, alerts))
 	if env == "dev" {
 		services = append(services, NewSpawnEventsService(12, database, events, imgServer))
 	}
@@ -1600,6 +1605,16 @@ func (app *MmrApp) Start() {
 	router.Delete("/event/:id", app.deleteEventHandler)
 
 	router.Run()
+}
+
+func (app *MmrApp) RunScrapers() error {
+
+	organizer, err := app.users.LoadByEmail(ADMIN_EMAIL)
+	if err != nil {
+		return errors.New(ADMIN_EMAIL + " " + err.Error())
+	}
+	scrapers := NewScrapersService(0, app.events, organizer.Id)
+	return scrapers.Run()
 }
 
 func (app *MmrApp) Stop() error {

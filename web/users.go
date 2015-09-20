@@ -92,6 +92,13 @@ func (users *UserService) Load(id bson.ObjectId) (*User, error) {
 	return &user, err
 }
 
+func (users *UserService) LoadByEmail(email string) (*User, error) {
+
+	var user User
+	err := users.table().Load(bson.M{"email": email}, &user)
+	return &user, err
+}
+
 func (users *UserService) FindUsers() ([]User, error) {
 
 	var result []User

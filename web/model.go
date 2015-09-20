@@ -61,6 +61,8 @@ type (
 	Event struct {
 		Id            bson.ObjectId `bson:"_id" json:",omitempty"`
 		OrganizerId   bson.ObjectId `json:",omitempty"`
+		Source        string        `json:",omitempty"`
+		SourceId      string        `json:",omitempty"`
 		Title         string
 		Image         string
 		ImageCredit   string
@@ -145,6 +147,8 @@ const (
 	ThirdWeek
 	FourthWeek
 	LastWeek
+
+	ADMIN_EMAIL = "mitmachrepublik@gmail.com"
 )
 
 const (
@@ -317,7 +321,7 @@ func (user *User) PlainDescription() string {
 
 func (user *User) IsAdmin() bool {
 
-	return user.Email == "mitmachrepublik@gmail.com"
+	return user.Email == ADMIN_EMAIL
 }
 
 func (addr Address) IsEmpty() bool {

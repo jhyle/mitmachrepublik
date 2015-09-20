@@ -255,6 +255,14 @@ func (events *EventService) Load(id bson.ObjectId) (*Event, error) {
 	return &event, err
 }
 
+func (events *EventService) LoadBySource(source, sourceId string) (*Event, error) {
+
+	var event Event
+	query := bson.M{"source": source, "sourceid": sourceId}
+	err := events.eventTable().Load(query, &event)
+	return &event, err
+}
+
 func (events *EventService) LoadDate(id bson.ObjectId) (*Date, error) {
 
 	var date Date
