@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/kennygrant/sanitize"
 	"gopkg.in/mgo.v2/bson"
+	"html"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -96,7 +97,9 @@ func (service *ScrapersService) saveScraped(event *Event) error {
 			oldEvent.End = event.End
 			return service.events.Store(oldEvent, true)
 		} else {
-			return nil
+			event.Id = oldEvent.Id
+			event.OrganizerId = oldEvent.OrganizerId
+			return service.events.Store(event, true)
 		}
 	} else {
 		event.Id = bson.NewObjectId()
@@ -142,12 +145,12 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 	event.SourceId = id
 	event.Web = UK_DETAILS_URL + id
 
-	html, err := service.getWebPage(event.Web)
+	page, err := service.getWebPage(event.Web)
 	if err != nil {
 		return nil, err
 	}
 
-	title := tag_title.FindSubmatch(html)
+	title := tag_title.FindSubmatch(page)
 	if title == nil {
 		return nil, errors.New("could not find title at Umweltkalender #" + id)
 	}
@@ -173,13 +176,13 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 		}
 	}
 
-	h1 := tag_h1.FindSubmatch(html)
+	h1 := tag_h1.FindSubmatch(page)
 	if title == nil {
 		return nil, errors.New("could not find h1 at Umweltkalender #" + id)
 	}
-	event.Title = string(h1[1])
+	event.Title = html.UnescapeString(string(h1[1]))
 
-	main := uk_div_main.FindSubmatch(html)
+	main := uk_div_main.FindSubmatch(page)
 	if main == nil {
 		return nil, errors.New("could not find main div at Umweltkalender #" + id)
 	}
@@ -194,11 +197,11 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 	}
 	event.Descr += "<p class=\"small\">Text von der Veranstaltungswebseite übernommen</p>"
 
-	location := uk_locations.FindSubmatch(html)
+	location := uk_locations.FindSubmatch(page)
 	if location == nil {
 		return nil, errors.New("could not find location at Umweltkalender #" + id)
 	}
-	
+
 	postcode_part := -1
 	address := bytes.Split(location[1], []byte(", "))
 	for i := range address {
@@ -208,7 +211,7 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 		}
 	}
 	if postcode_part > 0 {
-		event.Addr.Street = strings.Trim(string(address[postcode_part - 1]), " ")
+		event.Addr.Street = strings.Trim(string(address[postcode_part-1]), " ")
 	}
 	if postcode_part > -1 {
 		district := postcode_city.FindSubmatch(address[postcode_part])
@@ -225,29 +228,32 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 		}
 	}
 
-	targets := uk_targets.FindSubmatch(html)
+	targets := uk_targets.FindSubmatch(page)
 	if main == nil {
 		return nil, errors.New("could not find targets at Umweltkalender #" + id)
 	}
 
 	event.Targets = make([]int, 0)
 	for _, target := range bytes.Split(targets[1], []byte(", ")) {
-		event.Targets = append(event.Targets, TargetMap[strings.Trim(string(target), " ")])
+		targetId, exists := TargetMap[strings.Trim(string(target), " ")]
+		if exists {
+			event.Targets = append(event.Targets, targetId)
+		}
 	}
 
 	event.Categories = []int{CategoryMap["Leute treffen"], CategoryMap["Umweltschutz"]}
-	event.Rsvp = bytes.Contains(html, ANMELDUNG_ERFORDERLICH)
+	event.Rsvp = bytes.Contains(page, ANMELDUNG_ERFORDERLICH)
 	return &event, nil
 }
 
 func (service *ScrapersService) scrapeUmweltKalender() error {
 
-	html, err := service.getWebPage(UK_LIST_URL)
+	page, err := service.getWebPage(UK_LIST_URL)
 	if err != nil {
 		return err
 	}
 
-	ids := uk_list.FindAllSubmatch(html, -1)
+	ids := uk_list.FindAllSubmatch(page, -1)
 	if ids == nil {
 		return errors.New("no events found at Umweltkalender")
 	}
