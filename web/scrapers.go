@@ -97,9 +97,7 @@ func (service *ScrapersService) saveScraped(event *Event) error {
 			oldEvent.End = event.End
 			return service.events.Store(oldEvent, true)
 		} else {
-			event.Id = oldEvent.Id
-			event.OrganizerId = oldEvent.OrganizerId
-			return service.events.Store(event, true)
+			return nil
 		}
 	} else {
 		event.Id = bson.NewObjectId()
