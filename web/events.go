@@ -313,12 +313,12 @@ func (events *EventService) FindNextDates() ([]Date, error) {
 	return dates, nil
 }
 
-func (events *EventService) FindSimilarDates(event *Event, count int) ([]Date, error) {
+func (events *EventService) FindSimilarDates(date *Date, count int) ([]Date, error) {
 
-	query := []bson.M{bson.M{"eventid": bson.M{"$ne": event.Id}}, bson.M{"addr.city": event.Addr.City}, bson.M{"start": bson.M{"$gte": time.Now()}}}
+	query := []bson.M{bson.M{"eventid": bson.M{"$ne": date.EventId}}, bson.M{"addr.city": date.Addr.City}, bson.M{"start": bson.M{"$gt": date.Start}}}
 	
 	categories := make([]bson.M, 0)
-	for _, category := range event.Categories {
+	for _, category := range date.Categories {
 		categories = append(categories, bson.M{"categories": category})
 	}
 	if len(categories) > 0 {
@@ -326,7 +326,7 @@ func (events *EventService) FindSimilarDates(event *Event, count int) ([]Date, e
 	}
 
 	targets := make([]bson.M, 0)
-	for _, target := range event.Targets {
+	for _, target := range date.Targets {
 		targets = append(targets, bson.M{"targets": target})
 	}
 	if len(targets) > 0 {
