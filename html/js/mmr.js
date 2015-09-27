@@ -805,6 +805,11 @@ $(function() {
 		}
 	});
 
+	$("a[data-href]").each(function() {
+        var $this = $(this);
+        $this.attr("href", $this.attr("data-href"));
+    });
+
 	var hash = window.location.hash;
 	if (hash.substring(1) == "login") {
 		$.removeCookie("SESSIONID", {path: '/'});

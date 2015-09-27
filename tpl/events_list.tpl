@@ -1,6 +1,6 @@
 {{if not $.user }}{{if not $.organizer}}
 <div style="margin-bottom: 10px; font-weight: bolder">
-	<a class="highlight" href="/dialog/emailalert/{{eventSearchUrlWithQuery .place .targetIds .categoryIds .dateIds .radius .query}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Wir senden Dir die Ergebnisse dieser Suche per E-Mail."><span class="fa fa-caret-right"></span> Lass Dich per E-Mail über diese Suche informieren.</a>
+	<a class="highlight" href="javascript:void(0)" data-href="/dialog/emailalert/{{eventSearchUrlWithQuery .place .targetIds .categoryIds .dateIds .radius .query}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Wir senden Dir die Ergebnisse dieser Suche per E-Mail."><span class="fa fa-caret-right"></span> Lass Dich per E-Mail über diese Suche informieren.</a>
 </div>
 {{end}}{{end}}
 {{$n := len .events}}

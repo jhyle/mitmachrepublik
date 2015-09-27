@@ -28,7 +28,7 @@
 			<a style="margin-right: 10px" href="https://www.facebook.com/sharer/sharer.php?u=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/facebook_share.png"></a>
 			<a style="margin-right: 10px" href="https://plus.google.com/share?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/google_share.png"></a>
 			<a href="http://twitter.com/intent/tweet?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/twitter_share.png"></a>
-			<div style="display: inline-block; float: right;"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
+			<div style="display: inline-block; float: right;"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="javascript:void(0)" data-href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
 		</div>
 		{{end}}
 		{{with (or $.date $.event)}}
