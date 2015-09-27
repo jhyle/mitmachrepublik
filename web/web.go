@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sort"
 )
 
 type (
@@ -337,6 +338,16 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 					}
 				}
 				moreEvents = moreEvents || len(dates[category]) > 0
+			}
+		}
+
+		for i := range events {
+			for j := range events {
+				if events[i].Start > events[j].Start {
+					event := events[i]
+					events[i] = events[j]
+					events[j] = event
+				}
 			}
 		}
 
