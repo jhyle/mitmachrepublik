@@ -268,6 +268,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	eventsPerRow := 4
 	numberOfRows := 4
 	pageSize := eventsPerRow * numberOfRows
+	query := ""
 	place := ""
 	dateIds := []int{TwoWeeks}
 
@@ -292,17 +293,36 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		page := 0
-		moreEvents := true
-		events := make([]*Date, 0, eventsPerRow*2)
-		for len(events) < eventsPerRow*numberOfRows && moreEvents {
-			result, err := app.events.SearchDates("", place, timeSpans(dateIds), nil, nil, true, page, pageSize, "start")
+		dates := make(map[int][]*Date)
+		for {
+			result, err := app.events.SearchDates(query, place, timeSpans(dateIds), nil, nil, true, page, pageSize, "start")
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
-			if result.GetSize() == 0 {
-				moreEvents = false
-			} else {
-				for _, date := range result.Dates {
+			for _, date := range result.Dates {
+				for _, category := range date.Categories {
+					categoryDates := dates[category]
+					if categoryDates == nil {
+						categoryDates = make([]*Date, 0)
+					}
+					dates[category] = append(categoryDates, date)
+				}
+			}
+			if len(result.Dates) < pageSize {
+				break
+			}
+			page++
+		}
+
+		moreEvents := true
+		events := make([]*Date, 0, eventsPerRow*2)
+		for len(events) < eventsPerRow*numberOfRows && moreEvents {
+			moreEvents = false
+			for category := range dates {
+				for len(dates[category]) > 0 {
+					date := dates[category][0]
+					dates[category] = append(dates[category][:0], dates[category][1:]...)
+
 					alreadyIncluded := false
 					for _, event := range events {
 						if event.EventId == date.EventId {
@@ -310,12 +330,14 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 							break
 						}
 					}
+
 					if !alreadyIncluded && len(events) < eventsPerRow*numberOfRows {
 						events = append(events, date)
+						break
 					}
 				}
+				moreEvents = moreEvents || len(dates[category]) > 0
 			}
-			page++
 		}
 
 		if r.Param("fmt") == "RSS" {
@@ -655,7 +677,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if date == nil && len(recurrences) > 0 {
 			date = &recurrences[0]
 		}
-		
+
 		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "date": date, "organizer": organizer, "recurrences": recurrences, "similiars": similiars, "noindex": bson.IsObjectIdHex(r.Param("dateId"))})
 	}()
 
