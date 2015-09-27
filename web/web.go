@@ -10,7 +10,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sort"
 )
 
 type (
@@ -343,7 +342,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		for i := range events {
 			for j := range events {
-				if events[i].Start > events[j].Start {
+				if events[i].Start.Before(events[j].Start) {
 					event := events[i]
 					events[i] = events[j]
 					events[j] = event
