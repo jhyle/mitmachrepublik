@@ -11,7 +11,7 @@
 	<div class="col-xs-1 hidden-xs">&nbsp;</div>
 	<div class="col-xs-2">&nbsp;</div>
 	<div class="col-xs-6">
-		<a href="/veranstaltungen/{{simpleEventSearchUrl ""}}2" class="btn btn-mmr" style="width: 100%">Mehr Veranstaltungen</a>
+		<a href="/veranstaltungen/{{simpleEventSearchUrl ""}}" class="btn btn-mmr" style="width: 100%">Mehr Veranstaltungen</a>
 	</div>
 	<div class="col-xs-2">&nbsp;</div>
 	<div class="col-xs-1 hidden-xs">&nbsp;</div>
