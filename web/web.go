@@ -273,7 +273,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	dateIds := []int{TwoWeeks}
 
 	meta := metaTags{
-		"Willkommen in der Mitmach-Republik!",
+		"Gemeinschaftliche Veranstaltungen zum Mitmachen",
 		"Gemeinsam aktiv werden.",
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		"Gemeinsam aktiv werden - hier findest Du Veranstaltungen und Organisationen zum Mitmachen. Finde Nachbarschaftstreffen, Vereine, gemeinnützige Initiativen und Ehrenämter in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
@@ -381,7 +381,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	meta := metaTags{
-		"Registrierung bestätigen - Mitmach-Republik",
+		"Registrierung bestätigen | Mitmach-Republik",
 		"Registrierung bestätigen",
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		"",
@@ -428,7 +428,7 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) nlUnsubscribe(w traffic.ResponseWriter, r *traffic.Request) {
 
 	meta := metaTags{
-		"Benachrichtigung abbestellen - Mitmach-Republik",
+		"Benachrichtigung abbestellen | Mitmach-Republik",
 		"Benachrichtigung abbestellen",
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		"",
@@ -484,7 +484,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	targetIds := str2Int(strings.Split(r.Param("targetIds"), ","))
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
-	title := "Aktuelle Veranstaltungen"
+	title := "Gemeinschaftliche Veranstaltungen"
 	if len(targetIds) > 0 && targetIds[0] != 0 {
 		targets := make([]string, len(targetIds))
 		for i, targetId := range targetIds {
@@ -508,7 +508,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	meta := metaTags{
-		title + " - Mitmach-Republik",
+		title + " | Mitmach-Republik",
 		title,
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		"Veranstaltungen zum Mitmachen! Heute, morgen oder am nächsten Wochenende - finde Veranstaltungen für " + strConcat(TargetOrder) + " in den Kategorien " + strConcat(CategoryOrder) + ".",
@@ -677,7 +677,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		meta := metaTags{
-			title + " - Mitmach-Republik",
+			title + " | Mitmach-Republik",
 			title,
 			imageUrl,
 			strClip(event.PlainDescription(), 160),
@@ -696,7 +696,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) sendEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"Veranstaltung empfehlen - Mitmach-Republik", "", "", "", false}
+	meta := metaTags{"Veranstaltung empfehlen | Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -717,7 +717,7 @@ func (app *MmrApp) sendEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) emailAlertPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"E-Mail-Benachrichtung - Mitmach-Republik", "", "", "", false}
+	meta := metaTags{"E-Mail-Benachrichtung | Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -764,7 +764,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	}
 
 	meta := metaTags{
-		title + " - Mitmach-Republik",
+		title + " | Mitmach-Republik",
 		title,
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		"Mitmacher gesucht! Finde Organisatoren in den Kategorien " + strConcat(CategoryOrder) + ".",
@@ -859,7 +859,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 		meta := metaTags{
-			title + " - Mitmach-Republik",
+			title + " | Mitmach-Republik",
 			title,
 			imageUrl,
 			strClip(organizer.PlainDescription(), 160),
@@ -906,7 +906,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	search := strings.Trim(r.Param("query"), " ")
-	meta := metaTags{"Verwaltung - Mitmach-Republik", "", "", "", false}
+	meta := metaTags{"Verwaltung | Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -938,7 +938,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"Profil bearbeiten - Mitmach-Republik", "", "", "", false}
+	meta := metaTags{"Profil bearbeiten | Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -955,7 +955,7 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"E-Mail-Adresse oder Kennwort ändern - Mitmach-Republik", "", "", "", false}
+	meta := metaTags{"E-Mail-Adresse oder Kennwort ändern | Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -972,7 +972,7 @@ func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"Veranstaltung bearbeiten - Mitmach-Republik", "", "", "", false}
+	meta := metaTags{"Veranstaltung bearbeiten | Mitmach-Republik", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -1039,7 +1039,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) staticPage(w traffic.ResponseWriter, template, headline string) {
 
-	meta := metaTags{headline + " - Mitmach-Republik", headline, "", "", false}
+	meta := metaTags{headline + " | Mitmach-Republik", headline, "", "", false}
 
 	result := func() *appResult {
 		return app.view(template, w, &meta, nil)
