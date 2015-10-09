@@ -1,6 +1,6 @@
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-11"><h1>Veranstaltungen von {{.organizer.Name}} {{if and (gt .results 0) (gt .maxPage 0)}} - Seite {{inc .page}} von {{inc .maxPage}}{{end}}</h1></div>
+	<div class="col-xs-11"><h1>Gemeinschaftliche Veranstaltungen von {{.organizer.Name}} {{if and (gt .results 0) (gt .maxPage 0)}} - Seite {{inc .page}} von {{inc .maxPage}}{{end}}</h1></div>
 </div>
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>
