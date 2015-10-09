@@ -615,8 +615,8 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		if strings.Contains(r.Param("dateId"), ", ") {
-			date, _ = app.events.LoadDate(bson.ObjectIdHex(r.Param("id")))
-			if date != nil {
+			date, err := app.events.LoadDate(bson.ObjectIdHex(r.Param("id")))
+			if err == nil {
 				return &appResult{RedirectUrl: date.Url()}
 			}
 		}
@@ -632,20 +632,15 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		if bson.IsObjectIdHex(r.Param("dateId")) {
-			date, _ = app.events.LoadDate(bson.ObjectIdHex(r.Param("dateId")))
+			date, err = app.events.LoadDate(bson.ObjectIdHex(r.Param("dateId")))
+			if err != nil {
+				date = nil
+			}
 		}
 
 		organizer, err := app.users.Load(event.OrganizerId)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
-		}
-
-		similiars := make([]Date, 0)
-		if date != nil {
-			similiars, err = app.events.FindSimilarDates(date, 4)
-			if err != nil {
-				return &appResult{Status: http.StatusInternalServerError, Error: err}
-			}
 		}
 
 		place := citypartName(event.Addr)
@@ -686,6 +681,14 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		if date == nil && len(recurrences) > 0 {
 			date = &recurrences[0]
+		}
+
+		similiars := make([]Date, 0)
+		if date != nil {
+			similiars, err = app.events.FindSimilarDates(date, 4)
+			if err != nil {
+				return &appResult{Status: http.StatusInternalServerError, Error: err}
+			}
 		}
 
 		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "date": date, "organizer": organizer, "recurrences": recurrences, "similiars": similiars, "noindex": bson.IsObjectIdHex(r.Param("dateId"))})
