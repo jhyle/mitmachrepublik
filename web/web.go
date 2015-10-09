@@ -843,7 +843,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		result, err := app.events.SearchDatesOfUser(organizer.Id, page, pageSize, "start")
+		result, err := app.events.SearchFutureEventsOfUser(organizer.Id, page, pageSize)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
@@ -870,7 +870,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		if r.Param("fmt") == "RSS" {
-			return app.output("rss.tpl", w, "application/rss+xml", &meta, bson.M{"items": dates2RSSItems(result.Dates)})
+			return app.output("rss.tpl", w, "application/rss+xml", &meta, bson.M{"items": events2RSSItems(result.Events)})
 		} else {
 			pageCount := pageCount(result.Count, pageSize)
 			pages := make([]int, pageCount)
@@ -878,7 +878,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 				pages[i] = i
 			}
 			maxPage := pageCount - 1
-			return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer, "noindex": page > 0})
+			return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer, "noindex": page > 0})
 		}
 	}()
 

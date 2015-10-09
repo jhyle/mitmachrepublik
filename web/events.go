@@ -6,6 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"os"
 	"time"
+	"sort"
 )
 
 type (
@@ -259,7 +260,7 @@ func (events *EventService) LoadBySource(source, sourceId string) (*Event, error
 
 	var event Event
 	query := bson.M{"source": source, "sourceid": sourceId}
-	err := events.eventTable().Load(query, &event)
+	err := events.eventTable().Load(query, &event, "_id")
 	return &event, err
 }
 
@@ -277,11 +278,48 @@ func (events *EventService) SearchDates(query, place string, dates [][]time.Time
 	return result, err
 }
 
-func (events *EventService) SearchDatesOfUser(userId bson.ObjectId, page, pageSize int, sort string) (*DateSearchResult, error) {
+func (events *EventService) SearchFutureEventsOfUser(userId bson.ObjectId, page, pageSize int) (*EventSearchResult, error) {
 
-	var result DateSearchResult
+	var result EventSearchResult
+
+	var eventIds []bson.ObjectId
 	query := bson.M{"$and": []bson.M{bson.M{"organizerid": userId}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
-	err := events.dateTable().Search(query, page*pageSize, pageSize, &result, sort)
+	err := events.dateTable().Distinct(query, "eventid", &eventIds)
+	if err != nil {
+		return &result, err
+	}
+	
+	var eventsOfOrganizer Events
+	err = events.eventTable().Find(bson.M{"_id": bson.M{"$in": eventIds}}, &eventsOfOrganizer, "_id")
+	if err != nil {
+		return &result, err
+	}
+	
+	for i := 0; i < len(eventsOfOrganizer); i++ {
+		var date Date
+		query := bson.M{"$and": []bson.M{bson.M{"eventid": eventsOfOrganizer[i].Id}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
+		err = events.dateTable().Load(query, &date, "start")
+		if err != nil {
+			return &result, err
+		}
+		eventsOfOrganizer[i].Start = date.Start
+		eventsOfOrganizer[i].End = date.End
+	}
+	sort.Sort(eventsOfOrganizer)
+
+	start := page*pageSize
+	if start < len(eventsOfOrganizer) {
+		end := min(start + pageSize, len(eventsOfOrganizer))
+		result.Events = make([]*Event, end - start)
+		for i := 0; i < end - start; i++ {
+			result.Events[i] = &eventsOfOrganizer[start + i]
+		}
+	} else {
+		result.Events = make([]*Event, 0)
+	}
+	result.Start = start
+	result.Count = len(eventsOfOrganizer)
+
 	return &result, err
 }
 

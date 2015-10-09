@@ -133,6 +133,15 @@ func dates2RSSItems(dates []*Date) []rssItem {
 	return items
 }
 
+func events2RSSItems(events []*Event) []rssItem {
+
+	items := make([]rssItem, len(events))
+	for i, event := range events {
+		items[i] = rssItem{event.Id.Hex(), event.Title, citypartName(event.Addr) + ", " + datetimeFormat(event.Start) + " - " + event.PlainDescription(), event.Url()}
+	}
+	return items
+}
+
 func categoryIcon(categoryId int) string {
 
 	return CategoryIconMap[categoryId]

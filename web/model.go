@@ -80,6 +80,8 @@ type (
 		Addr          Address
 	}
 
+	Events []Event
+
 	Date struct {
 		Id          bson.ObjectId `bson:"_id"`
 		EventId     bson.ObjectId
@@ -359,6 +361,18 @@ func (event *Event) HtmlDescription() template.HTML {
 func (event *Event) PlainDescription() string {
 
 	return whiteSpace.ReplaceAllString(sanitize.HTML(event.Descr), " ")
+}
+
+func (events Events) Len() int {
+	return len(events)
+}
+
+func (events Events) Swap(i, j int) {
+	events[i], events[j] = events[j], events[i]
+}
+
+func (events Events) Less(i, j int) bool {
+	return events[i].Start.Before(events[j].Start)
 }
 
 func (date *Date) GetId() bson.ObjectId {

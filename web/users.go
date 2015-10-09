@@ -95,7 +95,7 @@ func (users *UserService) Load(id bson.ObjectId) (*User, error) {
 func (users *UserService) LoadByEmail(email string) (*User, error) {
 
 	var user User
-	err := users.table().Load(bson.M{"email": email}, &user)
+	err := users.table().Load(bson.M{"email": email}, &user, "_id")
 	return &user, err
 }
 
