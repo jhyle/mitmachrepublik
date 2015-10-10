@@ -9,7 +9,7 @@
 	<a href="{{.Url}}" title="Veranstaltungen von {{.Name}} ansehen">
 	{{if .Image}}
 		{{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}}
-		<img class="pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" alt="Logo {{.Name}}">
+		<img width="220" height="165" class="pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" alt="Logo {{.Name}}">
 	{{end}}
 	<div class="tile-text">
 		<h3>{{.Name}}</h3>

@@ -2,7 +2,7 @@
 <a href="{{if $.user}}/veranstalter/verwaltung/0{{else}}{{.Url}}{{end}}" title="Veranstaltungen von {{.Name}} anzeigen">
 	<h3 style="font-weight: normal">{{.Name}}</h3>
 	{{if .Image}}<p>
-		<img src="/bild/{{.Image}}?width=250" alt="Logo {{.Name}}" class="img-responsive" />
+		<img width="250" src="/bild/{{.Image}}?width=250" alt="Logo {{.Name}}" class="img-responsive" />
 	</p>{{end}}
 	{{if .ImageCredit}}
 		<p class="credits">{{.ImageCredit}}</p>
@@ -21,7 +21,7 @@
 {{end}}
 {{ if not .Addr.IsEmpty }}
 	<a href="http://maps.google.de/maps?hl=de&q={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&ie=UTF8" target="_blank" title="In Google Maps öffnen">
-		<img src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=250x187&key={{$.googleApiKey}}" title="in Google Maps öffnen" alt="Karte">
+		<img width="250" height="187" src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=250x187&key={{$.googleApiKey}}" title="in Google Maps öffnen" alt="Karte">
 	</a>
 {{end}}
 {{end}}

@@ -3,7 +3,7 @@
 		{{ if .Image }}
 			<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
 			<div style="min-height: 140px">
-				<img src="/bild/{{.Image}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
+				<img width="220" height="165" src="/bild/{{.Image}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
 			</div>
 		{{ end }}
 		<div class="tile-text">

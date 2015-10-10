@@ -11,7 +11,7 @@
 		<div class="pull-left" style="margin-right: 10px; margin-bottom: 10px">
 			{{if .Image}}
 				<a href="{{.Web}}" title="Webseite der Veranstaltung aufrufen" target="_blank">
-					<img style="margin-right: 10px; margin-bottom: 15px" src="/bild/{{.Image}}?width=300" alt="Veranstaltung {{.Title}}">
+					<img width="300" style="margin-right: 10px; margin-bottom: 15px" src="/bild/{{.Image}}?width=300" alt="Veranstaltung {{.Title}}">
 				</a>
 			{{end}}
 			{{if .ImageCredit}}
@@ -19,7 +19,7 @@
 			{{end}}
 			{{ if not .Addr.IsEmpty }}
 			<a href="http://maps.google.de/maps?hl=de&q={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&ie=UTF8" target="_blank" title="In Google Maps öffnen">
-				<img style="display: block" src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=300x225&key={{$.googleApiKey}}" title="in Google Maps öffnen" alt="Karte">
+				<img width="300" height="225" style="display: block" src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=300x225&key={{$.googleApiKey}}" title="in Google Maps öffnen" alt="Karte">
 			</a>
 			{{end}}
 		</div>
