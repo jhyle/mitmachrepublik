@@ -63,9 +63,9 @@ var (
 	importedAttributes = []string{"title"}
 )
 
-func NewScrapersService(hour int, events *EventService, organizerId bson.ObjectId) Service {
+func NewScrapersService(hour int, email *EmailAccount, events *EventService, organizerId bson.ObjectId) Service {
 
-	return &ScrapersService{NewBasicService(hour), events, organizerId}
+	return &ScrapersService{NewBasicService("NewSraperService", hour, email), events, organizerId}
 }
 
 func (service *ScrapersService) Start() {

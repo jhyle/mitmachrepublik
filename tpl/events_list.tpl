@@ -23,7 +23,7 @@
 			<p class="pull-right"><a href="#" name="delete-event" title="Löschen" data-target="{{.Id.Hex}}" class="close"><span class="fa fa-times"></span></a></p>
 		{{ end }}
 		<h3>{{.Title}}</h3>
-		<p class="datetime">{{datetimeFormat .Start}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizerNames}}{{if ne (index $.organizerNames .OrganizerId) ("Mitmach-Republik")}} - {{index $.organizerNames .OrganizerId}}{{end}}{{end}}</p>
+		<p class="datetime">{{longDatetimeFormat .Start}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizerNames}}{{if ne (index $.organizerNames .OrganizerId) ("Mitmach-Republik")}} - {{index $.organizerNames .OrganizerId}}{{end}}{{end}}</p>
 		{{ if $.user }}
 			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung/{{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Bearbeiten</a></p>
 		{{end}}

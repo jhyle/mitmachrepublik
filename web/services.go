@@ -20,9 +20,11 @@ type (
 	}
 
 	BasicService struct {
+		name  string
 		state int
 		hour  int
 		timer *time.Timer
+		email *EmailAccount
 	}
 
 	SessionService struct {
@@ -76,9 +78,9 @@ var (
 	}
 )
 
-func NewSessionService(hour int, database Database) Service {
+func NewSessionService(hour int, email *EmailAccount, database Database) Service {
 
-	return &SessionService{NewBasicService(hour), database}
+	return &SessionService{NewBasicService("SessionService", hour, email), database}
 }
 
 func (service *SessionService) Start() {
@@ -91,9 +93,9 @@ func (service *SessionService) Run() error {
 	return service.database.RemoveOldSessions(time.Duration(24) * time.Hour)
 }
 
-func NewUnusedImgService(hour int, database Database, imgServer string) Service {
+func NewUnusedImgService(hour int, email *EmailAccount, database Database, imgServer string) Service {
 
-	return &UnusedImgService{NewBasicService(hour), database, imgServer}
+	return &UnusedImgService{NewBasicService("UnusedImagesService", hour, email), database, imgServer}
 }
 
 func (service *UnusedImgService) Start() {
@@ -164,9 +166,9 @@ func (service *UnusedImgService) Run() error {
 	return nil
 }
 
-func NewUpdateRecurrencesService(hour int, events *EventService, account *EmailAccount, hostname string) Service {
+func NewUpdateRecurrencesService(hour int, email *EmailAccount, events *EventService, account *EmailAccount, hostname string) Service {
 
-	return &UpdateRecurrencesService{NewBasicService(hour), events, account, hostname}
+	return &UpdateRecurrencesService{NewBasicService("UpdateRecurrencesService", hour, email), events, account, hostname}
 }
 
 func (service *UpdateRecurrencesService) Start() {
@@ -195,9 +197,9 @@ func (service *UpdateRecurrencesService) Run() error {
 	}
 }
 
-func NewSendAlertsService(hour int, hostname string, from *EmailAccount, alerts *AlertService) *SendAlertsService {
+func NewSendAlertsService(hour int, email *EmailAccount, hostname string, from *EmailAccount, alerts *AlertService) *SendAlertsService {
 
-	return &SendAlertsService{NewBasicService(hour), hostname, from, alerts}
+	return &SendAlertsService{NewBasicService("SendAlertsService", hour, email), hostname, from, alerts}
 }
 
 func (service *SendAlertsService) Start() {
@@ -270,9 +272,9 @@ func (service *SendAlertsService) Run() error {
 	return nil
 }
 
-func NewSpawnEventsService(hour int, database Database, events *EventService, imgServer string) Service {
+func NewSpawnEventsService(hour int, email *EmailAccount, database Database, events *EventService, imgServer string) Service {
 
-	return &SpawnEventsService{NewBasicService(hour), database, events, imgServer}
+	return &SpawnEventsService{NewBasicService("SpawnEventsService", hour, email), database, events, imgServer}
 }
 
 func (service *SpawnEventsService) Start() {
@@ -321,9 +323,9 @@ func (service *SpawnEventsService) Run() error {
 	return service.events.Store(event, organizer.Approved)
 }
 
-func NewBasicService(hour int) BasicService {
+func NewBasicService(name string, hour int, email *EmailAccount) BasicService {
 
-	return BasicService{idle, hour, nil}
+	return BasicService{name, idle, hour, nil, email}
 }
 
 func timerDuration(hour int) time.Duration {
@@ -340,7 +342,7 @@ func (service *BasicService) start(serve func() error) {
 
 	if service.state == idle {
 		duration := timerDuration(service.hour)
-		traffic.Logger().Printf("Starting timer for hour %v with duration %v.\n", service.hour, duration)
+		traffic.Logger().Printf("Starting timer for service %s, hour %v with duration %v.\n", service.name, service.hour, duration)
 		service.timer = time.NewTimer(duration)
 		service.state = running
 	}
@@ -348,11 +350,15 @@ func (service *BasicService) start(serve func() error) {
 	go func() {
 		for {
 			<-service.timer.C
-			traffic.Logger().Printf("Fired timer for hour %v, running = %v.\n", service.hour, running)
+			traffic.Logger().Printf("Fired timer for service %s, hour %v, running = %v.\n", service.name, service.hour, running)
 			if service.state == running {
-				serve()
+				err := serve()
+				if err != nil {
+					traffic.Logger().Printf(service.name + ": " + err.Error())
+					SendEmail(service.email, service.email.From, nil, "Fehlermeldung von " + service.name, "text/plain", err.Error())
+				}
 				duration := timerDuration(service.hour)
-				traffic.Logger().Printf("Reseting timer for hour %v with duration %v.\n", service.hour, duration)
+				traffic.Logger().Printf("Reseting timer for service %s, hour %v with duration %v.\n", service.name, service.hour, duration)
 				service.timer.Reset(duration)
 			} else {
 				service.timer = nil

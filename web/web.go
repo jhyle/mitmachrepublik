@@ -117,6 +117,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		"dateFormat":              dateFormat,
 		"timeFormat":              timeFormat,
 		"datetimeFormat":          datetimeFormat,
+		"longDatetimeFormat":      longDatetimeFormat,
 		"iso8601Format":           iso8601Format,
 		"noescape":                noescape,
 		"strClip":                 strClip,
@@ -162,13 +163,13 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 	}
 
 	services := make([]Service, 0, 6)
-	services = append(services, NewSessionService(3, database))
-	services = append(services, NewScrapersService(3, events, admin.Id))
-	services = append(services, NewUpdateRecurrencesService(4, events, emailAccount, hostname))
-	services = append(services, NewUnusedImgService(4, database, imgServer))
-	services = append(services, NewSendAlertsService(5, hostname, emailAccount, alerts))
+	services = append(services, NewSessionService(3, emailAccount, database))
+	services = append(services, NewScrapersService(3, emailAccount, events, admin.Id))
+	services = append(services, NewUpdateRecurrencesService(4, emailAccount, events, emailAccount, hostname))
+	services = append(services, NewUnusedImgService(4, emailAccount, database, imgServer))
+	services = append(services, NewSendAlertsService(5, emailAccount, hostname, emailAccount, alerts))
 	if env == "dev" {
-		services = append(services, NewSpawnEventsService(12, database, events, imgServer))
+		services = append(services, NewSpawnEventsService(12, emailAccount, database, events, imgServer))
 	}
 
 	return &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services}, nil
@@ -1651,7 +1652,7 @@ func (app *MmrApp) RunScrapers() error {
 	if err != nil {
 		return errors.New(ADMIN_EMAIL + " " + err.Error())
 	}
-	scrapers := NewScrapersService(0, app.events, organizer.Id)
+	scrapers := NewScrapersService(0, app.emailAccount, app.events, organizer.Id)
 	return scrapers.Run()
 }
 

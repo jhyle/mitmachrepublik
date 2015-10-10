@@ -64,6 +64,19 @@ func datetimeFormat(t time.Time) string {
 	}
 }
 
+func longDatetimeFormat(t time.Time) string {
+
+	if t.IsZero() {
+		return ""
+	} else {
+		if t.Hour() == 0 && t.Minute() == 0 {
+			return fmt.Sprintf("%s, %02d.%02d.%04d", weekday[int(t.Weekday())], t.Day(), int(t.Month()), t.Year())
+		} else {
+			return fmt.Sprintf("%s, %02d.%02d.%04d %02d:%02d", weekday[int(t.Weekday())], t.Day(), int(t.Month()), t.Year(), t.Hour(), t.Minute())
+		}
+	}
+}
+
 func iso8601Format(t time.Time) string {
 
 	if t.IsZero() {
