@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/pilu/traffic"
 	"gopkg.in/mgo.v2/bson"
+	"html/template"
 	"net/http"
 	"os"
 	"strconv"
@@ -229,7 +230,7 @@ func (app *MmrApp) handle(w traffic.ResponseWriter, result *appResult) {
 			w.Header().Set("Location", "/#login")
 			w.WriteHeader(http.StatusFound)
 		} else if !isEmpty(result.RedirectUrl) {
-			w.Header().Set("Location", result.RedirectUrl)
+			w.Header().Set("Location", string(template.URL(result.RedirectUrl)))
 			w.WriteHeader(http.StatusMovedPermanently)
 		} else {
 			w.WriteHeader(result.Status)
