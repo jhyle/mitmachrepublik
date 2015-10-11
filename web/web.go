@@ -141,7 +141,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		return nil, errors.New("init of templates failed: " + err.Error())
 	}
 
-	emailAccount := &EmailAccount{"smtp.gmail.com", 465, "mitmachrepublik", "mitmachen", &EmailAddress{"Mitmach-Republik", "mitmachrepublik@gmail.com"}}
+	emailAccount := &EmailAccount{"smtp.gmail.com", 465, "mitmachrepublik", "mitmachen2015", &EmailAddress{"Mitmach-Republik", "mitmachrepublik@gmail.com"}}
 
 	ga_code := ga_dev
 	hostname := "dev.mitmachrepublik.de"
