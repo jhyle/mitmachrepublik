@@ -1316,6 +1316,9 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 			oldEvent, err := app.events.Load(event.Id)
 			if err != nil || oldEvent.OrganizerId != user.Id {
 				return resultBadRequest
+			} else {
+				event.Source = oldEvent.Source
+				event.SourceId = oldEvent.SourceId
 			}
 		} else {
 			created = true
