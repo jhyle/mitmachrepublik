@@ -4,7 +4,7 @@
 
 <div class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-11"><h1>{{if and (eq 1 (len .categoryIds)) (ne 0 (index .categoryIds 0))}}{{ range .categories }}{{if eq (index $.categoryMap .) (index $.categoryIds 0)}}{{.}}{{end}}{{end}}{{else}}Gemeinschaftliche Veranstaltungen{{end}}{{if eq 1 (len .targetIds)}}{{ range .targets }}{{if eq (index $.targetMap .) (index $.targetIds 0)}} für {{.}}{{end}}{{end}}{{end}}{{if eq 1 (len .dateIds)}}{{if eq 1 (index .dateIds 0)}} heute{{end}}{{if eq 2 (index .dateIds 0)}} morgen{{end}}{{if eq 4 (index .dateIds 0)}} am Wochenende{{end}}{{end}}{{if .place}} in {{.place}}{{end}}{{if and (gt .results 0) (gt .maxPage 0)}} - Seite {{inc .page}} von {{inc .maxPage}}{{end}}</h1></div>
+	<div class="col-xs-11"><h1>{{if and (eq 1 (len .categoryIds)) (ne 0 (index .categoryIds 0))}}{{ range .categories }}{{if eq (index $.categoryMap .) (index $.categoryIds 0)}}{{.}}{{end}}{{end}}{{else}}Veranstaltungen{{end}}{{if eq 1 (len .targetIds)}}{{ range .targets }}{{if eq (index $.targetMap .) (index $.targetIds 0)}} für {{.}}{{end}}{{end}}{{end}}{{.dateNames}}{{if .place}} in {{.place}}{{end}}{{if and (gt .results 0) (gt .maxPage 0)}} - Seite {{inc .page}} von {{inc .maxPage}}{{end}}</h1></div>
 </div>
 <div id="events" class="row tiles">
 	<div class="col-xs-1">&nbsp;</div>

@@ -4,13 +4,21 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=1170">
 	<title>{{.meta.Title}}</title>
-	<meta name="description" content="{{.meta.FB_Descr}}">
+	<meta name="description" content="{{.meta.Descr}}">
 	<meta property="og:title" content="{{.meta.FB_Title}}">
 	<meta property="og:site_name" content="Mitmach-Republik">
 	<meta property="og:image" content="{{.meta.FB_Image}}">
 	<meta property="og:description" content="{{.meta.FB_Descr}}">
 {{if .noindex}}
 	<meta name="robots" content="noindex, follow">
+{{end}}
+{{if and (.pages) (not .user)}}
+	{{if lt .page .maxPage}}
+	<link rel="next" href="./{{inc .page}}">
+	{{end}}
+	{{if gt .page 0 }}
+	<link rel="prev" href="./{{dec .page}}">
+	{{end}}
 {{end}}
 {{if and (.event) (not .user)}}
 	<meta property="og:url" content="http://{{.hostname}}{{.event.Url}}">
