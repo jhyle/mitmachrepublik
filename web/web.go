@@ -482,10 +482,10 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	var dateIds []int
-	if r.Param("dates") == "aktuell" {
+	if r.Param("dateIds") == "aktuell" {
 		dateIds = []int{FromNow}
 	} else {
-		dateIds = str2Int(strings.Split(r.Param("dates"), ","))
+		dateIds = str2Int(strings.Split(r.Param("dateIds"), ","))
 	}
 	targetIds := str2Int(strings.Split(r.Param("targetIds"), ","))
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
@@ -1618,10 +1618,12 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstalter/verwaltung/veranstaltung/:id", app.editEventPage)
 	router.Get("/veranstalter/verwaltung/:page", app.adminPage)
 
-	router.Get("/veranstaltungen/:place/:dates/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
-	router.Get("/veranstaltungen//:dates/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
-	router.Get("/veranstaltungen/:place/:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
-	router.Get("/veranstaltungen//:dates/:categoryIds/:radius/:categories/:page", app.eventsPage)
+	router.Get("/veranstaltungen/:place/:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
+	router.Get("/veranstaltungen//:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
+	router.Get("/veranstaltungen/:place/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
+	router.Get("/veranstaltungen//:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
+	router.Get("/veranstaltungen/:place/:dateIds/:categoryIds/:radius/:categories/:page", app.eventsPage)
+	router.Get("/veranstaltungen//:dateIds/:categoryIds/:radius/:categories/:page", app.eventsPage)
 
 	router.Get("/newsletter/veranstaltungen/:place/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
 	router.Get("/newsletter/veranstaltungen//:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)

@@ -102,6 +102,21 @@ func sanitizeHtml(s string) string {
 	return strings.Replace(html, "data#", "data:", -1)
 }
 
+func sanitizePath(s string) string {
+	
+	if isEmpty(s) {
+		return ""
+	}
+	
+	s = strings.Replace(s, "ä", "ae", -1);
+	s = strings.Replace(s, "ö", "oe", -1);
+	s = strings.Replace(s, "ü", "ue", -1);
+	s = strings.Replace(s, "Ä", "ae", -1);
+	s = strings.Replace(s, "Ö", "oe", -1);
+	s = strings.Replace(s, "Ü", "ie", -1);
+	return sanitize.Path(s)
+}
+
 func strClip(s string, n int) string {
 
 	runes := 0
@@ -195,6 +210,11 @@ func encodePath(path string) string {
 
 func eventSearchUrl(place string, targetIds, categoryIds, dateIds []int, radius int) string {
 
+	dateNames := make([]string, len(dateIds))
+	for i, id := range dateIds {
+		dateNames[i] = DateIdMap[id]
+	}
+	
 	targetNames := make([]string, len(targetIds))
 	for i, id := range targetIds {
 		targetNames[i] = TargetIdMap[id]
@@ -205,7 +225,7 @@ func eventSearchUrl(place string, targetIds, categoryIds, dateIds []int, radius 
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return place + "/" + strings.Join(int2Str(dateIds), ",") + "/" + strings.Join(int2Str(targetIds), ",")  + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/0"
+	return place + "/" + sanitizePath(strings.Join(dateNames, "-")) + "/" + strings.Join(int2Str(dateIds), ",") + "/" + strings.Join(int2Str(targetIds), ",")  + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + sanitizePath(strings.Join(targetNames, "-")) + "/" + sanitizePath(strings.Join(categoryNames, "-")) + "/0"
 }
 
 func eventSearchUrlWithQuery(place string, targetIds, categoryIds []int, dateIds []int, radius int, query string) string {
@@ -234,7 +254,7 @@ func organizerSearchUrl(place string, categoryIds []int) string {
 	for i, id := range categoryIds {
 		categoryNames[i] = CategoryIdMap[id]
 	}
-	return place + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strings.Join(categoryNames, ",") + "/0"
+	return place + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + sanitizePath(strings.Join(categoryNames, "-")) + "/0"
 }
 
 func simpleOrganizerSearchUrl(place string) string {

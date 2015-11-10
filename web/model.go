@@ -308,7 +308,7 @@ func (user *User) SetId(id bson.ObjectId) {
 
 func (user *User) Url() string {
 
-	return "/veranstalter/" + user.Id.Hex() + "/" + user.Name + "/0"
+	return "/veranstalter/" + user.Id.Hex() + "/" + sanitizePath(user.Name) + "/0"
 }
 
 func (user *User) HtmlDescription() template.HTML {
@@ -350,7 +350,7 @@ func (event *Event) Url() string {
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return "/veranstaltung/" + citypartName(event.Addr) + "/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/" + event.Id.Hex() + "/" + event.Title
+	return "/veranstaltung/" + sanitizePath(citypartName(event.Addr)) + "/" + sanitizePath(strings.Join(targetNames, "-")) + "/" + sanitizePath(strings.Join(categoryNames, "-")) + "/" + event.Id.Hex() + "/" + sanitizePath(event.Title) + ".html"
 }
 
 func (event *Event) HtmlDescription() template.HTML {
@@ -394,7 +394,7 @@ func (date *Date) Url() string {
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return "/veranstaltung/" + citypartName(date.Addr) + "/" + strings.Join(targetNames, ",") + "/" + strings.Join(categoryNames, ",") + "/" + date.Id.Hex() + "/" + date.EventId.Hex() + "/" + date.Title
+	return "/veranstaltung/" + sanitizePath(citypartName(date.Addr)) + "/" + sanitizePath(strings.Join(targetNames, "-")) + "/" + sanitizePath(strings.Join(categoryNames, "-")) + "/" + date.Id.Hex() + "/" + date.EventId.Hex() + "/" + sanitizePath(date.Title) + ".html"
 }
 
 func (date *Date) HtmlDescription() template.HTML {
