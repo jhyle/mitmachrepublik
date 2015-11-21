@@ -268,7 +268,7 @@ func (app *MmrApp) sitemapPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	pageSize := 2
+	pageSize := 32
 	query := ""
 	place := ""
 	dateIds := []int{TwoWeeks}
@@ -296,7 +296,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		dates := make(map[int][]*Date)
 		for category := range CategoryIdMap {
-			result, err := app.events.SearchDates(query, place, timeSpans(dateIds), nil, []int{category}, true, 0, pageSize, "start")
+			result, err := app.events.SearchDates(query, place, timeSpans(dateIds), nil, []int{category}, true, 0, 3, "start")
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
