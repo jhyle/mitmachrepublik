@@ -199,7 +199,7 @@ a:hover, a:focus {
 .tile {
 	border: 1px solid #e6e6e6;
 	overflow: hidden;
-	min-height: 430px;
+	min-height: 480px;
 }
 .row-tile {
 	border: 1px solid #e6e6e6;
