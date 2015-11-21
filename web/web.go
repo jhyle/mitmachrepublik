@@ -294,10 +294,9 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		page := 0
 		dates := make(map[int][]*Date)
-		for {
-			result, err := app.events.SearchDates(query, place, timeSpans(dateIds), nil, nil, true, page, pageSize, "start")
+		for category := range CategoryIdMap {
+			result, err := app.events.SearchDates(query, place, timeSpans(dateIds), nil, []int{category}, true, 0, pageSize, "start")
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
@@ -310,10 +309,6 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 					dates[category] = append(categoryDates, date)
 				}
 			}
-			if len(result.Dates) < pageSize {
-				break
-			}
-			page++
 		}
 
 		moreEvents := true
