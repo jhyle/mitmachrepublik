@@ -268,7 +268,7 @@ func (app *MmrApp) sitemapPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	pageSize := 16
+	pageSize := 2
 	query := ""
 	place := ""
 	dateIds := []int{TwoWeeks}
