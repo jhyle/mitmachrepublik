@@ -1,6 +1,6 @@
 {{if not $.user }}{{if not $.organizer}}
 <div style="margin-bottom: 10px; font-weight: bolder">
-	<a class="highlight" href="javascript:void(0)" data-href="/dialog/emailalert/{{eventSearchUrlWithQuery .place .targetIds .categoryIds .dateIds .radius .query}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Wir senden Dir die Ergebnisse dieser Suche per E-Mail."><span class="fa fa-caret-right"></span> Lass Dich per E-Mail über diese Suche informieren.</a>
+	<a id="events" class="highlight" href="javascript:void(0)" data-href="/dialog/emailalert/{{eventSearchUrlWithQuery .place .targetIds .categoryIds .dateIds .radius .query}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Wir senden Dir die Ergebnisse dieser Suche per E-Mail."><span class="fa fa-caret-right"></span> Lass Dich per E-Mail über diese Suche informieren.</a>
 </div>
 {{end}}{{end}}
 {{$n := len .events}}
@@ -27,7 +27,7 @@
 		{{ if $.user }}
 			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung/{{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Bearbeiten</a></p>
 		{{end}}
-		<p>{{strClip .PlainDescription 100}}</p>
+		<p>{{strClip .PlainDescription 160}}</p>
 		{{ if not .Addr.IsEmpty }}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
 			<p class="pull-left place">{{ if .Addr.Name }}<span>{{.Addr.Name}}</span><br />{{ end }}<span class="address">{{ if .Addr.Street }}<span>{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span>{{.Addr.Pcode}}</span> {{ end }}<span>{{citypartName .Addr}}</span></span></p>

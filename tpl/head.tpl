@@ -2,7 +2,7 @@
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=1170">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>{{.meta.Title}}</title>
 	<meta name="description" content="{{.meta.Descr}}">
 	<meta property="og:title" content="{{.meta.FB_Title}}">
@@ -30,7 +30,7 @@
 		<link rel="alternate" type="application/rss+xml" title="RSS" href="?fmt=RSS">
 	{{end}}
 	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
-	<link href="/css/styles-11.css" rel="stylesheet">
+	<link href="/css/styles-12.css" rel="stylesheet">
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
@@ -88,17 +88,16 @@
 {{end}}
 	<div class="container">
 		<div class="row">
-			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head">
-				<a href="/" title="Zur Startseite"><img src="/images/mitmachrepublik.png" style="max-width:80%" alt="Logo Mitmach-Republik"></a>
+			<div class="col-lg-3 col-sm-3 col-xs-6 col-logo">
+				<span class="logo-helper"></span><a href="/" title="Zur Startseite"><img src="/images/mitmachrepublik.png" style="width: 100%" alt="Logo"></a>
 			</div>
-			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head">
+			<div class="col-lg-2 visible-lg-block col-md-1 visible-md-block">&nbsp;</div>
+			<div class="col-lg-3 col-sm-4 col-xs-6 col-head">
 				<span id="head-organizer">Du bist ein Organisator?</span><br>
 				<a id="head-events" href="javascript:void(0)" data-href="/dialog/login" title="Melde Dich an, um Deine Veranstaltungen einzutragen." rel="nofollow" data-toggle="modal" data-target="#login" class="highlight"><span class="fa fa-caret-right"></span> Finde kostenlos Mitmacher</a>
 			</div>
-			<div class="col-xs-1">&nbsp;</div>
-			<div class="col-xs-3 col-head">
+			<div class="col-lg-1 visible-lg-block">&nbsp;</div>
+			<div class="col-lg-3 col-md-4 col-sm-5 col-xs-12 col-head">
 				<a class="highlight" title="Like uns auf Facebook." href="https://www.facebook.com/mitmachrepublik" target="_blank"><span class="fa fa-facebook"></span></a>
 				<a class="highlight" title="Folge uns auf twitter." href="https://twitter.com/mitmachrepublik" target="_blank"><span class="fa fa-twitter"></span></a>
 				| <a href="javascript:void(0)" data-href="/dialog/contact" rel="nofollow" title="Schreibe uns eine Nachricht." data-toggle="modal" data-target="#mail">Kontakt</a>

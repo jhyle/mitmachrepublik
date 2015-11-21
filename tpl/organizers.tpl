@@ -4,12 +4,11 @@
 <input type="hidden" name="search" value="organizers" /> 
 
 <div class="row tiles">
-	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-11"><h1>Gemeinschaftliche Organisatoren{{if .place}} in {{.place}}{{end}}{{if and (gt .results 0) (gt .maxPage 0)}} - Seite {{inc .page}} von {{inc .maxPage}}{{end}}</h1></div>
+	<div class="col-xs-12"><h1>Gemeinschaftliche Organisatoren{{if .place}} in {{.place}}{{end}}{{if and (gt .results 0) (gt .maxPage 0)}} - Seite {{inc .page}} von {{inc .maxPage}}{{end}}</h1></div>
 </div>
 <div id="organizers" class="row tiles">
-	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-3 col-box">
+	<div class="col-md-3 col-sm-4 col-xs-12 col-box">
+		<div class="filter-box">
 		<h3>Filter</h3>
 		<h5>Kategorien</h5>
 		<hr>
@@ -21,8 +20,9 @@
 			{{ end }}
 			>  {{.}}</label>					
 		{{ end }}
+		</div>
 	</div>
-	<div class="col-xs-7">
+	<div class="col-md-9 col-sm-8 col-xs-12">
 		{{template "organizers_list.tpl" .}}
 	</div>
 </div>

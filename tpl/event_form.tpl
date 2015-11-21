@@ -1,9 +1,8 @@
 <div class="row tiles">
-	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-3 col-box">
+	<div class="col-lg-3 col-sm-4 col-xs-5 col-box">
 		{{template "organizer_box.tpl" .}}
 	</div>
-	<div class="col-xs-7" style="padding-top: 15px">
+	<div class="col-lg-9 col-sm-8 col-xs-7">
 		<h3 style="margin-left: 10px">Veranstaltung {{ if .event.Id }}bearbeiten{{ else }}eintragen{{ end }}</h3>
 		<form role="form" id="event-upload" class="form-horizontal" action="/upload" method="POST">
 			{{if .event.Id }}<input type="hidden" id="event-Id" value="{{.event.Id.Hex}}">{{ end }}
@@ -158,15 +157,14 @@
 			</div>
 			<hr>
 			<div class="form-group">
-				<div class="col-xs-4">
+				<div class="col-sm-4 col-xs-5">
 					<a href="/veranstalter/verwaltung/0" onClick="history.back();return false" class="btn btn-default btn-cancel" style="width: 90%">Abbrechen</a>
 				</div>
-				<div class="col-xs-1">&nbsp;</div>
+				<div class="col-sm-1 hidden-xs">&nbsp;</div>
 				<div class="col-xs-7">
 					<button type="submit" class="btn btn-mmr" style="width: 90%">Speichern</button>
 				</div>
 			</div>
 		</form>
 	</div>
-	<div class="col-xs-1">&nbsp;</div>
 </div>

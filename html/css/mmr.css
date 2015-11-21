@@ -1,6 +1,7 @@
 body {
 	font-family: 'Open Sans', sans-serif;
 	font-size: 15px;
+	min-width: 480px;
 }
 h3 {
 	font-size: 23px;
@@ -37,20 +38,74 @@ body, a, a:hover, a:focus, .form-control, div.col-box h3 {
 a:hover, a:focus {
 	text-decoration: none;
 }
-div.col-banner {
+.col-banner {
 	padding: 0;
+	height: 617px;
+	background-image: url(../images/willkommen.jpg);
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
 }
-div.col-banner h1 {
+.col-banner h1 {
 	font-weight: bold;
 	color: white;
+	position: absolute;
+	top: 74%;
+	width: 100%;
 }
-div.col-banner h2 {
+.col-banner h2 {
 	font-size: 50px;
-	font-weight: lighter; 
+	font-weight: lighter;
+	color: #2f3030;
+	position: absolute;
+	top: 17%;
+	width: 100%;
+	background-color: rgba(255, 255, 255, 0.5); 
 }
-div.col-banner h4 {
+.col-banner h2 span {
+	color: #ff5200;
+}
+.col-banner h4 {
 	color: white;
 	font-weight: bolder;
+	padding-left: 5%;
+	padding-right: 5%;
+	position:absolute;
+	top: 85%;
+	width: 100%;
+}
+.search-form {
+	position: absolute;
+	top: 33%;
+	width: 90%;
+	margin-left: 5%;
+}
+.col-search-banner {
+	padding: 0;
+	height: 140px;
+	background-image: url(../images/hintergrund.jpg);
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+}
+.col-search-banner h2 {
+	position: absolute;
+	top: 25%;
+	color: white;
+	margin-left: 8.3333%;
+}
+@media(max-width: 991px) {
+	.search-form {
+		top: 13%;
+	}
+}
+@media(max-width: 767px) {
+	.col-banner h4 {
+		top: 76%;
+	}
+}
+.col-banner form {
+	position: absolute;
+	top: 40%;
+	width: 100%;
 }
 .btn-cancel, .btn-mmr, .form-control {
 	font-size: 17px;
@@ -58,6 +113,11 @@ div.col-banner h4 {
 	margin: 10px;
 	padding: 8px;
 	display: block;
+}
+.btn-search {
+	padding: 6px 10px;
+	margin: 0;
+	margin-top: -1px;
 }
 .form-control {
 	height: auto;
@@ -71,6 +131,10 @@ div.col-banner h4 {
 	font-size: 14px;
 	margin: 0;
 	padding: 5px;
+}
+.form-inline .search-field {
+	margin-left: 0;
+	width: 200px;
 }
 .modal-dialog {
 	width: auto;
@@ -93,16 +157,25 @@ div.col-banner h4 {
 .dropdown-menu li.active a, .dropdown-menu li.active a:hover, .dropdown-menu li.active a:focus {
 	background-color: #ff5200;
 }
-.container {
-	width: 1170px !important;
-}
 .highlight, a.highlight:hover, a.highlight:focus, div.col-box h5, .note-editable a, .description a, .description p a {
 	color: #2ba42b;
 }
-div.col-head {
-	padding: 10px;
+.col-head {
+	padding: 15px 0 10px 30px;
 	line-height: 2;
 }
+
+.col-logo {
+	padding: 5px 0;
+	height: 80px;
+}
+
+.logo-helper {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+
 .btn-mmr, .btn-mmr:hover, .btn-mmr:focus {
 	color: white;
 	font-size: 19px;
@@ -110,80 +183,95 @@ div.col-head {
 	background: linear-gradient(#31bd31, #2ba42b);
 }
 
-div.tiles {
+.tiles {
 	padding: 10px 0 10px 0;
 }
-div.tiles h1 {
+.tiles h1 {
 	font-weight: lighter;
 	font-size: 40px;
 	color: #ff5200;
 	margin-top: 25px;
 }
-div.col-tile {
-	margin: 10px;
-	padding: 0;
-	border: 1px solid #e6e6e6;
+.col-tile {
+	padding: 10px;
 	min-width: 19%;
-	min-height: 450px;
-	overflow: hidden;
 }
-div.row-tile {
+.tile {
+	border: 1px solid #e6e6e6;
+	overflow: hidden;
+	min-height: 430px;
+}
+.row-tile {
 	border: 1px solid #e6e6e6;
 	margin-bottom: 15px;
 	overflow: hidden;
 }
-div.tile-text {
+.tile-image {
+	height: 165px;
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+}
+.tile-text {
 	margin: 10px;
 	font-size: 15px;
 }
-div.tile-text .form-control, div.tile-text .btn {
+.tile-text .form-control, .tile-text .btn {
 	font-size: 14px;
 }
-div.tile-text p {
+.tile-text p {
 	margin-bottom: 3px;
 }
-div.col-box {
+.col-box, .col-box-admin {
+	padding: 10px;
+	margin-bottom: 15px;
+}
+.col-box {
+	padding-top: 0;
+}
+.box, .filter-box {
 	border: 1px solid #e6e6e6;
-	padding: 15px;
-	padding-top: 10px;
 }
-div.col-box h3 {
-	margin-top: 0;
+.filter-box {
+	padding: 10px;
 }
-div.col-box label {
+.box h3 {
+	font-weight: normal;
+	margin: 10px;
+}
+.col-box label {
 	margin-left: 20px;
 }
-div.col-box hr {
+.col-box hr {
 	margin-top: 0;
 }
-div.footer {
+.footer {
 	color: white;
 	font-size: 14px;
 	background-color: #303030;
 	line-height: 2;
 }
-div.footer a, div.footer a:hover, div.footer a:focus {
+.footer a, .footer a:hover, .footer a:focus {
 	color: white;
 }
-div.col-foot {
+.col-foot {
 	padding: 30px 0;
 }
-div.big-icon, div.small-icon, p.small-icon, div.cur-page {
+.big-icon, .small-icon, .cur-page {
 	color: white;
 	background-color: #ff7800;
 	background: linear-gradient(#ff7800, #ff5200);
 	margin: 10px auto 0 auto;
 }
-div.big-icon {
+.big-icon {
 	font-size: 60px;
 	width: 100px;
 	height: 100px;
 	border-radius: 50px;
 }
-div.big-icon span {
+.big-icon span {
 	line-height: 1.6;
 }
-div.small-icon {
+.small-icon {
 	position: absolute;
 	margin: 10px;
 	font-size: 24px;
@@ -191,7 +279,7 @@ div.small-icon {
 	height: 40px;
 	border-radius: 20px;
 }
-div.small-icon span {
+.small-icon span {
 	line-height: 1.7;
 	margin-left: 5px;
 }
@@ -200,29 +288,30 @@ p.small-icon {
 	width: 32px;
 	height: 32px;
 	border-radius: 16px;
-	margin: 4px 10px auto auto;
+	margin: 4px 10px 6px auto;
+	position: relative;
 }
 p.small-icon span {
 	margin-left: 2px;
 }
-p.datetime {
+.datetime {
 	font-weight: bold;
 	font-size: 13px;
 }
-p.date, p.time {
+.date, .time {
 	font-weight: bold;
 	line-height: 2.4;
 }
-p.place {
+.place {
 	font-size: 13px;
 	color: #7a7d7d;
 }
-div.tile-text p.description {
+.tile-text .description {
 	height: 130px;
 	overflow: hidden;
 	margin-bottom: 20px;
 }
-p.icon-text {
+.icon-text {
 	height: 2.7em;
 	overflow: hidden;
 }
@@ -231,11 +320,8 @@ p.icon-text {
 	padding: 0 10px 15px 10px;
 }
 .credits {
-	position: relative;
-	top: -10px;
 	font-size: 13px;
 	margin: 0;
-	max-width: 300px;
 }
 .thumbnail .fa-gear {
 	text-align: center;
@@ -246,20 +332,44 @@ p.icon-text {
 	margin-left: 63px;
 	visibility: hidden;
 }
-div.pages {
+.pages {
 	font-size: 16px;
 	font-weight: bold;
 	margin-bottom: 10px;
 }
-div.page {
+.page {
 	display: inline;
 	padding: 3px 10px 3px 10px;
 }
-
-div.cur-page {
+.cur-page {
 	border-radius: 20px;
 }
 .note-editor {
 	width: 90%;
 	margin: 10px;
+}
+.social {
+	margin-bottom: 15px;
+}
+@media(max-width: 1199px) {
+	.social {
+		width: 450px;
+	}
+}
+.recommend {
+	display: inline-block;
+	margin-left: 15px;
+	margin-right: auto;
+}
+.event-images {
+	margin-right: 10px;
+	margin-bottom: 15px;
+}
+@media(max-width: 767px) {
+	.social {
+		width: 100%;
+	}
+	.event-images img {
+		width: 100%;
+	}
 }

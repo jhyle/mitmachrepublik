@@ -1,7 +1,7 @@
       <div class="row footer">
-        <div class="col-xs-1">&nbsp;</div>
+        <div class="col-lg-1 col-md-1 visible-lg-block visible-md-block">&nbsp;</div>
 
-	<div class="col-xs-2 col-foot">
+	<div class="col-md-2 col-sm-3 col-xs-6 col-foot">
 	  <ul>
 	    <li><h5>Folge uns auf</h5></li>
 	    <li><a href="https://www.facebook.com/mitmachrepublik" target="_blank"><span class="fa fa-facebook fa-fw"></span>Facebook</a></li>
@@ -15,7 +15,7 @@
 	    <li><a rel="nofollow" href="/disclaimer">Haftungsausschluss (Disclaimer)</a></li>
 	  </ul>
 	</div>
-	<div class="col-xs-2 col-foot">
+	<div class="col-md-2 col-sm-3 col-xs-6  col-foot">
 	  <ul>
 	    <li><h5><a href="/veranstaltungen/{{simpleEventSearchUrl ""}}" title="Alle Veranstaltungen">Veranstaltungen</a> in..</h5></li>
 	    <li><a href="/veranstaltungen/{{simpleEventSearchUrl "Berlin"}}" title="Veranstaltungen in Berlin">Berlin</a></li>
@@ -24,7 +24,7 @@
 	    {{end}}
 	  </ul>
 	</div>
-	<div class="col-xs-2 col-foot">
+	<div class="col-md-2 col-sm-3 col-xs-6  col-foot">
 	  <ul>
 	    <li><h5><a href="/veranstalter/{{organizerSearchUrl ""}}" title="Alle Veranstalter">Organisatoren</a> in..</h5></li>
 	    <li><a href="/veranstalter/{{organizerSearchUrl "Berlin"}}" title="Veranstalter in Berlin">Berlin</a></li>
@@ -33,7 +33,7 @@
 	    {{end}}
 	  </ul>
 	</div>
-	<div class="col-xs-2 col-foot">
+	<div class="col-md-2 col-sm-3 col-xs-6 col-foot">
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
 	    <li><h5>In Kategorie..</h5></li>
 	    {{range $i, $category := .categories}}
@@ -41,7 +41,7 @@
 	    {{end}}
 	  </ul>
 	</div>
-	<div class="col-xs-2 col-foot">
+	<div class="col-md-2 col-foot visible-lg-block visible-md-block">
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
 	    <li><h5>Für..</h5></li>
 	    {{range $i, $target := .targets}}
@@ -55,7 +55,7 @@
 	  </ul>
 	</div>
 
-        <div class="col-xs-1">&nbsp;</div>
+        <div class="col-lg-1 col-md-1 visible-lg-block visible-md-block">&nbsp;</div>
       </div>
     </div>
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->

@@ -268,9 +268,7 @@ func (app *MmrApp) sitemapPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	eventsPerRow := 4
-	numberOfRows := 4
-	pageSize := eventsPerRow * numberOfRows
+	pageSize := 16
 	query := ""
 	place := ""
 	dateIds := []int{TwoWeeks}
@@ -319,8 +317,8 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		moreEvents := true
-		events := make([]*Date, 0, eventsPerRow*2)
-		for len(events) < eventsPerRow*numberOfRows && moreEvents {
+		events := make([]*Date, 0, pageSize)
+		for len(events) < pageSize && moreEvents {
 			moreEvents = false
 			for category := range dates {
 				for len(dates[category]) > 0 {
@@ -335,7 +333,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 						}
 					}
 
-					if !alreadyIncluded && len(events) < eventsPerRow*numberOfRows {
+					if !alreadyIncluded && len(events) < pageSize {
 						events = append(events, date)
 						break
 					}
@@ -357,25 +355,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if r.Param("fmt") == "RSS" {
 			return app.output("rss.tpl", w, "application/rss+xml", &meta, bson.M{"items": dates2RSSItems(events)})
 		} else {
-			var dates [][]*Date
-			if len(events) > 0 {
-				dates = make([][]*Date, ((len(events)-1)/eventsPerRow)+1)
-				for i := range dates {
-
-					rowSize := len(events) - i*eventsPerRow
-					if rowSize > eventsPerRow {
-						rowSize = eventsPerRow
-					}
-					dates[i] = make([]*Date, rowSize)
-
-					for j := 0; j < rowSize; j++ {
-						dates[i][j] = events[i*eventsPerRow+j]
-					}
-				}
-			} else {
-				dates = make([][]*Date, 0)
-			}
-			return app.view("start.tpl", w, &meta, bson.M{"events": dates, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "dates": DateOrder, "dateMap": DateIdMap})
+			return app.view("start.tpl", w, &meta, bson.M{"events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "dates": DateOrder, "dateMap": DateIdMap})
 		}
 	}()
 

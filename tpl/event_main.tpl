@@ -1,17 +1,15 @@
 <div class="row tiles">
-	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-11"><h1>{{.meta.FB_Title}}</h1></div>
+	<div class="col-xs-12"><h1>{{.meta.FB_Title}}</h1></div>
 </div>
 <div class="row tiles">
-	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-3 col-box">
+	<div class="col-lg-3 col-sm-4 col-xs-5 col-box">
 		{{template "organizer_box.tpl" .}}
 	</div>
-	{{with .event}}<div class="col-xs-7">
-		<div class="pull-left" style="margin-right: 10px; margin-bottom: 10px">
+	{{with .event}}<div class="col-lg-9 col-sm-8 col-xs-7">
+		<div class="event-images pull-left">
 			{{if .Image}}
 				<a href="{{.Web}}" title="Webseite der Veranstaltung aufrufen" target="_blank">
-					<img width="300" style="margin-right: 10px; margin-bottom: 15px" src="/bild/{{.Image}}?width=300" alt="Veranstaltung {{.Title}}">
+					<img width="450" style="margin-right: 10px; margin-bottom: 15px" src="/bild/{{.Image}}?width=450" alt="Veranstaltung {{.Title}}">
 				</a>
 			{{end}}
 			{{if .ImageCredit}}
@@ -19,16 +17,16 @@
 			{{end}}
 			{{ if not .Addr.IsEmpty }}
 			<a href="http://maps.google.de/maps?hl=de&q={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&ie=UTF8" target="_blank" title="In Google Maps öffnen">
-				<img width="300" height="225" style="display: block" src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=300x225&key={{$.googleApiKey}}" title="in Google Maps öffnen" alt="Karte">
+				<img width="450" height="225" style="display: block" src="http://maps.googleapis.com/maps/api/staticmap?center={{.Addr.Name}}+{{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&markers={{.Addr.Street}}+{{.Addr.Pcode}}+{{.Addr.City}}&zoom=15&size=450x225&key={{$.googleApiKey}}" title="in Google Maps öffnen" alt="Karte">
 			</a>
 			{{end}}
 		</div>
 		{{with $.date}}
-		<div style="margin-bottom: 15px">
+		<div class="social">
 			<a style="margin-right: 10px" href="https://www.facebook.com/sharer/sharer.php?u=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/facebook_share.png"></a>
 			<a style="margin-right: 10px" href="https://plus.google.com/share?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/google_share.png"></a>
 			<a href="http://twitter.com/intent/tweet?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/twitter_share.png"></a>
-			<div style="display: inline-block; float: right;"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="javascript:void(0)" data-href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
+			<div class="recommend"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="javascript:void(0)" data-href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
 		</div>
 		{{end}}
 		{{with (or $.date $.event)}}
@@ -74,28 +72,22 @@
 		<div class="clearfix"></div>
 		<div class="fb-comments" data-href="http://{{$.hostname}}{{.Url}}" data-width="100%" data-numposts="5" data-order-by="time" data-colorscheme="light"></div>
 	</div>{{end}}
-	<div class="col-xs-1">&nbsp;</div>
 </div>
 {{if len .similiars}}
 <div class="row tiles" style="padding-bottom: 0">
-	<div class="col-xs-1">&nbsp;</div>
-	<div class="col-xs-11"><h2 style="color: #ff5100; margin: 0; font-weight: lighter">Weitere gemeinschaftliche Veranstaltungen{{if .event.Addr.City}} in {{.event.Addr.City}}{{end}}</h2></div>
+	<div class="col-xs-12"><h2 style="color: #ff5100; margin: 0; font-weight: lighter">Weitere gemeinschaftliche Veranstaltungen{{if .event.Addr.City}} in {{.event.Addr.City}}{{end}}</h2></div>
 </div>
 <div class="row tiles">
-	<div class="col-xs-1 hidden-xs">&nbsp;</div>
 	{{range .similiars}}
 		{{template "tile_event.tpl" .}}
 	{{end}}
-	<div class="col-xs-1 hidden-xs">&nbsp;</div>
 </div>
 <div class="row tiles">
-	<div class="col-xs-1 hidden-xs">&nbsp;</div>
-	<div class="col-xs-2">&nbsp;</div>
-	<div class="col-xs-6">
+	<div class="col-sm-3 col-xs-2">&nbsp;</div>
+	<div class="col-sm-6 col-xs-8">
 		<a href="/veranstaltungen/{{eventSearchUrl .event.Addr.City .event.Targets .event.Categories (intSlice 0) 0}}" class="btn btn-mmr" style="width: 100%">Weitere Veranstaltungen</a>
 	</div>
-	<div class="col-xs-2">&nbsp;</div>
-	<div class="col-xs-1 hidden-xs">&nbsp;</div>
+	<div class="col-sm-3 col-xs-2">&nbsp;</div>
 </div>
 {{end}}
 {{if not .noindex}}{{range $i, $date := $.recurrences}}
