@@ -75,7 +75,7 @@
 </div>
 {{if len .similiars}}
 <div class="row tiles" style="padding-bottom: 0">
-	<div class="col-xs-12"><h2 style="color: #ff5100; margin: 0; font-weight: lighter">Weitere gemeinschaftliche Veranstaltungen{{if .event.Addr.City}} in {{.event.Addr.City}}{{end}}</h2></div>
+	<div class="col-xs-12"><h4>Weitere gemeinschaftliche Veranstaltungen{{if .event.Addr.City}} in {{.event.Addr.City}}{{end}}</h4></div>
 </div>
 <div class="row tiles">
 	{{range .similiars}}

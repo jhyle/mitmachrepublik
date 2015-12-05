@@ -9,7 +9,7 @@ h3 {
 	color: #ff5100;
 	margin: 10px 0;
 }
-h5 {
+h5, .filter-headline {
 	margin: 20px 0 0 0;
 	font-weight: bolder;
 	line-height: inherit;
@@ -32,7 +32,7 @@ label {
 .radio-inline {
 	margin-right: 25px;
 }
-body, a, a:hover, a:focus, .form-control, div.col-box h3 {
+body, a, a:hover, a:focus, .form-control {
 	color: #2f3030;
 }
 a:hover, a:focus {
@@ -157,7 +157,7 @@ a:hover, a:focus {
 .dropdown-menu li.active a, .dropdown-menu li.active a:hover, .dropdown-menu li.active a:focus {
 	background-color: #ff5200;
 }
-.highlight, a.highlight:hover, a.highlight:focus, div.col-box h5, .note-editable a, .description a, .description p a {
+.highlight, a.highlight:hover, a.highlight:focus, .filter-headline, .note-editable a, .description a, .description p a {
 	color: #2ba42b;
 }
 .col-head {
@@ -191,6 +191,11 @@ a:hover, a:focus {
 	font-size: 40px;
 	color: #ff5200;
 	margin-top: 25px;
+}
+.tiles h4 {
+	color: #ff5100;
+	margin: 0;
+	font-weight: lighter;
 }
 .col-tile {
 	padding: 10px;
@@ -234,7 +239,13 @@ a:hover, a:focus {
 .filter-box {
 	padding: 10px;
 }
-.box h3 {
+.box-headline {
+	font-size: 23px;
+	font-weight: lighter;
+	margin: 10px 0;
+}
+.box h2 {
+	font-size: 23px;
 	font-weight: normal;
 	margin: 10px;
 }

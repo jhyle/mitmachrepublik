@@ -9,8 +9,8 @@
 <div id="organizers" class="row tiles">
 	<div class="col-md-3 col-sm-4 col-xs-12 col-box">
 		<div class="filter-box">
-		<h3>Filter</h3>
-		<h5>Kategorien</h5>
+		<div class="box-headline">Filter</div>
+		<div class="filter-headline">Kategorien</div>
 		<hr>
 		{{ range .categories }}
 			{{ $id := index $.categoryMap . }}

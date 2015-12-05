@@ -8,8 +8,8 @@
 <div class="row tiles">
 	<div class="col-md-3 col-sm-4 col-xs-12 col-box">
 		<div class="filter-box">
-		<h3>Filter</h3>
-		<h5>Datum</h5>
+		<div class="box-headline">Filter</div>
+		<div class="filter-headline">Datum</div>
 		<hr>
 		{{ range .dates }}
 			{{ $id := . }}
@@ -21,7 +21,7 @@
 				>  {{ index $.dateMap $id }}</label>
 			{{ end }}
 		{{ end }}
-		<h5>Zielgruppen</h5>
+		<div class="filter-headline">Zielgruppen</div>
 		<hr>
 		{{ range .targets }}
 			{{ $id := index $.targetMap . }}
@@ -31,7 +31,7 @@
 			{{ end }}
 			>  {{.}}</label>					
 		{{ end }}
-		<h5>Kategorien</h5>
+		<div class="filter-headline">Kategorien</div>
 		<hr>
 		{{ range .categories }}
 			{{ $id := index $.categoryMap . }}

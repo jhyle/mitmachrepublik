@@ -1,7 +1,7 @@
 <div class="box">
 {{with (or .user .organizer)}}
 <a href="{{if $.user}}/veranstalter/verwaltung/0{{else}}{{.Url}}{{end}}" title="Veranstaltungen von {{.Name}} anzeigen">
-	<h3>{{.Name}}</h3>
+	<h2>{{.Name}}</h2>
 	{{if .Image}}
 		<div class="tile-image" style="background-image: url(/bild/{{.Image}}?height=165)"> </div>
 	{{end}}
