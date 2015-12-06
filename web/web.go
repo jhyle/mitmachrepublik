@@ -521,6 +521,8 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		true,
 	}
 
+	canonical := eventSearchUrl(place, targetIds, categoryIds, dateIds, 0)
+
 	result := func() *appResult {
 
 		eventCnt, err := app.events.Count(query, place, timeSpans(dateIds), targetIds, categoryIds)
@@ -558,7 +560,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 				pages[i] = i
 			}
 			maxPage := pageCount - 1
-			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "query": query, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "dateNames": dateNames, "targetIds": targetIds, "categoryIds": categoryIds, "noindex": page > 0})
+			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "query": query, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "dateNames": dateNames, "targetIds": targetIds, "categoryIds": categoryIds, "canonical": canonical, "noindex": page > 0})
 		}
 	}()
 

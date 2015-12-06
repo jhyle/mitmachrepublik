@@ -23,6 +23,10 @@
 {{if and (.event) (not .user)}}
 	<meta property="og:url" content="http://{{.hostname}}{{.event.Url}}">
 	<link rel="canonical" href="http://{{.hostname}}{{.event.Url}}">
+{{else}}
+{{if .canonical}}
+	<link rel="canonical" href="http://{{.hostname}}/veranstaltungen/{{.canonical}}">
+{{end}}
 {{end}}
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">
