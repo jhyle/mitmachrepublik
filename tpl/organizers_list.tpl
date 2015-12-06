@@ -4,6 +4,11 @@
 	<p class="big-text text-center" style="padding-top: 20px">Es wurden keine Veranstalter gefunden.</p>
 </div>
 {{else}}
+{{if and (gt .results 0) (gt .maxPage 0)}}
+<div class="clearfix" style="margin-bottom: 10px; font-weight: bolder">
+	<span class="pull-right" style="margin-right: 10px">Seite {{inc .page}} von {{inc .maxPage}}</span>
+</div>
+{{end}}
 {{range .organizers}}
 <div class="row-tile">
 	<a href="{{.Url}}" title="Veranstaltungen von {{.Name}} ansehen">

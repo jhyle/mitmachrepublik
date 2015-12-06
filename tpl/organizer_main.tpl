@@ -1,5 +1,5 @@
 <div class="row tiles">
-	<div class="col-xs-12"><h1>Gemeinschaftliche Veranstaltungen von {{.organizer.Name}} {{if and (gt .results 0) (gt .maxPage 0)}} - Seite {{inc .page}} von {{inc .maxPage}}{{end}}</h1></div>
+	<div class="col-xs-12"><h1>Gemeinschaftliche Veranstaltungen von {{.organizer.Name}}</h1></div>
 </div>
 <div class="row tiles">
 	<div class="col-lg-3 col-sm-4 hidden-xs col-box">

@@ -558,7 +558,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 				pages[i] = i
 			}
 			maxPage := pageCount - 1
-			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "query": query, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "dateNames": dateNames, "targetIds": targetIds, "categoryIds": categoryIds, "noindex": result.Count == 0})
+			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "query": query, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "dateNames": dateNames, "targetIds": targetIds, "categoryIds": categoryIds, "noindex": page > 0})
 		}
 	}()
 
@@ -667,9 +667,6 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		title := event.Title
-		if date != nil {
-			title += " am " + dateFormat(date.Start)
-		}
 		if !isEmpty(place) {
 			title += " in " + place
 		}
@@ -895,7 +892,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 				pages[i] = i
 			}
 			maxPage := pageCount - 1
-			return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer, "noindex": result.Count == 0})
+			return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer, "noindex": page > 0})
 		}
 	}()
 
