@@ -1,8 +1,8 @@
 <div class="row">
 	<div class="col-xs-12 col-search-banner">
 		<div class="search-form form-inline text-center">
-			<input name="query" type="text" class="form-control" value="{{.query}}" placeholder="Veranstaltungsname oder -ort" style="width: 33%" autocomplete="off">
-			<input name="place" type="text" class="form-control" value="{{.place}}" placeholder="Stadt(-teil) oder Postleitzahl" style="width: 33%" autocomplete="off">
+			<!-- input name="query" type="text" class="form-control" value="{{.query}}" placeholder="Veranstaltungsname oder -ort" style="width: 33%" autocomplete="off"-->
+			<input name="place" type="text" class="form-control" value="{{.place}}" placeholder="Stadt(-teil) oder Postleitzahl" style="width: 50%" autocomplete="off">
 			<!--select name="radius" class="form-control">
 				<option value="0" {{if eq .radius 0}}selected{{end}}>kein Umkreis</option>
 				<option value="2" {{if eq .radius 2}}selected{{end}}>2 km</option>

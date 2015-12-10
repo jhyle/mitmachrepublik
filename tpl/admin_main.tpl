@@ -8,7 +8,7 @@
 		<p><a href="#" id="delete-profile" class="btn btn-mmr" style="width: 90%">Profil löschen</a></p>
 	</div>
 	<div class="col-lg-9 col-sm-8 col-xs-7">
-		<form class="form-inline pull-left" role="form" action="0?">
+		<form id="adminsearch" class="form-inline pull-left" role="form" action="0?">
 			<input type="text" name="query" class="form-control search-field" placeholder="Veranstaltungen" value="{{.query}}" autocomplete="off">
 			<button type="submit" class="btn btn-mmr btn-search"><span class="fa fa-search"></span></button>
 		</form>

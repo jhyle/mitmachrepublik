@@ -719,21 +719,31 @@ $(function() {
 		}
 	});
 
-	$("input[name=fulltextsearch]").typeahead({ source: function(query, process) {
-		$.ajax({cache: false, url : "/typeahead/" + query, type: "GET", dataType: "json",
-			success: function(data) {
-				process(data);
-			}
-		});
-	}});
+	$("input[name=fulltextsearch]").typeahead({
+		source: function(query, process) {
+			$.ajax({cache: false, url : "/typeahead/" + query, type: "GET", dataType: "json",
+				success: function(data) {
+					process(data);
+				}
+			});
+		},
+		afterSelect: function(item) {
+			$('#fulltextsearch').submit();
+		}
+	});
 
-	$("input[name=query]").typeahead({ source: function(query, process) {
-		$.ajax({cache: false, url : "/typeahead/" + query, type: "GET", dataType: "json",
-			success: function(data) {
-				process(data);
-			}
-		});
-	}});
+	$("input[name=query]").typeahead({
+		source: function(query, process) {
+			$.ajax({cache: false, url : "/typeahead/" + query, type: "GET", dataType: "json",
+				success: function(data) {
+					process(data);
+				}
+			});
+		},
+		afterSelect: function(item) {
+			$('#adminsearch').submit();
+		}
+	});
 
 	$("input[name=query]").change(function() {
 		updateEventCount();
