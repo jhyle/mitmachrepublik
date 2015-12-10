@@ -15,12 +15,12 @@
 {{range .events}}
 <div style="border: 1px solid #e6e6e6; margin-bottom: 15px; overflow: hidden; ">
 	<a style="color: #2f3030; text-decoration: none;" href="http://{{$.hostname}}{{.Url}}" title="Veranstaltung anzeigen">
-	{{if .Image}}
-		<img style="margin-right: 10px; float: left !important; vertical-align: middle; border: 0 none; " src="http://{{$.hostname}}/bild/{{.Image}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
+	{{if or (.Image) ((index $.organizers .OrganizerId).Image)}}
+		<img style="margin-right: 10px; float: left !important; vertical-align: middle; border: 0 none; " src="http://{{$.hostname}}/bild/{{if .Image}}{{.Image}}{{else}}{{(index $.organizers .OrganizerId).Image}}{{end}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
 	{{end}}
 	<div style="margin: 10px;">
 		<h3 style="color: #ff5100; font-size: 23px; font-weight: lighter; margin: 10px 0; line-height: 1.1;">{{.Title}}</h3>
-		<p style="margin: 0 0 3px 0; font-size: 13px; font-weight: bold;">{{longDatetimeFormat .Start}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizerNames}}{{if ne (index $.organizerNames .OrganizerId) ("Mitmach-Republik")}} - {{index $.organizerNames .OrganizerId}}{{end}}{{end}}</p>
+		<p style="margin: 0 0 3px 0; font-size: 13px; font-weight: bold;">{{longDatetimeFormat .Start}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}} - {{(index $.organizers .OrganizerId).Name}}{{end}}{{end}}</p>
 		<p style="margin: 0 0 3px 0;">{{strClip .PlainDescription 100}}</p>
 		{{ if not .Addr.IsEmpty }}
 			<p style="margin: 0 0 3px 0; float: left !important; color: #7a7d7d; font-size: 13px;">{{ if .Addr.Name }}<span>{{.Addr.Name}}</span><br />{{ end }}<span class="address">{{ if .Addr.Street }}<span>{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span>{{.Addr.Pcode}}</span> {{ end }}<span>{{citypartName .Addr}}</span></span></p>

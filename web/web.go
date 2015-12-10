@@ -296,7 +296,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		dates := make(map[int][]*Date)
 		for category := range CategoryIdMap {
-			result, err := app.events.SearchDates(query, place, timeSpans(dateIds), nil, []int{category}, true, 0, 3, "start")
+			result, err := app.events.SearchDates(query, place, timeSpans(dateIds), nil, []int{category}, false, 0, 3, "start")
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
@@ -347,10 +347,15 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			}
 		}
 
+		organizers, err := app.users.FindForDates(events)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
 		if r.Param("fmt") == "RSS" {
 			return app.output("rss.tpl", w, "application/rss+xml", &meta, bson.M{"items": dates2RSSItems(events)})
 		} else {
-			return app.view("start.tpl", w, &meta, bson.M{"events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "dates": DateOrder, "dateMap": DateIdMap})
+			return app.view("start.tpl", w, &meta, bson.M{"events": events, "eventCnt": eventCnt, "organizerCnt": organizerCnt, "organizers": organizers, "dates": DateOrder, "dateMap": DateIdMap})
 		}
 	}()
 
@@ -540,15 +545,9 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerNames := make(map[bson.ObjectId]string)
-		for _, date := range result.Dates {
-			if _, found := organizerNames[date.OrganizerId]; !found {
-				user, err := app.users.Load(date.OrganizerId)
-				if err != nil {
-					return &appResult{Status: http.StatusInternalServerError, Error: err}
-				}
-				organizerNames[date.OrganizerId] = user.Name
-			}
+		organizers, err := app.users.FindForDates(result.Dates)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
 		if r.Param("fmt") == "RSS" {
@@ -560,7 +559,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 				pages[i] = i
 			}
 			maxPage := pageCount - 1
-			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizerNames": organizerNames, "query": query, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "dateNames": dateNames, "targetIds": targetIds, "categoryIds": categoryIds, "eventsCanonical": canonical, "noindex": result.Count == 0})
+			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizers": organizers, "query": query, "place": place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": dateIds, "dateNames": dateNames, "targetIds": targetIds, "categoryIds": categoryIds, "eventsCanonical": canonical, "noindex": result.Count == 0})
 		}
 	}()
 
@@ -593,18 +592,12 @@ func (app *MmrApp) nlEventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultNotFound
 		}
 
-		organizerNames := make(map[bson.ObjectId]string)
-		for _, date := range result.Dates {
-			if _, found := organizerNames[date.OrganizerId]; !found {
-				user, err := app.users.Load(date.OrganizerId)
-				if err != nil {
-					return &appResult{Status: http.StatusInternalServerError, Error: err}
-				}
-				organizerNames[date.OrganizerId] = user.Name
-			}
+		organizers, err := app.users.FindForDates(result.Dates)
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		return app.output("nl_events.tpl", w, "text/html", nil, bson.M{"alertId": alertId, "results": result.Count, "events": result.Dates, "organizerNames": organizerNames, "place": place, "radius": radius, "dateIds": dateIds, "targetIds": targetIds, "categoryIds": categoryIds})
+		return app.output("nl_events.tpl", w, "text/html", nil, bson.M{"alertId": alertId, "results": result.Count, "events": result.Dates, "organizers": organizers, "place": place, "radius": radius, "dateIds": dateIds, "targetIds": targetIds, "categoryIds": categoryIds})
 	}()
 
 	app.handle(w, result)
@@ -1569,8 +1562,6 @@ func (app *MmrApp) deleteEventHandler(w traffic.ResponseWriter, r *traffic.Reque
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		// TODO delete dates
-
 		return resultOK
 	}()
 
@@ -1601,8 +1592,8 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstaltungen/:place/:dateIds/:categoryIds/:radius/:categories/:page", app.eventsPage)
 	router.Get("/veranstaltungen//:dateIds/:categoryIds/:radius/:categories/:page", app.eventsPage)
 
-	router.Get("/newsletter/veranstaltungen/:place/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
-	router.Get("/newsletter/veranstaltungen//:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
+	router.Get("/newsletter/veranstaltungen/:place/:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
+	router.Get("/newsletter/veranstaltungen//:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
 
 	router.Get("/veranstaltung/:place/:targets/:categories/:dateId/:id/:title", app.eventPage)
 	router.Get("/veranstaltung//:targets/:categories/:dateId/:id/:title", app.eventPage)

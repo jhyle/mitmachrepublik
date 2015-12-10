@@ -106,6 +106,22 @@ func (users *UserService) FindUsers() ([]User, error) {
 	return result, err
 }
 
+func (users *UserService) FindForDates(dates []*Date) (map[bson.ObjectId]*User, error) {
+
+	organizers := make(map[bson.ObjectId]*User)
+	for _, date := range dates {
+		if _, found := organizers[date.OrganizerId]; !found {
+			user, err := users.Load(date.OrganizerId)
+			if err != nil {
+				return nil, err
+			}
+			organizers[date.OrganizerId] = user
+		}
+	}
+
+	return organizers, nil
+}
+
 func (users *UserService) Search(place string, categoryIds []int, page, pageSize int, sort string) (*OrganizerSearchResult, error) {
 
 	var result OrganizerSearchResult

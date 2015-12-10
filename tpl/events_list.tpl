@@ -13,16 +13,16 @@
 	{{if not $.user }}
 		<a href="{{.Url}}" title="Infos zu {{.Title}} anschauen">
 	{{end}}
-	{{if .Image}}
+	{{if or (.Image) ((index $.organizers .OrganizerId).Image)}}
 		<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
-		<img width="220" height="165" class="pull-left" style="margin-right: 10px" src="/bild/{{.Image}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
+		<img width="220" height="165" class="pull-left" style="margin-right: 10px" src="/bild/{{if .Image}}{{.Image}}{{else}}{{(index $.organizers .OrganizerId).Image}}{{end}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
 	{{end}}
 	<div class="tile-text">
 		{{ if $.user }}
 			<p class="pull-right"><a href="#" name="delete-event" title="Löschen" data-target="{{.Id.Hex}}" class="close"><span class="fa fa-times"></span></a></p>
 		{{ end }}
 		<h3>{{.Title}}</h3>
-		<p class="datetime">{{longDatetimeFormat .Start}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizerNames}}{{if ne (index $.organizerNames .OrganizerId) ("Mitmach-Republik")}} - {{index $.organizerNames .OrganizerId}}{{end}}{{end}}</p>
+		<p class="datetime">{{longDatetimeFormat .Start}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}} - {{(index $.organizers .OrganizerId).Name}}{{end}}{{end}}</p>
 		{{ if $.user }}
 			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung/{{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Bearbeiten</a></p>
 		{{end}}

@@ -719,7 +719,7 @@ $(function() {
 		}
 	});
 
-	$('.col-tile').matchHeight();
+	$('.tile').matchHeight();
 	
 	$("input[name=fulltextsearch]").typeahead({
 		source: function(query, process) {
