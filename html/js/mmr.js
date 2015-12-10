@@ -745,18 +745,18 @@ $(function() {
 		}
 	});
 
-	$("input[name=query]").change(function() {
-		updateEventCount();
-		updateOrganizerCount();
+	$("input[name=place]").typeahead({
+		source: function(query, process) {
+			$.ajax({cache: false, url : "/location/" + query, type: "GET", dataType: "json",
+				success: function(data) {
+					process(data);
+				}
+			});
+		},
+		afterSelect: function(item) {
+			$('#events-form').submit();
+		}
 	});
-
-	$("input[name=place]").typeahead({ source: function(query, process) {
-		$.ajax({cache: false, url : "/location/" + query, type: "GET", dataType: "json",
-			success: function(data) {
-				process(data);
-			}
-		});
-	}});
 	
 	$("input[name=place]").change(function() {
 		updateEventCount();
