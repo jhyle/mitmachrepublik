@@ -863,7 +863,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizerNames := map[bson.ObjectId]string{organizer.Id: organizer.Name}
+		organizers := map[bson.ObjectId]*User{organizer.Id: organizer}
 
 		imageUrl := ""
 		if !isEmpty(organizer.Image) {
@@ -894,7 +894,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 				pages[i] = i
 			}
 			maxPage := pageCount - 1
-			return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizerNames": organizerNames, "place": place, "radius": radius, "organizer": organizer, "noindex": result.Count == 0})
+			return app.view("organizer.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "organizers": organizers, "place": place, "radius": radius, "organizer": organizer, "noindex": result.Count == 0})
 		}
 	}()
 
@@ -939,8 +939,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizers := make(map[bson.ObjectId]*User)
-		organizers[user.Id] = user
+		organizers := map[bson.ObjectId]*User{user.Id: user}
 
 		pageCount := result.Count / pageSize
 		if pageCount == 0 {
