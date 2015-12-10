@@ -3,6 +3,7 @@
 <!--#include file="jquery.iframe-transport.js" -->
 <!--#include file="jquery.fileupload.js" -->
 <!--#include file="jquery.cookie-1.4.1.min.js" -->
+<!--#include file="jquery.matchHeight-min.js" -->
 <!--#include file="bootstrap.min.js" -->
 <!--#include file="bootstrap-datetimepicker.min.js" -->
 <!--#include file="locales/bootstrap-datetimepicker.de.js" -->
