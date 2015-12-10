@@ -40,6 +40,7 @@ type (
 
 	UpdateRecurrencesService struct {
 		BasicService
+		users    *UserService
 		events   *EventService
 		account  *EmailAccount
 		hostname string
@@ -166,9 +167,9 @@ func (service *UnusedImgService) Run() error {
 	return nil
 }
 
-func NewUpdateRecurrencesService(hour int, email *EmailAccount, events *EventService, account *EmailAccount, hostname string) Service {
+func NewUpdateRecurrencesService(hour int, email *EmailAccount, users *UserService, events *EventService, account *EmailAccount, hostname string) Service {
 
-	return &UpdateRecurrencesService{NewBasicService("UpdateRecurrencesService", hour, email), events, account, hostname}
+	return &UpdateRecurrencesService{NewBasicService("UpdateRecurrencesService", hour, email), users, events, account, hostname}
 }
 
 func (service *UpdateRecurrencesService) Start() {
@@ -178,7 +179,12 @@ func (service *UpdateRecurrencesService) Start() {
 
 func (service *UpdateRecurrencesService) Run() error {
 
-	dates, err := service.events.UpdateRecurrences()
+	users, err := service.users.FindApproved()
+	if err != nil {
+		return err
+	}
+	
+	dates, err := service.events.UpdateRecurrences(users)
 	if err != nil {
 		return err
 	}

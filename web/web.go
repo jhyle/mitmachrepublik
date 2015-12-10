@@ -167,7 +167,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 	services := make([]Service, 0, 6)
 	services = append(services, NewSessionService(3, emailAccount, database))
 	services = append(services, NewScrapersService(3, emailAccount, events, admin.Id))
-	services = append(services, NewUpdateRecurrencesService(4, emailAccount, events, emailAccount, hostname))
+	services = append(services, NewUpdateRecurrencesService(4, emailAccount, users, events, emailAccount, hostname))
 	services = append(services, NewUnusedImgService(4, emailAccount, database, imgServer))
 	services = append(services, NewSendAlertsService(5, emailAccount, hostname, emailAccount, alerts))
 	if env == "dev" {
@@ -255,7 +255,7 @@ func (app *MmrApp) sitemapPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		organizers, err := app.users.FindUsers()
+		organizers, err := app.users.FindApproved()
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}

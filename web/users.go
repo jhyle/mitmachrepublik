@@ -106,6 +106,13 @@ func (users *UserService) FindUsers() ([]User, error) {
 	return result, err
 }
 
+func (users *UserService) FindApproved() ([]User, error) {
+
+	var result []User
+	err := users.table().Find(bson.M{"approved": true}, &result, "name")
+	return result, err
+}
+
 func (users *UserService) FindForDates(dates []*Date) (map[bson.ObjectId]*User, error) {
 
 	organizers := make(map[bson.ObjectId]*User)

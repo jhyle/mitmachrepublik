@@ -627,7 +627,7 @@ func (events *EventService) SyncDates(event *Event) ([]bson.ObjectId, error) {
 	return newDates, nil
 }
 
-func (events *EventService) UpdateRecurrences() ([]bson.ObjectId, error) {
+func (events *EventService) UpdateRecurrences(users []User) ([]bson.ObjectId, error) {
 
 	var result []Event
 	err := events.eventTable().Find(bson.M{"recurrency": Weekly}, &result, "start")
@@ -637,11 +637,16 @@ func (events *EventService) UpdateRecurrences() ([]bson.ObjectId, error) {
 
 	dates := make([]bson.ObjectId, 0)
 	for _, event := range result {
-		newDates, err := events.SyncDates(&event)
-		if err != nil {
-			return nil, err
+		for _, user := range users {
+			if user.Id == event.OrganizerId {
+				newDates, err := events.SyncDates(&event)
+				if err != nil {
+					return nil, err
+				}
+				dates = append(dates, newDates...)
+				break;
+			}
 		}
-		dates = append(dates, newDates...)
 	}
 
 	err = events.eventTable().Find(bson.M{"recurrency": Monthly}, &result, "start")
@@ -650,11 +655,16 @@ func (events *EventService) UpdateRecurrences() ([]bson.ObjectId, error) {
 	}
 
 	for _, event := range result {
-		newDates, err := events.SyncDates(&event)
-		if err != nil {
-			return nil, err
+		for _, user := range users {
+			if user.Id == event.OrganizerId {
+				newDates, err := events.SyncDates(&event)
+				if err != nil {
+					return nil, err
+				}
+				dates = append(dates, newDates...)
+				break;
+			}
 		}
-		dates = append(dates, newDates...)
 	}
 
 	return dates, nil
