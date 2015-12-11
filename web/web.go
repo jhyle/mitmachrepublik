@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"bytes"
 )
 
 type (
@@ -208,11 +209,14 @@ func (app *MmrApp) output(tpl string, w traffic.ResponseWriter, contentType stri
 	data["meta"] = meta
 	data["hostname"] = app.hostname
 
-	w.Header().Set("Content-Type", contentType)
-	err := app.tpls.Execute(tpl, w, data)
+	var buf bytes.Buffer
+	err := app.tpls.Execute(tpl, &buf, data)
 	if err != nil {
 		return &appResult{Status: http.StatusInternalServerError, Error: err}
 	}
+
+	w.Header().Set("Content-Type", contentType)
+	w.Write(buf.Bytes())
 
 	return resultOK
 }
@@ -520,8 +524,8 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	meta := metaTags{
 		title + " | Mitmach-Republik",
 		descr,
-		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		title,
+		"http://" + app.hostname + "/images/mitmachrepublik.png",
 		descr,
 		true,
 	}
