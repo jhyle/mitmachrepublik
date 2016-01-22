@@ -193,11 +193,13 @@ func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, da
 	data["categoryMap"] = CategoryMap
 	data["googleApiKey"] = google_api_key
 
-	err := app.tpls.Execute(tpl, w, data)
+	var buf bytes.Buffer
+	err := app.tpls.Execute(tpl, &buf, data)
 	if err != nil {
 		return &appResult{Status: http.StatusInternalServerError, Error: err}
 	}
 
+	w.Write(buf.Bytes())
 	return resultOK
 }
 
