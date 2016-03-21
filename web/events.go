@@ -2,6 +2,7 @@ package mmr
 
 import (
 	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/blevex/lang/de"
 	"github.com/pilu/traffic"
 	"gopkg.in/mgo.v2/bson"
 	"os"
@@ -46,7 +47,7 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 	})
 
 	mapping := bleve.NewIndexMapping()
-	mapping.DefaultAnalyzer = "de"
+	mapping.DefaultAnalyzer = de.AnalyzerName
 
 	os.RemoveAll(indexDir + string(os.PathSeparator) + "events.bleve")
 	eventIndex, err := bleve.New(indexDir+string(os.PathSeparator)+"events.bleve", mapping)
