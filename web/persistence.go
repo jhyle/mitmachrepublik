@@ -153,7 +153,11 @@ func (table *mongoTable) EnsureIndices(indices [][]string) error {
 
 func (table *mongoTable) LoadById(id bson.ObjectId, item Item) error {
 
-	return table.collection.FindId(id).One(item)
+	err := table.collection.FindId(id).One(item)
+	if err != nil && item.GetId() != id {
+		err = errors.New(id.Hex() + " not found in " + table.collection.Name)
+	}
+	return err
 }
 
 func (table *mongoTable) CountById(id bson.ObjectId) (int, error) {
