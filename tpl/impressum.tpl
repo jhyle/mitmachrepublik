@@ -5,8 +5,7 @@
 	<div class="col-xs-10">
 
 <h2>Angaben gemäß § 5 TMG</h2>
-<p>Leonhard Holz<br />
-New Media Product Developer<br />
+<p>Mitmach-Republik e.V.<br />
 Neue Krugallee 120, 12437 Berlin</p>
 
 <h2>Kontakt</h2>
