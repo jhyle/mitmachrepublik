@@ -61,12 +61,13 @@ a:hover, a:focus {
 	width: 100%;
 	background-color: rgba(255, 255, 255, 0.5); 
 }
-.col-banner h2 span {
+.col-banner h2 span, .row-break span {
 	color: #ff5200;
 }
 .col-banner h4 {
 	color: white;
-	font-weight: bolder;
+	font-size: 20px;
+	font-weight: normal;
 	padding-left: 5%;
 	padding-right: 5%;
 	position:absolute;
@@ -225,6 +226,12 @@ a:hover, a:focus {
 }
 .tile-text p {
 	margin-bottom: 3px;
+}
+.row-break {
+	background-color: #f7f7f7;
+	font-size: 23px;
+	font-weight: lighter;
+	text-align: center;
 }
 .col-box, .col-box-admin {
 	padding: 10px;

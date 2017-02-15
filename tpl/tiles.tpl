@@ -1,5 +1,10 @@
 <div class="row tiles">
-{{range .events}}
+{{range $index, $event := .events}}
+	{{if gt $index 7}}
+		<div class="col-xs-12 row-break">
+			<a href="/dialog/login" data-href="/dialog/login" rel="nofollow" data-toggle="modal" data-target="#login">Veröffentliche Deine <span>Veranstaltungen</span> auf mitmachrepublik.de!</a> <button type="button" class="btn btn-mmr" style="display:inline-block" href="/dialog/login" data-href="/dialog/login" rel="nofollow" data-toggle="modal" data-target="#login" title="Melde Dich an, um Deine Veranstaltungen einzutragen."> Eintragen</button>
+		</div>
+	{{end}}
 	<div class="col-md-3 col-sm-4 col-xs-6 col-tile">
 		<div class="tile">
 			<a href="{{.Url}}" style="display:block" title="Infos zu {{.Title}} anschauen">
