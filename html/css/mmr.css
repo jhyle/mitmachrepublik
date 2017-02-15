@@ -232,6 +232,7 @@ a:hover, a:focus {
 	font-size: 23px;
 	font-weight: lighter;
 	text-align: center;
+	padding: 15px;
 }
 .col-box, .col-box-admin {
 	padding: 10px;

@@ -284,7 +284,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		"Gemeinschaftliche Veranstaltungen und Organisationen in Berlin und anderswo. Finde Veranstaltungen von Nachbarschaftszentren, Umweltverbänden, Bürgerinitiativen, Vereinen und Aktionsbündnissen für heute, morgen und am Wochenende in Deiner Umgebung.",
 		"Gemeinsam aktiv werden.",
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
-		"Deine Seite für gemeinschaftliche Veranstaltungen und Organisationen. Finde Veranstaltungen von Nachbarschaftszentren, Umweltverbänden, Bürgerinitiativen, Vereinen und Aktionsbündnissen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
+		"Deine Seite für gemeinschaftliche Veranstaltungen und Organisationen. Finde Veranstaltungen von Nachbarschaftszentren, Umweltverbänden, Bürgerinitiativen und Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
 		true,
 	}
 
