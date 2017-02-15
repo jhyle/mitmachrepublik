@@ -26,6 +26,7 @@ var (
 	imageServerFlag *string = flag.String("imageServer", "", "url of image server")
 	mongoServerFlag *string = flag.String("mongoServer", "localhost", "url of mongoDb server")
 	databaseFlag    *string = flag.String("database", "mitmachrepublik", "name of the database")
+	smtpPassFlag    *string = flag.String("smtpPassword", "", "password for mitmachrepublik@gmail.com")
 	scrapersFlag    *bool   = flag.Bool("s", false, "run scrapers")
 )
 
@@ -91,7 +92,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	app, err := mmr.NewMmrApp(*envFlag, *hostFlag, *portFlag, *templateDirFlag, *indexDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag)
+	if *smtpPassFlag == "" {
+		fmt.Println("You need to specify a SMTP password (-smtpPassword)!")
+		os.Exit(1)
+	}
+
+	app, err := mmr.NewMmrApp(*envFlag, *hostFlag, *portFlag, *templateDirFlag, *indexDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag, *smtpPassFlag)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(2)

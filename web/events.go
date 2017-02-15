@@ -2,6 +2,7 @@ package mmr
 
 import (
 	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/mapping"
 	"github.com/blevesearch/blevex/lang/de"
 	"github.com/pilu/traffic"
 	"gopkg.in/mgo.v2/bson"
@@ -144,7 +145,7 @@ func (events *EventService) Dates(query string) ([]string, error) {
 	}
 
 	dates := make(map[string]string)
-	tokenStream, err := events.dateIndex.Mapping().AnalyzeText("de", []byte(query))
+	tokenStream, err := events.dateIndex.Mapping().(*mapping.IndexMappingImpl).AnalyzeText("de", []byte(query))
 	if err != nil {
 		return nil, err
 	}

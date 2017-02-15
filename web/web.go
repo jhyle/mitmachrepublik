@@ -1,7 +1,7 @@
 package mmr
 
 import (
-	"code.google.com/p/go-uuid/uuid"
+	"github.com/google/uuid"
 	"errors"
 	"fmt"
 	"github.com/pilu/traffic"
@@ -90,7 +90,7 @@ var (
 	sendAlertsService *SendAlertsService
 )
 
-func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName string) (*MmrApp, error) {
+func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass string) (*MmrApp, error) {
 
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
@@ -143,7 +143,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		return nil, errors.New("init of templates failed: " + err.Error())
 	}
 
-	emailAccount := &EmailAccount{"smtp.gmail.com", 465, "mitmachrepublik", "mitmachen2016", &EmailAddress{"Mitmach-Republik", "mitmachrepublik@gmail.com"}}
+	emailAccount := &EmailAccount{"smtp.gmail.com", 465, "mitmachrepublik", smtpPass, &EmailAddress{"Mitmach-Republik", "mitmachrepublik@gmail.com"}}
 
 	ga_code := ga_dev
 	hostname := "dev.mitmachrepublik.de"
@@ -1127,7 +1127,7 @@ func (app *MmrApp) uploadHandler(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultBadRequest
 		}
 
-		filename := uuid.New() + ".jpg"
+		filename := uuid.New().String() + ".jpg"
 		resp, err := http.Post(app.imgServer+"/"+filename, "image/jpeg", file)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
