@@ -12,26 +12,9 @@
 {{if .noindex}}
 	<meta name="robots" content="noindex, follow">
 {{end}}
-{{if and (.pages) (not .user)}}
-	{{if lt .page .maxPage}}
-	<link rel="next" href="./{{inc .page}}">
-	{{end}}
-	{{if gt .page 0 }}
-	<link rel="prev" href="./{{dec .page}}">
-	{{end}}
-{{end}}
 {{if and (.event) (not .user)}}
 	<meta property="og:url" content="http://{{.hostname}}{{.event.Url}}">
 	<link rel="canonical" href="http://{{.hostname}}{{.event.Url}}">
-{{else if .organizer}}
-	<link rel="canonical" href="http://{{.hostname}}{{.organizer.Url}}">
-{{else}}
-{{if .eventsCanonical}}
-	<link rel="canonical" href="http://{{.hostname}}/veranstaltungen/{{.eventsCanonical}}">
-{{end}}
-{{if .organizersCanonical}}
-	<link rel="canonical" href="http://{{.hostname}}/veranstalter/{{.organizersCanonical}}">
-{{end}}
 {{end}}
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">

@@ -161,6 +161,7 @@
 {{if $date.Image}}
 		"image": "/bild/{{$date.Image}}?width=300",
 {{end}}
+		"url": {{$date.Url}},
 		"startDate": {{iso8601Format $date.Start}},
 		"description": {{$date.PlainDescription}}
 	}
