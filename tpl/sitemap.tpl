@@ -5,21 +5,13 @@
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
   </url>
+{{range .topics}}
   <url>
-    <loc>http://{{$.hostname}}/veranstaltungen/{{eventSearchUrl "Berlin" (intSlice 0) (intSlice 0) (intSlice 1) 0}}</loc>
+    <loc>http://{{$.hostname}}/{{.}}</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url>
-    <loc>http://{{$.hostname}}/veranstaltungen/{{eventSearchUrl "Berlin" (intSlice 0) (intSlice 0) (intSlice 2) 0}}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>http://{{$.hostname}}/veranstaltungen/{{eventSearchUrl "Berlin" (intSlice 0) (intSlice 0) (intSlice 4) 0}}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
+{{end}}
 {{range .events}}
   <url>
     <loc>http://{{$.hostname}}{{.Url}}</loc>

@@ -227,12 +227,22 @@ a:hover, a:focus {
 .tile-text p {
 	margin-bottom: 3px;
 }
-.row-break {
+.row-break, .row-topic {
 	background-color: #f7f7f7;
 	font-size: 23px;
 	font-weight: lighter;
 	text-align: center;
+}
+.row-break {
+	border-bottom: 5px solid white;
+	padding: 10px;
+}
+.row-topic {
+	text-align: left;
 	padding: 15px;
+}
+.row-topic a {
+	color: #ff5100;
 }
 .col-box, .col-box-admin {
 	padding: 10px;

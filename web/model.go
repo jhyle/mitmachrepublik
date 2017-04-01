@@ -137,6 +137,15 @@ type (
 		Start      int
 		Organizers []*User
 	}
+
+	Topic struct {
+		Name string
+		Place string
+		TargetIds []int
+		CategoryIds []int
+		DateIds []int
+		FrontPage bool
+	}
 )
 
 const (
@@ -296,6 +305,105 @@ var (
 	DateOrder []int = []int{TwoWeeks, Today, Tomorrow, AfterTomorrow, ThisWeek, NextWeekend, NextWeek, FromNow}
 
 	whiteSpace = regexp.MustCompile(`\s+`)
+
+	Topics map[string]Topic = map[string]Topic{
+		"babies-und-kleinkinder": Topic{
+			Name: "Babies & Kleinkinder",
+			Place: "Berlin",
+			TargetIds: []int{19, 20},
+			CategoryIds: []int{0},
+			DateIds: []int{FromNow},
+			FrontPage: true,
+		},
+		"sport-und-gesundheit": Topic{
+			Name: "Sport & Gesundheit",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{8,24},
+			DateIds: []int{FromNow},
+			FrontPage: true,
+		},
+		"natur-und-garten": Topic{
+			Name: "Natur & Garten",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{9,18},
+			DateIds: []int{FromNow},
+			FrontPage: true,
+		},
+		"eltern-und-familien": Topic{
+			Name: "Eltern & Familien",
+			Place: "Berlin",
+			TargetIds: []int{1,2,19,20,21},
+			CategoryIds: []int{0},
+			DateIds: []int{FromNow},
+			FrontPage: true,
+		},
+		"bildung-und-kultur": Topic{
+			Name: "Bildung & Kultur",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{10,11},
+			DateIds: []int{FromNow},
+			FrontPage: true,
+		},
+		"umwelt-und-tierschutz": Topic{
+			Name: "Umwelt- & Tierschutz",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{13,14},
+			DateIds: []int{FromNow},
+			FrontPage: true,
+		},
+		"demonstrationen-und-politik": Topic{
+			Name: "Demonstrationen & Politik",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{15,23},
+			DateIds: []int{FromNow},
+			FrontPage: true,
+		},
+		"soziales-und-ehrenamt": Topic{
+			Name: "Soziales & Ehrenamt",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{16,17},
+			DateIds: []int{FromNow},
+			FrontPage: true,
+		},
+		"heute-in-berlin": Topic{
+			Name: "heute",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{0},
+			DateIds: []int{Today},
+			FrontPage: false,
+		},
+		"morgen-in-berlin": Topic{
+			Name: "morgen",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{0},
+			DateIds: []int{Tomorrow},
+			FrontPage: false,
+		},
+		"uebermorgen-in-berlin": Topic{
+			Name: "übermorgen",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{0},
+			DateIds: []int{AfterTomorrow},
+			FrontPage: false,
+		},
+		"am-wochenende-in-berlin": Topic{
+			Name: "das nächste Wochenende",
+			Place: "Berlin",
+			TargetIds: []int{0},
+			CategoryIds: []int{0},
+			DateIds: []int{NextWeekend},
+			FrontPage: false,
+		},
+	}
 )
 
 func (user *User) GetId() bson.ObjectId {

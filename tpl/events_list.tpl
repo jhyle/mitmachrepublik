@@ -1,5 +1,5 @@
 <div class="clearfix" style="margin-bottom: 10px; font-weight: bolder">
-	{{if not $.user }}{{if not $.organizer}}<a id="events" class="highlight" href="javascript:void(0)" data-href="/dialog/emailalert/{{eventSearchUrlWithQuery .place .targetIds .categoryIds .dateIds .radius .query}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Wir senden Dir die Ergebnisse dieser Suche per E-Mail."><span class="fa fa-caret-right"></span> Lass Dich per E-Mail über diese Suche informieren.</a>{{end}}{{end}}
+	{{if not $.user }}{{if not $.organizer}}<a class="highlight" href="javascript:void(0)" data-href="/dialog/emailalert/{{eventSearchUrlWithQuery .place .targetIds .categoryIds .dateIds .radius .query}}" rel="nofollow" data-toggle="modal" data-target="#email-alert" title="Wir senden Dir die Ergebnisse dieser Suche per E-Mail."><span class="fa fa-caret-right"></span> Lass Dich per E-Mail über diese Suche informieren.</a>{{end}}{{end}}
 	{{if and (gt .results 0) (gt .maxPage 0)}}<span class="pull-right" style="margin-right: 10px">Seite {{inc .page}} von {{inc .maxPage}}</span>{{end}}
 </div>
 {{$n := len .events}}
