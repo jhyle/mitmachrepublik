@@ -1,9 +1,10 @@
 package mmr
 
 import (
-	"github.com/google/uuid"
+	"bytes"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/pilu/traffic"
 	"gopkg.in/mgo.v2/bson"
 	"html/template"
@@ -11,7 +12,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"bytes"
 )
 
 type (
@@ -281,7 +281,7 @@ func (app *MmrApp) sitemapPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	pageSize := 4
+	pageSize := 8
 	query := ""
 	place := ""
 	dateIds := []int{TwoWeeks}
@@ -541,7 +541,7 @@ func (app *MmrApp) landingPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	path := r.Param("path")
 
-	var topic *Topic	
+	var topic *Topic
 	for topicPath, topicData := range Topics {
 		if path == topicPath {
 			topic = &topicData
@@ -557,7 +557,7 @@ func (app *MmrApp) landingPage(w traffic.ResponseWriter, r *traffic.Request) {
 	query := ""
 
 	pageSize := 10
-	page, err := strconv.Atoi(r.Param("page"))
+	page, err := strconv.Atoi(r.Param("p"))
 	if err != nil {
 		page = 0
 	}
@@ -605,7 +605,7 @@ func (app *MmrApp) landingPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	result := func() *appResult {
-		
+
 		eventCnt, err := app.events.Count(query, topic.Place, timeSpans(topic.DateIds), topic.TargetIds, topic.CategoryIds)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
@@ -635,7 +635,7 @@ func (app *MmrApp) landingPage(w traffic.ResponseWriter, r *traffic.Request) {
 				pages[i] = i
 			}
 			maxPage := pageCount - 1
-			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizers": organizers, "query": query, "place": topic.Place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": topic.DateIds, "targetIds": topic.TargetIds, "categoryIds": topic.CategoryIds, "headline": title, "noindex": page > 0})
+			return app.view("events.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "results": result.Count, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Dates, "organizers": organizers, "query": query, "place": topic.Place, "radius": radius, "dates": DateOrder, "dateMap": DateIdMap, "dateIds": topic.DateIds, "targetIds": topic.TargetIds, "categoryIds": topic.CategoryIds, "headline": title, "noindex": len(r.Param("p")) > 0, "altPage": true})
 		}
 	}()
 
@@ -765,7 +765,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
 		}
-		
+
 		organizers, err := app.users.FindForDates(similiars)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
@@ -1182,7 +1182,7 @@ func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 	}
 
-	w.Header().Set("Location", path + "#events")
+	w.Header().Set("Location", path+"#events")
 	w.WriteHeader(http.StatusFound)
 }
 
