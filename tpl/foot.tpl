@@ -52,13 +52,13 @@
 	<div class="col-md-2 col-foot visible-lg-block visible-md-block">
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
 	    <li><h5><a href="/veranstaltungen/{{simpleEventSearchUrl "Berlin"}}">Berlin</a></h5></li>
+		<li><a href="/heute-in-berlin">Heute in Berlin</a></li>
 		<li><a href="/morgen-in-berlin">Morgen in Berlin</a></li>
 		<li><a href="/uebermorgen-in-berlin">Übermorgen in Berlin</a></li>
 		<li><a href="/am-wochenende-in-berlin">Am nächsten Wochenende</a></li>
 		<li>&nbsp;</li> 
 		<li><a href="/babies-und-kleinkinder">Babies &amp; Kleinkinder</a></li> 
 		<li><a href="/sport-und-gesundheit">Sport &amp; Gesundheit</a></li> 
-		<li><a href="/natur-und-garten">Natur &amp; Garten</a></li> 
 		<li><a href="/natur-und-garten">Natur &amp; Garten</a></li> 
 		<li><a href="/eltern-und-familien">Eltern &amp; Familien</a></li> 
 		<li><a href="/bildung-und-kultur">Bildung &amp; Kultur</a></li> 

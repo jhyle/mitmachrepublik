@@ -760,7 +760,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		similiars := make([]*Date, 0)
 		if date != nil {
-			similiars, err = app.events.FindSimilarDates(date, 4)
+			similiars, err = app.events.FindSimilarDates(date, 8)
 			if err != nil {
 				return &appResult{Status: http.StatusInternalServerError, Error: err}
 			}
