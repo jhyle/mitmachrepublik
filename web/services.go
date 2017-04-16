@@ -38,6 +38,11 @@ type (
 		imgServer string
 	}
 
+	DatesService struct {
+		BasicService
+		database Database
+	}
+
 	UpdateRecurrencesService struct {
 		BasicService
 		users    *UserService
@@ -92,6 +97,22 @@ func (service *SessionService) Start() {
 func (service *SessionService) Run() error {
 
 	return service.database.RemoveOldSessions(time.Duration(24) * time.Hour)
+}
+
+func NewDatesService(hour int, email *EmailAccount, database Database) Service {
+
+	return &DatesService{NewBasicService("DatesService", hour, email), database}
+}
+
+func (service *DatesService) Start() {
+
+	service.start(service.Run)
+}
+
+func (service *DatesService) Run() error {
+
+	date := time.Now().Add(-24 * 30 * time.Hour)
+	return service.database.Table("date").Delete(bson.M{"start": bson.M{"$lt": date}})
 }
 
 func NewUnusedImgService(hour int, email *EmailAccount, database Database, imgServer string) Service {
@@ -183,7 +204,7 @@ func (service *UpdateRecurrencesService) Run() error {
 	if err != nil {
 		return err
 	}
-	
+
 	dates, err := service.events.UpdateRecurrences(users)
 	if err != nil {
 		return err
@@ -361,7 +382,7 @@ func (service *BasicService) start(serve func() error) {
 				err := serve()
 				if err != nil {
 					traffic.Logger().Printf(service.name + ": " + err.Error())
-					SendEmail(service.email, service.email.From, nil, "Fehlermeldung von " + service.name, "text/plain", err.Error())
+					SendEmail(service.email, service.email.From, nil, "Fehlermeldung von "+service.name, "text/plain", err.Error())
 				}
 				duration := timerDuration(service.hour)
 				traffic.Logger().Printf("Reseting timer for service %s, hour %v with duration %v.\n", service.name, service.hour, duration)

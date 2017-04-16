@@ -165,8 +165,9 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		return nil, errors.New(ADMIN_EMAIL + " " + err.Error())
 	}
 
-	services := make([]Service, 0, 6)
+	services := make([]Service, 0)
 	services = append(services, NewSessionService(3, emailAccount, database))
+	services = append(services, NewDatesService(3, emailAccount, database))
 	services = append(services, NewScrapersService(3, emailAccount, events, admin.Id))
 	services = append(services, NewUpdateRecurrencesService(4, emailAccount, users, events, emailAccount, hostname))
 	services = append(services, NewUnusedImgService(4, emailAccount, database, imgServer))
