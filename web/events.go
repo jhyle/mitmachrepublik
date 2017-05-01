@@ -7,8 +7,8 @@ import (
 	"github.com/pilu/traffic"
 	"gopkg.in/mgo.v2/bson"
 	"os"
-	"time"
 	"sort"
+	"time"
 )
 
 type (
@@ -152,6 +152,7 @@ func (events *EventService) Dates(query string) ([]string, error) {
 
 	for _, token := range tokenStream {
 		fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewPrefixQuery(string(token.Term)), 1000, 0, false)
+		fullTextSearch.IncludeLocations = true
 		results, err := events.dateIndex.Search(fullTextSearch)
 		if err != nil {
 			return nil, err
@@ -290,13 +291,13 @@ func (events *EventService) SearchFutureEventsOfUser(userId bson.ObjectId, page,
 	if err != nil {
 		return &result, err
 	}
-	
+
 	var eventsOfOrganizer Events
 	err = events.eventTable().Find(bson.M{"_id": bson.M{"$in": eventIds}}, &eventsOfOrganizer, "_id")
 	if err != nil {
 		return &result, err
 	}
-	
+
 	for i := 0; i < len(eventsOfOrganizer); i++ {
 		var date Date
 		query := bson.M{"$and": []bson.M{bson.M{"eventid": eventsOfOrganizer[i].Id}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
@@ -309,12 +310,12 @@ func (events *EventService) SearchFutureEventsOfUser(userId bson.ObjectId, page,
 	}
 	sort.Sort(eventsOfOrganizer)
 
-	start := page*pageSize
+	start := page * pageSize
 	if start < len(eventsOfOrganizer) {
-		end := min(start + pageSize, len(eventsOfOrganizer))
-		result.Events = make([]*Event, end - start)
-		for i := 0; i < end - start; i++ {
-			result.Events[i] = &eventsOfOrganizer[start + i]
+		end := min(start+pageSize, len(eventsOfOrganizer))
+		result.Events = make([]*Event, end-start)
+		for i := 0; i < end-start; i++ {
+			result.Events[i] = &eventsOfOrganizer[start+i]
 		}
 	} else {
 		result.Events = make([]*Event, 0)
@@ -349,14 +350,14 @@ func (events *EventService) FindNextDates() ([]Date, error) {
 			dates = append(dates, datesOfEvent[0])
 		}
 	}
-	
+
 	return dates, nil
 }
 
 func (events *EventService) FindSimilarDates(date *Date, count int) ([]*Date, error) {
 
 	query := []bson.M{bson.M{"eventid": bson.M{"$ne": date.EventId}}, bson.M{"addr.city": date.Addr.City}, bson.M{"start": bson.M{"$gt": date.Start}}}
-	
+
 	categories := make([]bson.M, 0)
 	for _, category := range date.Categories {
 		categories = append(categories, bson.M{"categories": category})
@@ -646,7 +647,7 @@ func (events *EventService) UpdateRecurrences(users []User) ([]bson.ObjectId, er
 					return nil, err
 				}
 				dates = append(dates, newDates...)
-				break;
+				break
 			}
 		}
 	}
@@ -664,7 +665,7 @@ func (events *EventService) UpdateRecurrences(users []User) ([]bson.ObjectId, er
 					return nil, err
 				}
 				dates = append(dates, newDates...)
-				break;
+				break
 			}
 		}
 	}

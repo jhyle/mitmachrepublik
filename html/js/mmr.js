@@ -720,7 +720,7 @@ $(function() {
 	});
 
 	$('.tile').matchHeight();
-	
+
 	$("input[name=fulltextsearch]").typeahead({
 		source: function(query, process) {
 			$.ajax({cache: false, url : "/typeahead/" + query, type: "GET", dataType: "json",
