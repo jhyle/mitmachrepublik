@@ -1,9 +1,9 @@
 package mmr
 
 import (
-	"gopkg.in/gomail.v1"
-	"strings"
 	"errors"
+	"gopkg.in/gomail.v2"
+	"strings"
 )
 
 type (
@@ -34,7 +34,7 @@ func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, conten
 	if account.From == nil {
 		return errors.New("You need to specify a From address.")
 	}
-	
+
 	if to == nil {
 		return errors.New("You need to specify a To address.")
 	}
@@ -60,6 +60,6 @@ func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, conten
 	msg.SetHeader("Subject", subject)
 	msg.SetBody(contentType, body)
 
-	mailer := gomail.NewMailer(account.EmailServer, account.Username, account.Password, account.Port)
-	return mailer.Send(msg)
+	mailer := gomail.NewDialer(account.EmailServer, account.Port, account.Username, account.Password)
+	return mailer.DialAndSend(msg)
 }

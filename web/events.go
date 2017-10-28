@@ -2,8 +2,8 @@ package mmr
 
 import (
 	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/analysis/lang/de"
 	"github.com/blevesearch/bleve/mapping"
-	"github.com/blevesearch/blevex/lang/de"
 	"github.com/pilu/traffic"
 	"gopkg.in/mgo.v2/bson"
 	"os"

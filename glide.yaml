@@ -1,0 +1,17 @@
+package: github.com/jhyle/mmr
+import:
+- package: github.com/armon/go-radix
+- package: github.com/blevesearch/bleve
+  subpackages:
+  - mapping
+- package: github.com/google/uuid
+  version: ^0.2.0
+- package: github.com/kennygrant/sanitize
+  version: ^1.2.3
+- package: github.com/pilu/traffic
+  version: ^0.5.3
+- package: gopkg.in/gomail.v2
+  version: ^2.0.0
+- package: gopkg.in/mgo.v2
+  subpackages:
+  - bson

@@ -1,0 +1,87 @@
+hash: d15f500d4faf821ca97a13ceb4044e78203858bc4e693bb996a7e1eceb11a14c
+updated: 2017-10-28T05:58:20.956310657+02:00
+imports:
+- name: github.com/armon/go-radix
+  version: 1fca145dffbcaa8fe914309b1ec0cfc67500fe61
+- name: github.com/blevesearch/bleve
+  version: 6eea5b78da004393b1d06b8c88d1bed9ca0a94b2
+  subpackages:
+  - analysis
+  - analysis/analyzer/standard
+  - analysis/datetime/flexible
+  - analysis/datetime/optional
+  - analysis/lang/de
+  - analysis/lang/en
+  - analysis/token/lowercase
+  - analysis/token/porter
+  - analysis/token/stop
+  - analysis/tokenizer/unicode
+  - document
+  - geo
+  - index
+  - index/store
+  - index/store/boltdb
+  - index/store/gtreap
+  - index/upsidedown
+  - mapping
+  - numeric
+  - registry
+  - search
+  - search/collector
+  - search/facet
+  - search/highlight
+  - search/highlight/format/html
+  - search/highlight/fragmenter/simple
+  - search/highlight/highlighter/html
+  - search/highlight/highlighter/simple
+  - search/query
+  - search/scorer
+  - search/searcher
+- name: github.com/blevesearch/go-porterstemmer
+  version: 23a2c8e5cf1f380f27722c6d2ae8896431dc7d0e
+  repo: https://github.com/blevesearch/go-porterstemmer
+- name: github.com/blevesearch/segment
+  version: db70c57796cc8c310613541dfade3dce627d09c7
+  repo: https://github.com/blevesearch/segment
+- name: github.com/boltdb/bolt
+  version: 144418e1475d8bf7abbdc48583500f1a20c62ea7
+  repo: https://github.com/boltdb/bolt
+- name: github.com/golang/protobuf
+  version: 655cdfa588ea190e901bc5590e65d5621688847c
+  repo: https://github.com/golang/protobuf
+  subpackages:
+  - proto
+- name: github.com/google/uuid
+  version: 064e2069ce9c359c118179501254f67d7d37ba24
+- name: github.com/kennygrant/sanitize
+  version: 2e6820834a1f36c626bf19a253b7d3cc060e9b8b
+- name: github.com/pilu/config
+  version: 3eb99e6c0b9a2dae0f56f05552c06ca5a643919b
+- name: github.com/pilu/traffic
+  version: 19ea6534e33472fb79059e2cdbe1d36f80a11526
+- name: github.com/steveyen/gtreap
+  version: 0abe01ef9be25c4aedc174758ec2d917314d6d70
+  repo: https://github.com/steveyen/gtreap
+- name: golang.org/x/net
+  version: e45385e9b226f570b1f086bf287b25d3d4117776
+  repo: https://go.googlesource.com/net
+  subpackages:
+  - context
+  - html
+  - html/atom
+- name: golang.org/x/sys
+  version: b98136db334ff9cb24f28a68e3be3cb6608f7630
+  subpackages:
+  - unix
+- name: gopkg.in/alexcesaro/quotedprintable.v3
+  version: 2caba252f4dc53eaf6b553000885530023f54623
+- name: gopkg.in/gomail.v2
+  version: 81ebce5c23dfd25c6c67194b37d3dd3f338c98b1
+- name: gopkg.in/mgo.v2
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  subpackages:
+  - bson
+  - internal/json
+  - internal/sasl
+  - internal/scram
+testImports: []
