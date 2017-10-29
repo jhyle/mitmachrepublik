@@ -1,10 +1,11 @@
 package mmr
 
 import (
-	"errors"
+	"time"
+
+	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"time"
 )
 
 type (
@@ -48,7 +49,11 @@ type (
 func NewMongoDb(mongoUrl string, dbName string) (Database, error) {
 
 	session, err := mgo.Dial(mongoUrl)
-	return &mongoDb{session, dbName}, err
+	if err != nil {
+		return nil, errors.Wrap(err, "error dialing MongoDB")
+	}
+
+	return &mongoDb{session, dbName}, nil
 }
 
 func (db *mongoDb) Table(name string) Table {
@@ -60,18 +65,35 @@ func (db *mongoDb) Table(name string) Table {
 func (db *mongoDb) CreateSession(userId bson.ObjectId) (bson.ObjectId, error) {
 
 	session := Session{bson.NewObjectId(), userId, time.Now()}
-	return db.Table("session").UpsertById(session.GetId(), &session)
+
+	id, err := db.Table("session").UpsertById(session.GetId(), &session)
+	if err != nil {
+		return "", errors.Wrap(err, "error creating session")
+	}
+
+	return id, nil
 }
 
 func (db *mongoDb) RemoveOldSessions(olderThan time.Duration) error {
 
 	date := time.Now().Add(-olderThan)
-	return db.Table("session").Delete(bson.M{"contact": bson.M{"$lt": date}})
+
+	err := db.Table("session").Delete(bson.M{"contact": bson.M{"$lt": date}})
+	if err != nil {
+		return errors.Wrap(err, "error deleting old sessions")
+	}
+
+	return nil
 }
 
 func (db *mongoDb) RemoveSession(sessionId bson.ObjectId) error {
 
-	return db.Table("session").DeleteById(sessionId)
+	err := db.Table("session").DeleteById(sessionId)
+	if err != nil {
+		return errors.Wrapf(err, "error deleting session: %s", sessionId.String())
+	}
+
+	return nil
 }
 
 func (db *mongoDb) Disconnect() {
@@ -85,7 +107,7 @@ func (db *mongoDb) LoadUserByEmailAndPassword(email string, password string) (*U
 	n, err := find.Count()
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error checking user by email and password")
 	}
 
 	if n != 1 {
@@ -94,7 +116,11 @@ func (db *mongoDb) LoadUserByEmailAndPassword(email string, password string) (*U
 
 	var user User
 	err = find.One(&user)
-	return &user, err
+	if err != nil {
+		return nil, errors.Wrap(err, "error loading user by email and password")
+	}
+
+	return &user, nil
 }
 
 func (db *mongoDb) LoadUserBySessionId(sessionId bson.ObjectId) (*User, error) {
@@ -102,19 +128,19 @@ func (db *mongoDb) LoadUserBySessionId(sessionId bson.ObjectId) (*User, error) {
 	var session Session
 	err := db.Table("session").LoadById(sessionId, &session)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error loading session: %s", sessionId.String())
 	}
 
 	var user User
 	err = db.Table("user").LoadById(session.UserId, &user)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error loading user: %s", session.UserId.String())
 	}
 
 	session.Contact = time.Now()
 	_, err = db.Table("session").UpsertById(sessionId, &session)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error storing session: %s", sessionId.String())
 	}
 
 	return &user, nil
@@ -124,19 +150,29 @@ func (table *mongoTable) DropIndices() error {
 
 	indices, err := table.collection.Indexes()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error loading indices of %s", table.collection.Name)
 	}
-	
+
 	for _, index := range indices {
-		table.collection.DropIndex(index.Key...)
+		if index.Name != "_id_" {
+			err = table.collection.DropIndexName(index.Name)
+			if err != nil {
+				return errors.Wrapf(err, "error dropping index %s of %s", index.Name, table.collection.Name)
+			}
+		}
 	}
-	
+
 	return nil
 }
 
 func (table *mongoTable) EnsureIndex(keys ...string) error {
 
-	return table.collection.EnsureIndexKey(keys...)
+	err := table.collection.EnsureIndexKey(keys...)
+	if err != nil {
+		return errors.Wrapf(err, "error creating index %+v in %s", keys, table.collection.Name)
+	}
+
+	return nil
 }
 
 func (table *mongoTable) EnsureIndices(indices [][]string) error {
@@ -147,22 +183,32 @@ func (table *mongoTable) EnsureIndices(indices [][]string) error {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
 func (table *mongoTable) LoadById(id bson.ObjectId, item Item) error {
 
 	err := table.collection.FindId(id).One(item)
-	if err != nil && item.GetId() != id {
-		err = errors.New(id.Hex() + " not found in " + table.collection.Name)
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return errors.Wrapf(err, "%s not found in %s", id.String(), table.collection.Name)
+		} else {
+			return errors.Wrapf(err, "error loading %s from %s", id.String(), table.collection.Name)
+		}
 	}
-	return err
+
+	return nil
 }
 
 func (table *mongoTable) CountById(id bson.ObjectId) (int, error) {
 
-	return table.collection.FindId(id).Count()
+	cnt, err := table.collection.FindId(id).Count()
+	if err != nil {
+		return 0, errors.Wrapf(err, "error counting id %s in %s", id.String(), table.collection.Name)
+	}
+
+	return cnt, nil
 }
 
 func (table *mongoTable) CheckForId(id bson.ObjectId) error {
@@ -181,22 +227,42 @@ func (table *mongoTable) CheckForId(id bson.ObjectId) error {
 
 func (table *mongoTable) Load(query interface{}, item Item, orderBy ...string) error {
 
-	return table.collection.Find(query).Sort(orderBy...).One(item)
+	err := table.collection.Find(query).Sort(orderBy...).One(item)
+	if err != nil {
+		return errors.Wrapf(err, "error loading item from %s with query: %+v", table.collection.Name, query)
+	}
+
+	return nil
 }
 
 func (table *mongoTable) Find(query interface{}, result interface{}, orderBy ...string) error {
 
-	return table.collection.Find(query).Sort(orderBy...).All(result)
+	err := table.collection.Find(query).Sort(orderBy...).All(result)
+	if err != nil {
+		return errors.Wrapf(err, "error loading items from %s with query: %+v", table.collection.Name, query)
+	}
+
+	return nil
 }
 
 func (table *mongoTable) Distinct(query interface{}, field string, result interface{}) error {
 
-	return table.collection.Find(query).Distinct(field, result)
+	err := table.collection.Find(query).Distinct(field, result)
+	if err != nil {
+		return errors.Wrapf(err, "error loading distinct items from %s with query: %+v", table.collection.Name, query)
+	}
+
+	return nil
 }
 
 func (table *mongoTable) Count(query interface{}) (int, error) {
 
-	return table.collection.Find(query).Count()
+	cnt, err := table.collection.Find(query).Count()
+	if err != nil {
+		return 0, errors.Wrapf(err, "error counting items from %s with query: %+v", table.collection.Name, query)
+	}
+
+	return cnt, nil
 }
 
 func (table *mongoTable) Search(query interface{}, skip int, limit int, result SearchResult, orderBy ...string) error {
@@ -204,20 +270,25 @@ func (table *mongoTable) Search(query interface{}, skip int, limit int, result S
 	find := table.collection.Find(query).Sort(orderBy...)
 	count, err := find.Count()
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error counting items from %s with query: %+v", table.collection.Name, query)
 	}
 	result.SetCount(count)
 	result.SetStart(skip)
 
 	data := result.GetData()
-	return find.Skip(skip).Limit(limit).All(data)
+	err = find.Skip(skip).Limit(limit).All(data)
+	if err != nil {
+		return errors.Wrapf(err, "error searching items from %s with query: %+v", table.collection.Name, query)
+	}
+
+	return nil
 }
 
 func (table *mongoTable) UpsertById(id bson.ObjectId, item Item) (bson.ObjectId, error) {
 
 	info, err := table.collection.UpsertId(id, item)
 	if err != nil {
-		return id, err
+		return "", errors.Wrapf(err, "error upserting item %s in %s", id.String(), table.collection.Name)
 	}
 
 	if info.UpsertedId != nil {
@@ -230,11 +301,19 @@ func (table *mongoTable) UpsertById(id bson.ObjectId, item Item) (bson.ObjectId,
 func (table *mongoTable) Delete(query interface{}) error {
 
 	_, err := table.collection.RemoveAll(query)
-	return err
-}
+	if err != nil {
+		return errors.Wrapf(err, "error deleting items with query %+v in %s", query, table.collection.Name)
+	}
 
+	return nil
+}
 
 func (table *mongoTable) DeleteById(id bson.ObjectId) error {
 
-	return table.collection.RemoveId(id)
+	err := table.collection.RemoveId(id)
+	if err != nil {
+		return errors.Wrapf(err, "error deleting item %s in %s", id.String(), table.collection.Name)
+	}
+
+	return nil
 }

@@ -2,14 +2,16 @@ package mmr
 
 import (
 	"encoding/json"
-	"github.com/pilu/traffic"
-	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pilu/traffic"
+	"github.com/pkg/errors"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type (
@@ -96,7 +98,12 @@ func (service *SessionService) Start() {
 
 func (service *SessionService) Run() error {
 
-	return service.database.RemoveOldSessions(time.Duration(24) * time.Hour)
+	err := service.database.RemoveOldSessions(time.Duration(24) * time.Hour)
+	if err != nil {
+		return errors.Wrap(err, "error deleting sessions older than 24 hours")
+	}
+
+	return nil
 }
 
 func NewDatesService(hour int, email *EmailAccount, database Database) Service {
@@ -112,7 +119,13 @@ func (service *DatesService) Start() {
 func (service *DatesService) Run() error {
 
 	date := time.Now().Add(-24 * 30 * time.Hour)
-	return service.database.Table("date").Delete(bson.M{"start": bson.M{"$lt": date}})
+
+	err := service.database.Table("date").Delete(bson.M{"start": bson.M{"$lt": date}})
+	if err != nil {
+		return errors.Wrap(err, "error deleting dates older than 30 days")
+	}
+
+	return nil
 }
 
 func NewUnusedImgService(hour int, email *EmailAccount, database Database, imgServer string) Service {
@@ -127,15 +140,16 @@ func (service *UnusedImgService) Start() {
 
 func listImages(imgServer string, age int) ([]string, error) {
 
-	resp, err := http.Get(imgServer + "/?age=" + strconv.Itoa(age))
+	listUrl := imgServer + "/?age=" + strconv.Itoa(age)
+	resp, err := http.Get(listUrl)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error reading image list: %s", listUrl)
 	}
 
 	var images []string
 	err = json.NewDecoder(resp.Body).Decode(&images)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error reading image list: %s", listUrl)
 	}
 
 	return images, nil
@@ -145,19 +159,19 @@ func (service *UnusedImgService) Run() error {
 
 	images, err := listImages(service.imgServer, 3600*24)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error getting images of the last 24 hours")
 	}
 
 	var eventImages []string
 	err = service.database.Table("event").Distinct(nil, "image", &eventImages)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error loading images of events")
 	}
 
 	var userImages []string
 	err = service.database.Table("user").Distinct(nil, "image", &userImages)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error loading images of users")
 	}
 
 	unusedImages := make(map[string]string)
@@ -175,13 +189,14 @@ func (service *UnusedImgService) Run() error {
 
 	for image := range unusedImages {
 
-		req, err := http.NewRequest("DELETE", service.imgServer+"/"+image, nil)
+		imgUrl := service.imgServer + "/" + image
+		req, err := http.NewRequest("DELETE", imgUrl, nil)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "error creating delete image request: %s", imgUrl)
 		}
 		_, err = http.DefaultClient.Do(req)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "error deleting image: %s", imgUrl)
 		}
 	}
 
@@ -202,12 +217,12 @@ func (service *UpdateRecurrencesService) Run() error {
 
 	users, err := service.users.FindApproved()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error loading approved users")
 	}
 
 	dates, err := service.events.UpdateRecurrences(users)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error updating recurrences")
 	}
 
 	if dates != nil {
@@ -236,14 +251,23 @@ func (service *SendAlertsService) Start() {
 
 func getNewsletter(hostname string, alert Alert) (string, error) {
 
-	url := "/newsletter/veranstaltungen/" + eventSearchUrlWithQuery(alert.Place, alert.Targets, alert.Categories, alert.Dates, alert.Radius, alert.Query)
-	resp, err := http.Get("http://" + hostname + url[0:strings.LastIndex(url, "/")+1] + alert.Id.Hex())
-	if err != nil || resp.StatusCode != 200 {
-		return "", err
+	path := "/newsletter/veranstaltungen/" + eventSearchUrlWithQuery(alert.Place, alert.Targets, alert.Categories, alert.Dates, alert.Radius, alert.Query)
+	url := "http://" + hostname + path[0:strings.LastIndex(path, "/")+1] + alert.Id.Hex()
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", errors.Wrapf(err, "error getting newsletter: %s", url)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.Errorf("error getting newsletter %s, status code %d", url, resp.StatusCode)
 	}
 
 	bytes, err := ioutil.ReadAll(resp.Body)
-	return string(bytes), err
+	if err != nil {
+		return "", errors.Wrapf(err, "error reading newsletter: %s", url)
+	}
+
+	return string(bytes), nil
 }
 
 func getNewsletterSubject(place string, dates []int) string {
@@ -281,17 +305,19 @@ func (service *SendAlertsService) Run() error {
 
 	alerts, err := service.alerts.FindAlerts(time.Now().Weekday())
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error loading newsletter alerts")
 	}
 
 	for _, alert := range alerts {
 		newsletter, err := getNewsletter(service.hostname, alert)
 		if err != nil {
-			return err
+			err = errors.Wrapf(err, "error getting newsletter: %s", alert.Id.String())
+			traffic.Logger().Print(err.Error())
 		} else if !isEmpty(newsletter) {
 			err = SendEmail(service.from, &EmailAddress{alert.Name, alert.Email}, service.from.From, getNewsletterSubject(alert.Place, alert.Dates), "text/html", newsletter)
 			if err != nil {
-				return err
+				err = errors.Wrapf(err, "error sending newsletter %s to %s", alert.Id.String(), alert.Email)
+				traffic.Logger().Print(err.Error())
 			}
 		}
 	}

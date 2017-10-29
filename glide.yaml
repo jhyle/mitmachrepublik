@@ -15,3 +15,5 @@ import:
 - package: gopkg.in/mgo.v2
   subpackages:
   - bson
+- package: github.com/pkg/errors
+  version: ^0.8.0

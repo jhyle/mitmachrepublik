@@ -1,13 +1,14 @@
 package mmr
 
 import (
-	"errors"
 	"html/template"
 	"io"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type (
@@ -25,21 +26,21 @@ func NewTemplates(pattern string, funcs map[string]interface{}) (*Templates, err
 
 	files, err := filepath.Glob(pattern)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error loading templates from %s", pattern)
 	}
 
 	modTimes := make([]time.Time, len(files))
 	for i, file := range files {
 		fileInfo, err := os.Stat(file)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "error getting file stats from %s", file)
 		}
 		modTimes[i] = fileInfo.ModTime()
 	}
 
 	tpls, err := template.New("/").Funcs(funcs).ParseFiles(files...)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error parsing templates")
 	}
 
 	return &Templates{pattern: pattern, files: files, modTimes: modTimes, tpls: tpls, funcs: funcs}, nil
@@ -47,7 +48,7 @@ func NewTemplates(pattern string, funcs map[string]interface{}) (*Templates, err
 
 func (templates *Templates) reloadIfChanged() error {
 
-	var err error = nil
+	var err error
 	var fileInfo os.FileInfo
 	var newTemplates *Templates
 
@@ -56,6 +57,7 @@ func (templates *Templates) reloadIfChanged() error {
 	for i, file := range templates.files {
 		fileInfo, err = os.Stat(file)
 		if err != nil {
+			err = errors.Wrapf(err, "error getting file stats from %s", file)
 			break
 		}
 		if fileInfo.ModTime() != templates.modTimes[i] {
@@ -77,7 +79,7 @@ func (templates *Templates) Find(name string) (*template.Template, error) {
 
 	err := templates.reloadIfChanged()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error reloading changed templates")
 	}
 
 	tpl := templates.tpls.Lookup(name)
@@ -92,7 +94,13 @@ func (templates *Templates) Execute(name string, wr io.Writer, data map[string]i
 
 	tpl, err := templates.Find(name)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error finding template %s", name)
 	}
-	return tpl.Execute(wr, data)
+
+	err = tpl.Execute(wr, data)
+	if err != nil {
+		return errors.Wrapf(err, "error executing template %s", name)
+	}
+
+	return nil
 }

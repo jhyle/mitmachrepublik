@@ -1,9 +1,10 @@
 package mmr
 
 import (
-	"errors"
-	"gopkg.in/gomail.v2"
 	"strings"
+
+	"github.com/pkg/errors"
+	"gopkg.in/gomail.v2"
 )
 
 type (
@@ -60,6 +61,10 @@ func SendEmail(account *EmailAccount, to, replyTo *EmailAddress, subject, conten
 	msg.SetHeader("Subject", subject)
 	msg.SetBody(contentType, body)
 
-	mailer := gomail.NewDialer(account.EmailServer, account.Port, account.Username, account.Password)
-	return mailer.DialAndSend(msg)
+	err := gomail.NewDialer(account.EmailServer, account.Port, account.Username, account.Password).DialAndSend(msg)
+	if err != nil {
+		return errors.Wrap(err, "error sending email")
+	}
+
+	return nil
 }

@@ -2,9 +2,6 @@ package mmr
 
 import (
 	"bytes"
-	"errors"
-	"github.com/kennygrant/sanitize"
-	"gopkg.in/mgo.v2/bson"
 	"html"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +9,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/kennygrant/sanitize"
+	"github.com/pkg/errors"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type (
@@ -77,12 +78,12 @@ func (service *ScrapersService) getWebPage(url string) ([]byte, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error getting url: %s", url)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error reading body of url: %s", url)
 	}
 
 	return body, nil
@@ -95,15 +96,21 @@ func (service *ScrapersService) saveScraped(event *Event) error {
 		if oldEvent.Start != event.Start || oldEvent.End != event.End {
 			oldEvent.Start = event.Start
 			oldEvent.End = event.End
-			return service.events.Store(oldEvent, true)
-		} else {
-			return nil
+			err = service.events.Store(oldEvent, true)
+			if err != nil {
+				return errors.Wrapf(err, "error updating imported event: %s %s", event.Source, event.SourceId)
+			}
 		}
 	} else {
 		event.Id = bson.NewObjectId()
 		event.OrganizerId = service.organizerId
-		return service.events.Store(event, true)
+		err = service.events.Store(event, true)
+		if err != nil {
+			return errors.Wrapf(err, "error storing imported event: %s %s", event.Source, event.SourceId)
+		}
 	}
+
+	return nil
 }
 
 func (service *ScrapersService) makeDateTime(day, month, year, hour, minute string) (time.Time, error) {
@@ -145,7 +152,7 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 
 	page, err := service.getWebPage(event.Web)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error scraping Umweltkalender page: %s", id)
 	}
 
 	title := tag_title.FindSubmatch(page)
@@ -164,13 +171,13 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 
 	event.Start, err = service.makeDateTime(string(date[1]), string(date[2]), "20"+string(date[3]), string(date[4]), string(date[5]))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error parsing start date at Umweltkalender page: %s", id)
 	}
 
 	if len(date) > 6 {
 		event.End, err = service.makeDateTime(string(date[1]), string(date[2]), "20"+string(date[3]), string(date[6]), string(date[7]))
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "error parsing end date at Umweltkalender page: %s", id)
 		}
 	}
 
@@ -191,7 +198,7 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 
 	event.Descr, err = sanitize.HTMLAllowing(event.Descr, importedTags, importedAttributes)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "error sanitizing HTML of Umweltkalende page: %s", id)
 	}
 	event.Descr += "<p class=\"small\">Text von der Veranstaltungswebseite übernommen</p>"
 
@@ -248,7 +255,7 @@ func (service *ScrapersService) scrapeUmweltKalender() error {
 
 	page, err := service.getWebPage(UK_LIST_URL)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error loading Umweltkalender event list at %s", UK_LIST_URL)
 	}
 
 	ids := uk_list.FindAllSubmatch(page, -1)
@@ -259,11 +266,11 @@ func (service *ScrapersService) scrapeUmweltKalender() error {
 	for i := range ids {
 		event, err := service.scrapeUmweltKalenderEvent(string(ids[i][1]))
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "error reading Umweltkalender event: %s", ids[i][1])
 		}
 		err = service.saveScraped(event)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "error importing Umweltkalender event: %s %s", event.Source, event.SourceId)
 		}
 	}
 
@@ -272,5 +279,10 @@ func (service *ScrapersService) scrapeUmweltKalender() error {
 
 func (service *ScrapersService) Run() error {
 
-	return service.scrapeUmweltKalender()
+	err := service.scrapeUmweltKalender()
+	if err != nil {
+		return errors.Wrap(err, "error scraping Umweltkalender")
+	}
+
+	return nil
 }

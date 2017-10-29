@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/pilu/traffic"
-	"gopkg.in/mgo.v2/bson"
 	"html/template"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
+	"github.com/pilu/traffic"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type (
