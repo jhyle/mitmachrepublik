@@ -1,6 +1,7 @@
 package mmr
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -26,7 +27,6 @@ type (
 		Load(interface{}, Item, ...string) error
 		LoadById(bson.ObjectId, Item) error
 		CountById(bson.ObjectId) (int, error)
-		CheckForId(bson.ObjectId) error
 		Find(interface{}, interface{}, ...string) error
 		Search(interface{}, int, int, SearchResult, ...string) error
 		Distinct(interface{}, string, interface{}) error
@@ -44,7 +44,17 @@ type (
 	mongoTable struct {
 		collection *mgo.Collection
 	}
+
+	ErrorNotFound struct {
+		collection string
+		id         string
+	}
 )
+
+func (e *ErrorNotFound) Error() string {
+
+	return fmt.Sprintf("could not find %s in %s", e.id, e.collection)
+}
 
 func NewMongoDb(mongoUrl string, dbName string) (Database, error) {
 
@@ -103,21 +113,14 @@ func (db *mongoDb) Disconnect() {
 
 func (db *mongoDb) LoadUserByEmailAndPassword(email string, password string) (*User, error) {
 
-	find := db.session.DB(db.name).C("user").Find(bson.M{"email": email, "pwd": password})
-	n, err := find.Count()
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error checking user by email and password")
-	}
-
-	if n != 1 {
-		return nil, errors.New("E-Mail + Password not found!")
-	}
-
 	var user User
-	err = find.One(&user)
+	err := db.session.DB(db.name).C("user").Find(bson.M{"email": email, "pwd": password}).One(&user)
 	if err != nil {
-		return nil, errors.Wrap(err, "error loading user by email and password")
+		if err == mgo.ErrNotFound {
+			return nil, &ErrorNotFound{"user", email}
+		} else {
+			return nil, errors.Wrap(err, "error checking user by email and password")
+		}
 	}
 
 	return &user, nil
@@ -128,13 +131,21 @@ func (db *mongoDb) LoadUserBySessionId(sessionId bson.ObjectId) (*User, error) {
 	var session Session
 	err := db.Table("session").LoadById(sessionId, &session)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error loading session: %s", sessionId.String())
+		if err == mgo.ErrNotFound {
+			return nil, &ErrorNotFound{"session", sessionId.String()}
+		} else {
+			return nil, errors.Wrapf(err, "error loading session: %s", sessionId.String())
+		}
 	}
 
 	var user User
 	err = db.Table("user").LoadById(session.UserId, &user)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error loading user: %s", session.UserId.String())
+		if err == mgo.ErrNotFound {
+			return nil, &ErrorNotFound{"user", session.UserId.String()}
+		} else {
+			return nil, errors.Wrapf(err, "error loading user: %s", session.UserId.String())
+		}
 	}
 
 	session.Contact = time.Now()
@@ -192,7 +203,7 @@ func (table *mongoTable) LoadById(id bson.ObjectId, item Item) error {
 	err := table.collection.FindId(id).One(item)
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			return errors.Wrapf(err, "%s not found in %s", id.String(), table.collection.Name)
+			return &ErrorNotFound{table.collection.Name, id.String()}
 		} else {
 			return errors.Wrapf(err, "error loading %s from %s", id.String(), table.collection.Name)
 		}
@@ -209,20 +220,6 @@ func (table *mongoTable) CountById(id bson.ObjectId) (int, error) {
 	}
 
 	return cnt, nil
-}
-
-func (table *mongoTable) CheckForId(id bson.ObjectId) error {
-
-	count, err := table.CountById(id)
-	if err != nil {
-		return err
-	}
-
-	if count == 1 {
-		return nil
-	} else {
-		return errors.New(table.collection.Name + " " + id.Hex() + " not found.")
-	}
 }
 
 func (table *mongoTable) Load(query interface{}, item Item, orderBy ...string) error {
