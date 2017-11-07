@@ -96,7 +96,7 @@ func (service *ScrapersService) saveScraped(event *Event) error {
 		if oldEvent.Start != event.Start || oldEvent.End != event.End {
 			oldEvent.Start = event.Start
 			oldEvent.End = event.End
-			err = service.events.Store(oldEvent, true)
+			err = service.events.Store(oldEvent)
 			if err != nil {
 				return errors.Wrapf(err, "error updating imported event: %s %s", event.Source, event.SourceId)
 			}
@@ -104,7 +104,7 @@ func (service *ScrapersService) saveScraped(event *Event) error {
 	} else {
 		event.Id = bson.NewObjectId()
 		event.OrganizerId = service.organizerId
-		err = service.events.Store(event, true)
+		err = service.events.Store(event)
 		if err != nil {
 			return errors.Wrapf(err, "error storing imported event: %s %s", event.Source, event.SourceId)
 		}

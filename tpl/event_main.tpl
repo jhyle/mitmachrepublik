@@ -21,27 +21,25 @@
 			</a>
 			{{end}}
 		</div>
-		{{with $.date}}
+		{{with $.event}}
 		<div class="social">
-			<a style="margin-right: 10px" href="https://www.facebook.com/sharer/sharer.php?u=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/facebook_share.png"></a>
-			<a style="margin-right: 10px" href="https://plus.google.com/share?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/google_share.png"></a>
-			<a href="http://twitter.com/intent/tweet?url=http://{{$.hostname}}{{.Url}}" target="_blank"><img src="/images/twitter_share.png"></a>
-			<div class="recommend"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="javascript:void(0)" data-href="/dialog/sendevent/{{.Id.Hex}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
+			<a style="margin-right: 10px" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2F{{$.hostname}}{{.Url}}%3Ffrom%3D{{$.start.Unix}}" target="_blank"><img src="/images/facebook_share.png"></a>
+			<a style="margin-right: 10px" href="https://plus.google.com/share?url=http%3A%2F%2F{{$.hostname}}{{.Url}}%3Ffrom%3D{{$.start.Unix}}" target="_blank"><img src="/images/google_share.png"></a>
+			<a href="http://twitter.com/intent/tweet?url=http%3A%2F%2F{{$.hostname}}{{.Url}}%3Ffrom%3D{{$.start.Unix}}" target="_blank"><img src="/images/twitter_share.png"></a>
+			<div class="recommend"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="javascript:void(0)" data-href="/dialog/sendevent/{{.Id.Hex}}?from={{$.start.Unix}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
 		</div>
-		{{end}}
-		{{with (or $.date $.event)}}
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
-		<p class="icon-text date">{{dateFormat .Start}}</p>
-		{{if ne (timeFormat .Start) ("00:00")}}
+		<p class="icon-text date">{{dateFormat $.start}}</p>
+		{{if ne (timeFormat $.start) ("00:00")}}
 			<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
-			<p class="icon-text date">{{timeFormat .Start}}{{if timeFormat .End}}{{if eq (dateFormat .Start) (dateFormat .End)}} bis {{timeFormat .End}}{{end}}{{end}} Uhr</p>
+			<p class="icon-text date">{{timeFormat $.start}}{{if timeFormat $.end}}{{if eq (dateFormat $.start) (dateFormat $.end)}}{{if ne (timeFormat $.end) (timeFormat $.start)}} bis {{timeFormat $.end}}{{end}}{{end}}{{end}} Uhr</p>
 		{{end}}
-		{{if dateFormat .End}}{{if ne (dateFormat .Start) (dateFormat .End)}}
+		{{if dateFormat $.end}}{{if ne (dateFormat $.start) (dateFormat $.end)}}
 			<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Enddatum"></span></p>
-			<p class="icon-text date">{{dateFormat .End}}</p>
-			{{if ne (timeFormat .Start) ("23:59")}}
+			<p class="icon-text date">{{dateFormat $.end}}</p>
+			{{if ne (timeFormat $.end) ("23:59")}}
 				<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
-				<p class="icon-text date">{{timeFormat .End}} Uhr</p>
+				<p class="icon-text date">{{timeFormat $.end}} Uhr</p>
 			{{end}}
 		{{end}}{{end}}
 		{{end}}
@@ -57,10 +55,10 @@
 			<p class="small-icon pull-left"><span class="fa fa-{{categoryIcon .}} fa-fw" title="Kategorien"></span></p>{{end}}
 			<p class="icon-text">{{range $i, $category := .Categories}}{{if $i}}, {{end}}{{categoryTitle $category}}{{end}}</p>
 		{{end}}
-		{{if gt (len $.recurrences) 1}}
+		{{/*{{if gt (len $.recurrences) 1}}
 			<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
 			<p class="icon-text">{{range $i, $date := $.recurrences}}{{if $i}}, {{end}}<a class="highlight" title="{{$date.Title}} am {{dateFormat $date.Start}} in {{citypartName $date.Addr}}" href="{{$date.Url}}" rel="nofollow">{{cut (dateFormat $date.Start) 1}}</a>{{end}}</p>
-		{{end}}
+		{{end}}*/}}
 		{{if .Web}}
 			<p class="small-icon pull-left"><span class="fa fa-external-link fa-fw" title="Webseite"></span></p>
 			<p class="icon-text date"><a href="{{.Web}}" class="highlight" title="Webseite von {{.Title}}" target="_blank">{{strClip .Web 30}}</a></p>
@@ -81,14 +79,14 @@
 	{{range .similiars}}
 		<div class="col-md-3 col-sm-4 col-xs-6 col-tile">
 			<div class="tile">
-				<a href="{{.Url}}" style="display:block" title="Infos zu {{.Title}} anschauen">
+				<a href="{{.Url}}?from={{$.from.Unix}}" style="display:block" title="Infos zu {{.Title}} anschauen">
 				{{if or (.Image) ((index $.organizers .OrganizerId).Image)}}
 					<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
 					<div class="tile-image" style="background-image: url(/bild/{{if .Image}}{{.Image}}{{else}}{{(index $.organizers .OrganizerId).Image}}{{end}}?height=165)"> </div>
 				{{ end }}
 				<div class="tile-text">
 					<h3>{{.Title}}</h3>
-					<p class="datetime">{{longDatetimeFormat .Start}}</p>
+					<p class="datetime">{{longDatetimeFormat (.NextDate $.from)}}</p>
 					{{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}}<p class="datetime">{{(index $.organizers .OrganizerId).Name}}</p>{{end}}{{end}}
 					<p class="place">{{if .Addr.Name}}{{.Addr.Name}}{{if .Addr.City}}, {{end}}{{end}}{{citypartName .Addr}}</p>
 					<p class="description">{{strClip .PlainDescription 150}}</p>
@@ -107,7 +105,7 @@
 	<div class="col-sm-3 col-xs-2">&nbsp;</div>
 </div>
 {{end}}
-{{if not .noindex}}{{range $i, $date := $.recurrences}}
+{{if not .noindex}}
 <script type="application/ld+json">
 	{
 		"@context": "http://schema.org",
@@ -116,18 +114,18 @@
 			"@type": "Place",
 			"address": {
 				"@type": "PostalAddress"
-{{if $date.Addr.City}}
-				, "addressLocality": {{$date.Addr.City}}
+{{if .event.Addr.City}}
+				, "addressLocality": {{.event.Addr.City}}
 {{end}}
-{{if $date.Addr.Pcode}}
-				, "postalCode": {{$date.Addr.Pcode}}
+{{if .event.Addr.Pcode}}
+				, "postalCode": {{.event.Addr.Pcode}}
 {{end}}
-{{if $date.Addr.Street}}
-				, "streetAddress": {{$date.Addr.Street}}
+{{if .event.Addr.Street}}
+				, "streetAddress": {{.event.Addr.Street}}
 {{end}}
 			}
-{{if $date.Addr.Name}}
-			, "name": {{$date.Addr.Name}}
+{{if .event.Addr.Name}}
+			, "name": {{.event.Addr.Name}}
 {{end}}
 		},
 		"organizer": {
@@ -157,13 +155,13 @@
 {{end}}
 			"url": {{$.organizer.Url}}
   		},
-		"name": {{$date.Title}},
-{{if $date.Image}}
-		"image": "/bild/{{$date.Image}}?width=300",
+		"name": {{.event.Title}},
+{{if .event.Image}}
+		"image": "/bild/{{.event.Image}}?width=300",
 {{end}}
-		"url": {{$date.Url}},
-		"startDate": {{iso8601Format $date.Start}},
-		"description": {{$date.PlainDescription}}
+		"url": {{.event.Url}},
+		"startDate": {{iso8601Format .start}},
+		"description": {{.event.PlainDescription}}
 	}
  </script>
- {{end}}{{end}}
+ {{end}}

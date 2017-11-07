@@ -40,19 +40,6 @@ type (
 		imgServer string
 	}
 
-	DatesService struct {
-		BasicService
-		database Database
-	}
-
-	UpdateRecurrencesService struct {
-		BasicService
-		users    *UserService
-		events   *EventService
-		account  *EmailAccount
-		hostname string
-	}
-
 	SendAlertsService struct {
 		BasicService
 		hostname string
@@ -101,28 +88,6 @@ func (service *SessionService) Run() error {
 	err := service.database.RemoveOldSessions(time.Duration(24) * time.Hour)
 	if err != nil {
 		return errors.Wrap(err, "error deleting sessions older than 24 hours")
-	}
-
-	return nil
-}
-
-func NewDatesService(hour int, email *EmailAccount, database Database) Service {
-
-	return &DatesService{NewBasicService("DatesService", hour, email), database}
-}
-
-func (service *DatesService) Start() {
-
-	service.start(service.Run)
-}
-
-func (service *DatesService) Run() error {
-
-	date := time.Now().Add(-24 * 30 * time.Hour)
-
-	err := service.database.Table("date").Delete(bson.M{"start": bson.M{"$lt": date}})
-	if err != nil {
-		return errors.Wrap(err, "error deleting dates older than 30 days")
 	}
 
 	return nil
@@ -201,42 +166,6 @@ func (service *UnusedImgService) Run() error {
 	}
 
 	return nil
-}
-
-func NewUpdateRecurrencesService(hour int, email *EmailAccount, users *UserService, events *EventService, account *EmailAccount, hostname string) Service {
-
-	return &UpdateRecurrencesService{NewBasicService("UpdateRecurrencesService", hour, email), users, events, account, hostname}
-}
-
-func (service *UpdateRecurrencesService) Start() {
-
-	service.start(service.Run)
-}
-
-func (service *UpdateRecurrencesService) Run() error {
-
-	users, err := service.users.FindApproved()
-	if err != nil {
-		return errors.Wrap(err, "error loading approved users")
-	}
-
-	dates, err := service.events.UpdateRecurrences(users)
-	if err != nil {
-		return errors.Wrap(err, "error updating recurrences")
-	}
-
-	if dates != nil {
-		message := ""
-		for _, dateId := range dates {
-			date, err := service.events.LoadDate(dateId)
-			if err == nil {
-				message += "http://" + service.hostname + date.Url() + "\n"
-			}
-		}
-		return SendEmail(service.account, service.account.From, nil, "Generierte Veranstaltungen", "text/plain", message)
-	} else {
-		return nil
-	}
 }
 
 func NewSendAlertsService(hour int, email *EmailAccount, hostname string, from *EmailAccount, alerts *AlertService) *SendAlertsService {
@@ -373,7 +302,7 @@ func (service *SpawnEventsService) Run() error {
 	district := districts[rand.Intn(len(districts))]
 	event.Addr.Pcode = PostcodeMap[district][rand.Intn(len(PostcodeMap[district]))]
 	event.Addr.City = "Berlin"
-	return service.events.Store(event, organizer.Approved)
+	return service.events.Store(event)
 }
 
 func NewBasicService(name string, hour int, email *EmailAccount) BasicService {

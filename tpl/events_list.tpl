@@ -11,7 +11,7 @@
 {{range .events}}
 <div class="row-tile">
 	{{if not $.user }}
-		<a href="{{.Url}}" title="Infos zu {{.Title}} anschauen">
+		<a href="{{.Url}}?from={{(index (index $.timespans 0) 0).Unix}}" title="Infos zu {{.Title}} anschauen">
 	{{end}}
 	{{if or (.Image) ((index $.organizers .OrganizerId).Image)}}
 		<!-- {{if len .Categories}}{{with index .Categories 0}}<div class="small-icon"><span class="fa fa-{{categoryIcon .}} fa-fw" title="{{categoryTitle .}}"></span></div>{{end}}{{end}} -->
@@ -22,7 +22,7 @@
 			<p class="pull-right"><a href="#" name="delete-event" title="Löschen" data-target="{{.Id.Hex}}" class="close"><span class="fa fa-times"></span></a></p>
 		{{ end }}
 		<h3>{{.Title}}</h3>
-		<p class="datetime">{{longDatetimeFormat .Start}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}} - {{(index $.organizers .OrganizerId).Name}}{{end}}{{end}}</p>
+		<p class="datetime">{{longDatetimeFormat (.NextDate (index (index $.timespans 0) 0))}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}} - {{(index $.organizers .OrganizerId).Name}}{{end}}{{end}}</p>
 		{{ if $.user }}
 			<p class="pull-right"><a href="/veranstalter/verwaltung/veranstaltung/{{.Id.Hex}}" class="btn btn-mmr" style="margin: 0; width: 100px">Bearbeiten</a></p>
 		{{end}}

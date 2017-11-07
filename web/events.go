@@ -15,41 +15,25 @@ import (
 
 type (
 	EventService struct {
-		database       Database
-		eventTableName string
-		dateTableName  string
-		eventIndex     bleve.Index
-		dateIndex      bleve.Index
+		database Database
+		tableame string
+		index    bleve.Index
 	}
 )
 
-func NewEventService(database Database, eventTableName, dateTableName, indexDir string) (*EventService, error) {
+func NewEventService(database Database, tablename, indexDir string) (*EventService, error) {
 
-	err := database.Table(eventTableName).DropIndices()
+	err := database.Table(tablename).DropIndices()
 	if err != nil {
 		return nil, errors.Wrap(err, "error dropping indices of event service database")
 	}
 
-	err = database.Table(eventTableName).EnsureIndices([][]string{
+	err = database.Table(tablename).EnsureIndices([][]string{
 		{"organizerid", "start"},
 		{"recurrency"},
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating indices of event service database")
-	}
-
-	err = database.Table(dateTableName).DropIndices()
-	if err != nil {
-		return nil, errors.Wrap(err, "error dropping indicies of date service database")
-	}
-
-	err = database.Table(dateTableName).EnsureIndices([][]string{
-		{"start", "addr.city", "addr.pcode"},
-		{"eventid", "start"},
-		{"organizerid", "start"},
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "error creating indices of date service database")
 	}
 
 	mapping := bleve.NewIndexMapping()
@@ -61,7 +45,7 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 		return nil, errors.Wrapf(err, "error removing full text index file: %s", indexFile)
 	}
 
-	eventIndex, err := bleve.New(indexFile, mapping)
+	index, err := bleve.New(indexFile, mapping)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error creating full text index file: %s", indexFile)
 	}
@@ -69,14 +53,14 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 	go func() {
 
 		var events []*Event
-		err = database.Table(eventTableName).Find(bson.M{}, &events, "start")
+		err = database.Table(tablename).Find(bson.M{}, &events, "start")
 		if err != nil {
 			err = errors.Wrap(err, "error loading events for indexing")
 			traffic.Logger().Print(err.Error())
 			return
 		}
 
-		batch := eventIndex.NewBatch()
+		batch := index.NewBatch()
 		for _, event := range events {
 			err := batch.Index(event.Id.Hex(), bson.M{"title": event.Title, "location": event.Addr.Name})
 			if err != nil {
@@ -85,7 +69,7 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 				return
 			}
 		}
-		err = eventIndex.Batch(batch)
+		err = index.Batch(batch)
 		if err != nil {
 			err = errors.Wrap(err, "error writing events to full text index")
 			traffic.Logger().Print(err.Error())
@@ -93,62 +77,18 @@ func NewEventService(database Database, eventTableName, dateTableName, indexDir 
 		}
 	}()
 
-	indexFile = indexDir + string(os.PathSeparator) + "dates.bleve"
-	err = os.RemoveAll(indexFile)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error removing full text index file: %s", indexFile)
-	}
-
-	dateIndex, err := bleve.New(indexFile, mapping)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error creating full text index file: %s", indexFile)
-	}
-
-	go func() {
-
-		var dates []*Date
-		err := database.Table(dateTableName).Find(bson.M{"start": bson.M{"$gte": time.Now()}}, &dates, "start")
-		if err != nil {
-			err = errors.Wrap(err, "error loading dates for indexing")
-			traffic.Logger().Print(err.Error())
-			return
-		}
-
-		batch := dateIndex.NewBatch()
-		for _, date := range dates {
-			err := batch.Index(date.Id.Hex(), bson.M{"title": date.Title, "location": date.Addr.Name})
-			if err != nil {
-				err = errors.Wrapf(err, "error adding date %s to full text index batch", date.Id.String())
-				traffic.Logger().Print(err.Error())
-				return
-			}
-		}
-
-		err = dateIndex.Batch(batch)
-		if err != nil {
-			err = errors.Wrap(err, "error writing dates to full text index")
-			traffic.Logger().Print(err.Error())
-			return
-		}
-	}()
-
-	return &EventService{database, eventTableName, dateTableName, eventIndex, dateIndex}, nil
+	return &EventService{database, tablename, index}, nil
 }
 
-func (events *EventService) eventTable() Table {
+func (events *EventService) table() Table {
 
-	return events.database.Table(events.eventTableName)
-}
-
-func (events *EventService) dateTable() Table {
-
-	return events.database.Table(events.dateTableName)
+	return events.database.Table(events.tableame)
 }
 
 func (events *EventService) Cities() ([]string, error) {
 
 	var cities []string
-	err := events.eventTable().Distinct(bson.M{}, "addr.city", &cities)
+	err := events.table().Distinct(bson.M{}, "addr.city", &cities)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error loading cities")
@@ -160,7 +100,7 @@ func (events *EventService) Cities() ([]string, error) {
 func (events *EventService) Locations() ([]string, error) {
 
 	var locations []string
-	err := events.eventTable().Distinct(bson.M{}, "addr.name", &locations)
+	err := events.table().Distinct(bson.M{}, "addr.name", &locations)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error loading locations")
@@ -169,14 +109,14 @@ func (events *EventService) Locations() ([]string, error) {
 	return locations, nil
 }
 
-func (events *EventService) Dates(query string) ([]string, error) {
+func (events *EventService) SearchText(query string) ([]string, error) {
 
 	if isEmpty(query) {
 		return make([]string, 0), nil
 	}
 
-	dates := make(map[string]string)
-	tokenStream, err := events.dateIndex.Mapping().(*mapping.IndexMappingImpl).AnalyzeText("de", []byte(query))
+	resultMap := make(map[string]string)
+	tokenStream, err := events.index.Mapping().(*mapping.IndexMappingImpl).AnalyzeText("de", []byte(query))
 	if err != nil {
 		return nil, errors.Wrapf(err, "error tokenizing full text query: %s", query)
 	}
@@ -184,20 +124,20 @@ func (events *EventService) Dates(query string) ([]string, error) {
 	for _, token := range tokenStream {
 		fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewPrefixQuery(string(token.Term)), 1000, 0, false)
 		fullTextSearch.IncludeLocations = true
-		results, err := events.dateIndex.Search(fullTextSearch)
+		results, err := events.index.Search(fullTextSearch)
 		if err != nil {
-			return nil, errors.Wrapf(err, "error searching for term %s in date full text index", string(token.Term))
+			return nil, errors.Wrapf(err, "error searching for term %s in event full text index", string(token.Term))
 		} else {
 			for _, hit := range results.Hits {
-				date, err := events.LoadDate(bson.ObjectIdHex(hit.ID))
+				event, err := events.Load(bson.ObjectIdHex(hit.ID))
 				if err != nil {
-					return nil, errors.Wrapf(err, "error loading date by full text search result: %s", hit.ID)
+					return nil, errors.Wrapf(err, "error loading event by full text search result: %s", hit.ID)
 				}
 				for field := range hit.Locations {
 					if field == "title" {
-						dates[date.Title] = date.Title
+						resultMap[event.Title] = event.Title
 					} else if field == "location" {
-						dates[date.Addr.Name] = date.Addr.Name
+						resultMap[event.Addr.Name] = event.Addr.Name
 					}
 				}
 			}
@@ -205,23 +145,65 @@ func (events *EventService) Dates(query string) ([]string, error) {
 	}
 
 	i := 0
-	result := make([]string, len(dates))
-	for date := range dates {
-		result[i] = date
+	result := make([]string, len(resultMap))
+	for text := range resultMap {
+		result[i] = text
 		i++
 	}
 
 	return result, nil
 }
 
-func (events *EventService) buildQuery(search, place string, dates [][]time.Time, targetIds, categoryIds []int, withImagesOnly bool) bson.M {
+func (events *EventService) Load(id bson.ObjectId) (*Event, error) {
 
-	query := make([]bson.M, 0, 6)
+	var event Event
+
+	err := events.table().LoadById(id, &event)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error loading event: %s", id.String())
+	}
+
+	return &event, nil
+}
+
+func (events *EventService) LoadBySource(source, sourceId string) (*Event, error) {
+
+	var event Event
+	query := bson.M{"source": source, "sourceid": sourceId}
+
+	err := events.table().Load(query, &event, "_id")
+	if err != nil {
+		return nil, errors.Wrapf(err, "error loading event by source: %s and sourceId: %s", source, sourceId)
+	}
+
+	return &event, nil
+}
+
+func (events *EventService) buildQuery(search, place string, targetIds, categoryIds []int, withImagesOnly bool) bson.M {
+
+	query := make([]bson.M, 1, 6)
+	query[0] = bson.M{
+		"$or": []bson.M{
+			bson.M{"start": bson.M{"$gte": time.Now()}},
+			bson.M{
+				"$and": []bson.M{
+					bson.M{"recurrency": bson.M{"$gt": 0}},
+					bson.M{
+						"$or": []bson.M{
+							bson.M{"recurrencyend": time.Time{}},
+							bson.M{"recurrencyend": bson.M{"$gt": time.Now()}},
+						},
+					},
+				},
+			},
+		},
+	}
 
 	if !isEmpty(search) {
 		fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewMatchPhraseQuery(search), 1000, 0, false)
-		results, err := events.dateIndex.Search(fullTextSearch)
+		results, err := events.index.Search(fullTextSearch)
 		if err != nil {
+			err = errors.Wrap(err, "error searching in events full text index")
 			traffic.Logger().Print(err.Error())
 		} else {
 			ids := make([]bson.ObjectId, results.Hits.Len())
@@ -240,19 +222,6 @@ func (events *EventService) buildQuery(search, place string, dates [][]time.Time
 		}
 		placesQuery[len(postcodes)] = bson.M{"addr.city": place}
 		query = append(query, bson.M{"$or": placesQuery})
-	}
-
-	if len(dates) > 0 {
-		datesQuery := make([]bson.M, len(dates))
-		for i, timespan := range dates {
-			rangeQuery := make(bson.M)
-			rangeQuery["$gte"] = timespan[0]
-			if timespan[1] != timespan[0] {
-				rangeQuery["$lt"] = timespan[1]
-			}
-			datesQuery[i] = bson.M{"start": rangeQuery}
-		}
-		query = append(query, bson.M{"$or": datesQuery})
 	}
 
 	if len(targetIds) > 0 && targetIds[0] != 0 {
@@ -278,106 +247,89 @@ func (events *EventService) buildQuery(search, place string, dates [][]time.Time
 	return bson.M{"$and": query}
 }
 
-func (events *EventService) Count(query, place string, dates [][]time.Time, targetIds, categoryIds []int) (int, error) {
+func (events *EventService) search(query, place string, dates [][]time.Time, targetIds, categoryIds []int, withImagesOnly bool) ([]*Event, error) {
 
-	cnt, err := events.dateTable().Count(events.buildQuery(query, place, dates, targetIds, categoryIds, false))
+	var sourceEvents []*Event
+	err := events.table().Find(events.buildQuery(query, place, targetIds, categoryIds, withImagesOnly), &sourceEvents)
 	if err != nil {
-		return 0, errors.Wrap(err, "error counting dates")
+		return nil, errors.Wrap(err, "error searching events")
 	}
 
-	return cnt, nil
-}
-
-func (events *EventService) Load(id bson.ObjectId) (*Event, error) {
-
-	var event Event
-
-	err := events.eventTable().LoadById(id, &event)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error loading event: %s", id.String())
+	filteredEvents := make([]*Event, 0)
+	for _, event := range sourceEvents {
+		for _, dateRange := range dates {
+			if event.RecurresIn(dateRange[0], dateRange[1]) {
+				filteredEvents = append(filteredEvents, event)
+				break
+			}
+		}
 	}
 
-	return &event, nil
+	return filteredEvents, nil
 }
 
-func (events *EventService) LoadBySource(source, sourceId string) (*Event, error) {
+func (events *EventService) Search(query, place string, dates [][]time.Time, targetIds, categoryIds []int, withImagesOnly bool, page, pageSize int) (*EventSearchResult, error) {
 
-	var event Event
-	query := bson.M{"source": source, "sourceid": sourceId}
-
-	err := events.eventTable().Load(query, &event, "_id")
+	filteredEvents, err := events.search(query, place, dates, targetIds, categoryIds, withImagesOnly)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error loading event by source: %s and sourceId: %s", source, sourceId)
+		return nil, err
 	}
 
-	return &event, nil
-}
-
-func (events *EventService) LoadDate(id bson.ObjectId) (*Date, error) {
-
-	var date Date
-
-	err := events.dateTable().LoadById(id, &date)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error loading date: %s", id.String())
+	var start time.Time
+	if len(dates) > 0 {
+		start = dates[0][0]
+	} else {
+		start = time.Now()
 	}
+	eventList := EventList{start: start, events: filteredEvents}
+	sort.Sort(eventList)
 
-	return &date, nil
-}
+	var result EventSearchResult
+	result.SetCount(len(filteredEvents))
+	result.SetStart(page * pageSize)
+	result.Events = make([]*Event, 0)
 
-func (events *EventService) SearchDates(query, place string, dates [][]time.Time, targetIds, categoryIds []int, withImagesOnly bool, page, pageSize int, sort string) (*DateSearchResult, error) {
-
-	var result DateSearchResult
-
-	err := events.dateTable().Search(events.buildQuery(query, place, dates, targetIds, categoryIds, withImagesOnly), page*pageSize, pageSize, &result, sort)
-	if err != nil {
-		return nil, errors.Wrap(err, "error searching dates")
+	for i := page * pageSize; i < len(filteredEvents) && i < (page+1)*pageSize; i++ {
+		result.Events = append(result.Events, filteredEvents[i])
 	}
 
 	return &result, nil
 }
 
+func (events *EventService) Count(query, place string, dates [][]time.Time, targetIds, categoryIds []int) (int, error) {
+
+	filteredEvents, err := events.search(query, place, dates, targetIds, categoryIds, false)
+	if err != nil {
+		return 0, errors.Wrap(err, "error counting events")
+	}
+
+	return len(filteredEvents), nil
+}
+
 func (events *EventService) SearchFutureEventsOfUser(userId bson.ObjectId, page, pageSize int) (*EventSearchResult, error) {
+
+	// TODO correct start parameter
+	var eventList []*Event
+	query := bson.M{"$and": []bson.M{bson.M{"organizerid": userId}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
+	err := events.table().Find(query, &eventList, "start")
+	if err != nil {
+		return nil, errors.Wrapf(err, "error searching future event ids of user: %s", userId.String())
+	}
 
 	var result EventSearchResult
 
-	var eventIds []bson.ObjectId
-	query := bson.M{"$and": []bson.M{bson.M{"organizerid": userId}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
-	err := events.dateTable().Distinct(query, "eventid", &eventIds)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error searching event ids of user: %s", userId.String())
-	}
-
-	var eventsOfOrganizer Events
-	err = events.eventTable().Find(bson.M{"_id": bson.M{"$in": eventIds}}, &eventsOfOrganizer, "_id")
-	if err != nil {
-		return nil, errors.Wrapf(err, "error loading future events of user: %s", userId.String())
-	}
-
-	for i := 0; i < len(eventsOfOrganizer); i++ {
-		var date Date
-		query := bson.M{"$and": []bson.M{bson.M{"eventid": eventsOfOrganizer[i].Id}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
-		err = events.dateTable().Load(query, &date, "start")
-		if err != nil {
-			return nil, errors.Wrapf(err, "error loading future dates of event: %s", eventsOfOrganizer[i].Id.String())
-		}
-		eventsOfOrganizer[i].Start = date.Start
-		eventsOfOrganizer[i].End = date.End
-	}
-	sort.Sort(eventsOfOrganizer)
-
 	start := page * pageSize
-	if start < len(eventsOfOrganizer) {
-		end := min(start+pageSize, len(eventsOfOrganizer))
+	if start < len(eventList) {
+		end := min(start+pageSize, len(eventList))
 		result.Events = make([]*Event, end-start)
 		for i := 0; i < end-start; i++ {
-			result.Events[i] = &eventsOfOrganizer[start+i]
+			result.Events[i] = eventList[start+i]
 		}
 	} else {
 		result.Events = make([]*Event, 0)
 	}
 	result.Start = start
-	result.Count = len(eventsOfOrganizer)
+	result.Count = len(eventList)
 
 	return &result, nil
 }
@@ -386,7 +338,7 @@ func (events *EventService) FindEvents() ([]Event, error) {
 
 	var allEvents []Event
 
-	err := events.eventTable().Find(bson.M{}, &allEvents, "start")
+	err := events.table().Find(bson.M{}, &allEvents, "start")
 	if err != nil {
 		return nil, errors.Wrap(err, "error loading all events")
 	}
@@ -394,33 +346,31 @@ func (events *EventService) FindEvents() ([]Event, error) {
 	return allEvents, nil
 }
 
-func (events *EventService) FindNextDates() ([]Date, error) {
+func (events *EventService) FindSimilarEvents(event *Event, count int) ([]*Event, error) {
 
-	allEvents, err := events.FindEvents()
-	if err != nil {
-		return nil, err
+	query := []bson.M{
+		bson.M{"eventid": bson.M{"$ne": event.Id}},
+		bson.M{"addr.city": event.Addr.City},
+		bson.M{
+			"$or": []bson.M{
+				bson.M{"start": bson.M{"$gte": time.Now()}},
+				bson.M{
+					"$and": []bson.M{
+						bson.M{"recurrency": bson.M{"$gt": 0}},
+						bson.M{
+							"$or": []bson.M{
+								bson.M{"recurrencyend": time.Time{}},
+								bson.M{"recurrencyend": bson.M{"$gt": time.Now()}},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
-
-	dates := make([]Date, 0)
-	for _, event := range allEvents {
-		datesOfEvent, err := events.FindDatesOfEvent(event.Id, "start")
-		if err != nil {
-			return nil, err
-		}
-		if len(datesOfEvent) > 0 {
-			dates = append(dates, datesOfEvent[0])
-		}
-	}
-
-	return dates, nil
-}
-
-func (events *EventService) FindSimilarDates(date *Date, count int) ([]*Date, error) {
-
-	query := []bson.M{bson.M{"eventid": bson.M{"$ne": date.EventId}}, bson.M{"addr.city": date.Addr.City}, bson.M{"start": bson.M{"$gt": date.Start}}}
 
 	categories := make([]bson.M, 0)
-	for _, category := range date.Categories {
+	for _, category := range event.Categories {
 		categories = append(categories, bson.M{"categories": category})
 	}
 	if len(categories) > 0 {
@@ -428,37 +378,37 @@ func (events *EventService) FindSimilarDates(date *Date, count int) ([]*Date, er
 	}
 
 	targets := make([]bson.M, 0)
-	for _, target := range date.Targets {
+	for _, target := range event.Targets {
 		targets = append(targets, bson.M{"targets": target})
 	}
 	if len(targets) > 0 {
 		query = append(query, bson.M{"$or": targets})
 	}
 
-	dates := make([]*Date, 0)
+	eventsList := make([]*Event, 0)
 	query1 := bson.M{"$and": query}
 
 	page := 0
 	pageSize := 10
 	var err error
-	var result DateSearchResult
+	var result EventSearchResult
 
-	for len(dates) < count {
-		err = events.dateTable().Search(query1, page*pageSize, pageSize, &result, "start")
-		if err != nil || len(result.Dates) == 0 {
+	for len(eventsList) < count {
+		err = events.table().Search(query1, page*pageSize, pageSize, &result, "start")
+		if err != nil || len(result.Events) == 0 {
 			break
 		}
-		for _, date := range result.Dates {
+		for _, event := range result.Events {
 			found := false
-			for _, have := range dates {
-				if date.EventId == have.EventId {
+			for _, have := range eventsList {
+				if event.Id == have.Id {
 					found = true
 					break
 				}
 			}
 			if !found {
-				dates = append(dates, date)
-				if len(dates) == count {
+				eventsList = append(eventsList, event)
+				if len(eventsList) == count {
 					break
 				}
 			}
@@ -467,29 +417,17 @@ func (events *EventService) FindSimilarDates(date *Date, count int) ([]*Date, er
 	}
 
 	if err != nil {
-		return nil, errors.Wrapf(err, "error loading similar dates for date: %s", date.Id.String())
+		return nil, errors.Wrapf(err, "error loading similar events for event: %s", event.Id.String())
 	}
 
-	return dates, nil
-}
-
-func (events *EventService) FindDatesOfEvent(eventId bson.ObjectId, sort string) ([]Date, error) {
-
-	var result []Date
-
-	err := events.dateTable().Find(bson.M{"$and": []bson.M{bson.M{"eventid": eventId}, bson.M{"start": bson.M{"$gte": time.Now()}}}}, &result, sort)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error loading future dates of event: %s", eventId.String())
-	}
-
-	return result, nil
+	return eventsList, nil
 }
 
 func (events *EventService) FindEventsOfUser(userId bson.ObjectId, sort string) ([]Event, error) {
 
 	var result []Event
 
-	err := events.eventTable().Find(bson.M{"organizerid": userId}, &result, sort)
+	err := events.table().Find(bson.M{"organizerid": userId}, &result, sort)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error loading events of user: %s", userId.String())
 	}
@@ -508,7 +446,7 @@ func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, search stri
 		descr := []bson.M{bson.M{"organizerid": userId}}
 		if !isEmpty(search) {
 			fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewMatchPhraseQuery(search), 1000, 0, false)
-			results, err := events.eventIndex.Search(fullTextSearch)
+			results, err := events.index.Search(fullTextSearch)
 			if err != nil {
 				return nil, errors.Wrapf(err, "error retrieving events of user %s from full text index", userId.String())
 			}
@@ -521,7 +459,7 @@ func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, search stri
 		query = bson.M{"$and": descr}
 	}
 
-	err := events.eventTable().Search(query, page*pageSize, pageSize, &result, sort)
+	err := events.table().Search(query, page*pageSize, pageSize, &result, sort)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error loading events of user: %s", userId.String())
 	}
@@ -529,311 +467,20 @@ func (events *EventService) SearchEventsOfUser(userId bson.ObjectId, search stri
 	return &result, nil
 }
 
-func (events *EventService) generateDates(event *Event, now time.Time) []Date {
+func (events *EventService) Store(event *Event) error {
 
-	dates := make([]Date, 0)
-
-	var date Date
-	date.OrganizerId = event.OrganizerId
-	date.EventId = event.Id
-	date.Title = event.Title
-	date.Start = event.Start.Local()
-	date.End = event.End.Local()
-	date.Image = event.Image
-	date.ImageCredit = event.ImageCredit
-	date.Targets = event.Targets
-	date.Categories = event.Categories
-	date.Descr = event.Descr
-	date.Rsvp = event.Rsvp
-	date.Web = event.Web
-	date.Addr = event.Addr
-
-	if !date.Start.Before(now) {
-		date.Id = bson.NewObjectId()
-		dates = append(dates, date)
-	}
-
-	if event.Recurrency != NoRecurrence {
-		timeHorizon := event.RecurrencyEnd
-		maxTimeHorizon := now.Add(366 * 24 * time.Hour)
-		if timeHorizon.IsZero() || timeHorizon.After(maxTimeHorizon) {
-			timeHorizon = maxTimeHorizon
-		}
-
-		var dateDuration time.Duration = 0
-		if !date.End.IsZero() {
-			dateDuration = date.End.Sub(date.Start)
-		}
-
-		year, week := date.Start.ISOWeek()
-		var startOfFirstWeek int = -3
-		for {
-			firstWeek := time.Date(year, time.January, startOfFirstWeek, 6, 0, 0, 0, time.Local)
-			testYear, _ := firstWeek.ISOWeek()
-			if testYear == year {
-				break
-			} else {
-				startOfFirstWeek++
-			}
-		}
-
-		month := int(date.Start.Month())
-		hour := date.Start.Hour()
-		minute := date.Start.Minute()
-
-		if event.Recurrency == Weekly && len(event.Weekly.Weekdays) > 0 {
-			for date.Start.Before(timeHorizon) {
-				week += event.Weekly.Interval
-				weekDate := time.Date(year, time.January, (7*(week-1))+startOfFirstWeek, 6, 0, 0, 0, time.Local)
-				for _, weekday := range event.Weekly.Weekdays {
-					day := weekDate
-					for day.Weekday() != weekday {
-						day = day.Add(24 * time.Hour)
-					}
-					date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
-					if !date.Start.Before(now) && date.Start.Before(timeHorizon) {
-						if dateDuration != 0 {
-							date.End = date.Start.Add(dateDuration)
-						}
-						date.Id = bson.NewObjectId()
-						dates = append(dates, date)
-					}
-				}
-			}
-		}
-
-		if event.Recurrency == Monthly && event.Monthly.Interval > 0 {
-			for date.Start.Before(timeHorizon) {
-				month += event.Monthly.Interval
-				monthDate := time.Date(year, time.Month(month), 1, 6, 0, 0, 0, time.Local)
-				day := monthDate
-				days := make([]time.Time, 0)
-				for day.Month() == monthDate.Month() {
-					if day.Weekday() == event.Monthly.Weekday {
-						days = append(days, day)
-					}
-					day = day.Add(24 * time.Hour)
-				}
-				if event.Monthly.Week == LastWeek || int(event.Monthly.Week) >= len(days) {
-					day = days[len(days)-1]
-				} else {
-					day = days[event.Monthly.Week]
-				}
-				date.Start = time.Date(day.Year(), day.Month(), day.Day(), hour, minute, 0, 0, time.Local)
-				if !date.Start.Before(now) && date.Start.Before(timeHorizon) {
-					if dateDuration != 0 {
-						date.End = date.Start.Add(dateDuration)
-					}
-					date.Id = bson.NewObjectId()
-					dates = append(dates, date)
-				}
-			}
-		}
-	}
-
-	return dates
-}
-
-func (events *EventService) Store(event *Event, publish bool) error {
-
-	if !publish {
-		err := events.DeleteDatesOfEvent(event.Id)
-		if err != nil {
-			return errors.Wrapf(err, "error unpublishing event: %s", event.Id.String())
-		}
-	}
-
-	_, err := events.eventTable().UpsertById(event.Id, event)
+	_, err := events.table().UpsertById(event.Id, event)
 	if err != nil {
 		return errors.Wrapf(err, "error upserting event: %s", event.Id.String())
 	}
-
-	if publish {
-
-		var dates []Date
-		dates, err = events.FindDatesOfEvent(event.Id, "id")
-		if err != nil {
-			return errors.Wrapf(err, "error loading dates of event %s for update", event.Id.String())
-		}
-
-		for _, date := range dates {
-			if date.OrganizerId != event.OrganizerId {
-				date.OrganizerId = event.OrganizerId
-				err = events.StoreDate(&date)
-				if err != nil {
-					return errors.Wrapf(err, "error updating organizer of date: %s", date.Id)
-				}
-			}
-		}
-		_, err = events.SyncDates(event)
-		if err != nil {
-			return errors.Wrapf(err, "error updating dates of event %s", event.Id.String())
-		}
-	}
-
-	go func() {
-		events.eventIndex.Index(event.Id.Hex(), bson.M{"title": event.Title})
-	}()
-
-	return nil
-}
-
-func (events *EventService) StoreDate(date *Date) error {
-
-	_, err := events.dateTable().UpsertById(date.Id, date)
-	if err != nil {
-		return errors.Wrapf(err, "error upserting date: %s", date.Id.String())
-	}
-
-	go func() {
-		events.dateIndex.Index(date.Id.Hex(), bson.M{"title": date.Title, "location": date.Addr.Name})
-	}()
-
-	return nil
-}
-
-func (events *EventService) SyncDates(event *Event) ([]bson.ObjectId, error) {
-
-	now := time.Now()
-	genDates := events.generateDates(event, now)
-
-	var dates []Date
-	query := bson.M{"$and": []bson.M{bson.M{"eventid": event.Id}, bson.M{"start": bson.M{"$gte": now}}}}
-	err := events.dateTable().Find(query, &dates, "start")
-	if err != nil {
-		return nil, errors.Wrapf(err, "error loading future dates of event: %s", event.Id.String())
-	}
-
-	n := min(len(genDates), len(dates))
-	for i := 0; i < n; i++ {
-		genDates[i].Id = dates[i].Id
-		err := events.StoreDate(&genDates[i])
-		if err != nil {
-			return nil, errors.Wrapf(err, "error updating date %s of event %s", dates[i].Id.String(), event.Id.String())
-		}
-	}
-
-	newDates := make([]bson.ObjectId, 0)
-	for i := n; i < len(genDates); i++ {
-		err := events.StoreDate(&genDates[i])
-		if err != nil {
-			return nil, errors.Wrapf(err, "error inserting date of event %s", event.Id.String())
-		}
-		newDates = append(newDates, genDates[i].Id)
-	}
-
-	for i := n; i < len(dates); i++ {
-		err := events.DeleteDate(dates[i].Id)
-		if err != nil {
-			return nil, errors.Wrapf(err, "error deleting date %s of event %s", dates[i].Id.String(), event.Id.String())
-		}
-	}
-
-	return newDates, nil
-}
-
-func (events *EventService) UpdateRecurrences(users []User) ([]bson.ObjectId, error) {
-
-	var result []Event
-	err := events.eventTable().Find(bson.M{"recurrency": Weekly}, &result, "start")
-	if err != nil {
-		return nil, errors.Wrap(err, "error loading weekly recurrent events")
-	}
-
-	dates := make([]bson.ObjectId, 0)
-	for _, event := range result {
-		for _, user := range users {
-			if user.Id == event.OrganizerId {
-				newDates, err := events.SyncDates(&event)
-				if err != nil {
-					return nil, errors.Wrapf(err, "error syncing dates of event: %s", event.Id.String())
-				}
-				dates = append(dates, newDates...)
-				break
-			}
-		}
-	}
-
-	err = events.eventTable().Find(bson.M{"recurrency": Monthly}, &result, "start")
-	if err != nil {
-		return nil, errors.Wrap(err, "error loading monthly recurrent events")
-	}
-
-	for _, event := range result {
-		for _, user := range users {
-			if user.Id == event.OrganizerId {
-				newDates, err := events.SyncDates(&event)
-				if err != nil {
-					return nil, errors.Wrapf(err, "error syncing dates of event: %s", event.Id.String())
-				}
-				dates = append(dates, newDates...)
-				break
-			}
-		}
-	}
-
-	return dates, nil
-}
-
-func (events *EventService) DeleteDatesOfEvent(eventId bson.ObjectId) error {
-
-	var dates []Date
-	err := events.dateTable().Find(bson.M{"eventid": eventId}, &dates, "start")
-	if err != nil {
-		return errors.Wrapf(err, "error loading dates of event: %s", eventId.String())
-	}
-
-	for _, date := range dates {
-		err = events.DeleteDate(date.Id)
-		if err != nil {
-			return errors.Wrapf(err, "error deleting date: %s", date.Id.String())
-		}
-	}
-
-	return nil
-}
-
-func (events *EventService) DeleteDatesOfUser(userId bson.ObjectId) error {
-
-	var dates []Date
-	err := events.dateTable().Find(bson.M{"organizerid": userId}, &dates, "start")
-	if err != nil {
-		return errors.Wrapf(err, "error loading dates of user: %s", userId.String())
-	}
-
-	for _, date := range dates {
-		err = events.DeleteDate(date.Id)
-		if err != nil {
-			return errors.Wrapf(err, "error deleting date: %s", date.Id.String())
-		}
-	}
-
-	return nil
-}
-
-func (events *EventService) DeleteDate(id bson.ObjectId) error {
-
-	err := events.dateTable().DeleteById(id)
-	if err != nil {
-		return errors.Wrapf(err, "error deleting date: %s", id.String())
-	}
-
-	go func() {
-		events.dateIndex.Delete(id.Hex())
-	}()
 
 	return nil
 }
 
 func (events *EventService) DeleteOfUser(userId bson.ObjectId) error {
 
-	err := events.DeleteDatesOfUser(userId)
-	if err != nil {
-		return errors.Wrapf(err, "error deleting dates of user: %s", userId.String())
-	}
-
 	query := bson.M{"organizerid": userId}
-	err = events.eventTable().Delete(query)
+	err := events.table().Delete(query)
 	if err != nil {
 		return errors.Wrapf(err, "error deleting events of user: %s", userId.String())
 	}
@@ -843,18 +490,13 @@ func (events *EventService) DeleteOfUser(userId bson.ObjectId) error {
 
 func (events *EventService) Delete(id bson.ObjectId) error {
 
-	err := events.DeleteDatesOfEvent(id)
-	if err != nil {
-		return errors.Wrapf(err, "error deleting dates of event: %s", id.String())
-	}
-
-	err = events.eventTable().DeleteById(id)
+	err := events.table().DeleteById(id)
 	if err != nil {
 		return errors.Wrapf(err, "error deleting event: %s", id.String())
 	}
 
 	go func() {
-		events.eventIndex.Delete(id.Hex())
+		events.index.Delete(id.Hex())
 	}()
 
 	return nil
@@ -862,8 +504,7 @@ func (events *EventService) Delete(id bson.ObjectId) error {
 
 func (events *EventService) Stop() error {
 
-	events.eventIndex.Close()
-	events.dateIndex.Close()
+	events.index.Close()
 
 	return nil
 }

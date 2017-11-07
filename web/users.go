@@ -134,16 +134,16 @@ func (users *UserService) FindApproved() ([]User, error) {
 	return result, nil
 }
 
-func (users *UserService) FindForDates(dates []*Date) (map[bson.ObjectId]*User, error) {
+func (users *UserService) FindForEvents(events []*Event) (map[bson.ObjectId]*User, error) {
 
 	organizers := make(map[bson.ObjectId]*User)
-	for _, date := range dates {
-		if _, found := organizers[date.OrganizerId]; !found {
-			user, err := users.Load(date.OrganizerId)
+	for _, event := range events {
+		if _, found := organizers[event.OrganizerId]; !found {
+			user, err := users.Load(event.OrganizerId)
 			if err != nil {
 				return nil, err
 			}
-			organizers[date.OrganizerId] = user
+			organizers[event.OrganizerId] = user
 		}
 	}
 

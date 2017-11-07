@@ -1,12 +1,13 @@
 package mmr
 
 import (
-	"github.com/kennygrant/sanitize"
-	"gopkg.in/mgo.v2/bson"
 	"html/template"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/kennygrant/sanitize"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type (
@@ -80,23 +81,9 @@ type (
 		Addr          Address
 	}
 
-	Events []Event
-
-	Date struct {
-		Id          bson.ObjectId `bson:"_id"`
-		EventId     bson.ObjectId
-		OrganizerId bson.ObjectId
-		Title       string
-		Image       string
-		ImageCredit string
-		Descr       string
-		Web         string
-		Targets     []int
-		Categories  []int
-		Start       time.Time
-		End         time.Time
-		Rsvp        bool
-		Addr        Address
+	EventList struct {
+		start  time.Time
+		events []*Event
 	}
 
 	Alert struct {
@@ -126,12 +113,6 @@ type (
 		Events []*Event
 	}
 
-	DateSearchResult struct {
-		Count int
-		Start int
-		Dates []*Date
-	}
-
 	OrganizerSearchResult struct {
 		Count      int
 		Start      int
@@ -139,12 +120,12 @@ type (
 	}
 
 	Topic struct {
-		Name string
-		Place string
-		TargetIds []int
+		Name        string
+		Place       string
+		TargetIds   []int
 		CategoryIds []int
-		DateIds []int
-		FrontPage bool
+		DateIds     []int
+		FrontPage   bool
 	}
 )
 
@@ -308,100 +289,100 @@ var (
 
 	Topics map[string]Topic = map[string]Topic{
 		"babies-und-kleinkinder": Topic{
-			Name: "Babies & Kleinkinder",
-			Place: "Berlin",
-			TargetIds: []int{19, 20},
+			Name:        "Babies & Kleinkinder",
+			Place:       "Berlin",
+			TargetIds:   []int{19, 20},
 			CategoryIds: []int{0},
-			DateIds: []int{FromNow},
-			FrontPage: true,
+			DateIds:     []int{FromNow},
+			FrontPage:   true,
 		},
 		"sport-und-gesundheit": Topic{
-			Name: "Sport & Gesundheit",
-			Place: "Berlin",
-			TargetIds: []int{0},
-			CategoryIds: []int{8,24},
-			DateIds: []int{FromNow},
-			FrontPage: true,
+			Name:        "Sport & Gesundheit",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
+			CategoryIds: []int{8, 24},
+			DateIds:     []int{FromNow},
+			FrontPage:   true,
 		},
 		"natur-und-garten": Topic{
-			Name: "Natur & Garten",
-			Place: "Berlin",
-			TargetIds: []int{0},
-			CategoryIds: []int{9,18},
-			DateIds: []int{FromNow},
-			FrontPage: true,
+			Name:        "Natur & Garten",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
+			CategoryIds: []int{9, 18},
+			DateIds:     []int{FromNow},
+			FrontPage:   true,
 		},
 		"eltern-und-familien": Topic{
-			Name: "Eltern & Familien",
-			Place: "Berlin",
-			TargetIds: []int{1,2,19,20,21},
+			Name:        "Eltern & Familien",
+			Place:       "Berlin",
+			TargetIds:   []int{1, 2, 19, 20, 21},
 			CategoryIds: []int{0},
-			DateIds: []int{FromNow},
-			FrontPage: true,
+			DateIds:     []int{FromNow},
+			FrontPage:   true,
 		},
 		"bildung-und-kultur": Topic{
-			Name: "Bildung & Kultur",
-			Place: "Berlin",
-			TargetIds: []int{0},
-			CategoryIds: []int{10,11},
-			DateIds: []int{FromNow},
-			FrontPage: true,
+			Name:        "Bildung & Kultur",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
+			CategoryIds: []int{10, 11},
+			DateIds:     []int{FromNow},
+			FrontPage:   true,
 		},
 		"umwelt-und-tierschutz": Topic{
-			Name: "Umwelt- & Tierschutz",
-			Place: "Berlin",
-			TargetIds: []int{0},
-			CategoryIds: []int{13,14},
-			DateIds: []int{FromNow},
-			FrontPage: true,
+			Name:        "Umwelt- & Tierschutz",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
+			CategoryIds: []int{13, 14},
+			DateIds:     []int{FromNow},
+			FrontPage:   true,
 		},
 		"demonstrationen-und-politik": Topic{
-			Name: "Demonstrationen & Politik",
-			Place: "Berlin",
-			TargetIds: []int{0},
-			CategoryIds: []int{15,23},
-			DateIds: []int{FromNow},
-			FrontPage: true,
+			Name:        "Demonstrationen & Politik",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
+			CategoryIds: []int{15, 23},
+			DateIds:     []int{FromNow},
+			FrontPage:   true,
 		},
 		"soziales-und-ehrenamt": Topic{
-			Name: "Soziales & Ehrenamt",
-			Place: "Berlin",
-			TargetIds: []int{0},
-			CategoryIds: []int{16,17},
-			DateIds: []int{FromNow},
-			FrontPage: true,
+			Name:        "Soziales & Ehrenamt",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
+			CategoryIds: []int{16, 17},
+			DateIds:     []int{FromNow},
+			FrontPage:   true,
 		},
 		"heute-in-berlin": Topic{
-			Name: "heute",
-			Place: "Berlin",
-			TargetIds: []int{0},
+			Name:        "heute",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
 			CategoryIds: []int{0},
-			DateIds: []int{Today},
-			FrontPage: false,
+			DateIds:     []int{Today},
+			FrontPage:   false,
 		},
 		"morgen-in-berlin": Topic{
-			Name: "morgen",
-			Place: "Berlin",
-			TargetIds: []int{0},
+			Name:        "morgen",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
 			CategoryIds: []int{0},
-			DateIds: []int{Tomorrow},
-			FrontPage: false,
+			DateIds:     []int{Tomorrow},
+			FrontPage:   false,
 		},
 		"uebermorgen-in-berlin": Topic{
-			Name: "übermorgen",
-			Place: "Berlin",
-			TargetIds: []int{0},
+			Name:        "übermorgen",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
 			CategoryIds: []int{0},
-			DateIds: []int{AfterTomorrow},
-			FrontPage: false,
+			DateIds:     []int{AfterTomorrow},
+			FrontPage:   false,
 		},
 		"am-wochenende-in-berlin": Topic{
-			Name: "das nächste Wochenende",
-			Place: "Berlin",
-			TargetIds: []int{0},
+			Name:        "das nächste Wochenende",
+			Place:       "Berlin",
+			TargetIds:   []int{0},
 			CategoryIds: []int{0},
-			DateIds: []int{NextWeekend},
-			FrontPage: false,
+			DateIds:     []int{NextWeekend},
+			FrontPage:   false,
 		},
 	}
 )
@@ -471,48 +452,111 @@ func (event *Event) PlainDescription() string {
 	return whiteSpace.ReplaceAllString(sanitize.HTML(event.Descr), " ")
 }
 
-func (events Events) Len() int {
-	return len(events)
-}
+func (event *Event) Dates(until time.Time) []time.Time {
 
-func (events Events) Swap(i, j int) {
-	events[i], events[j] = events[j], events[i]
-}
+	dates := make([]time.Time, 1)
+	dates[0] = event.Start
 
-func (events Events) Less(i, j int) bool {
-	return events[i].Start.Before(events[j].Start)
-}
+	date := event.Start
+	if Weekly == event.Recurrency {
 
-func (date *Date) GetId() bson.ObjectId {
-	return date.Id
-}
+		weekday := date.Weekday()
+		for (event.RecurrencyEnd.IsZero() || date.Before(event.RecurrencyEnd)) && date.Before(until) {
 
-func (date *Date) SetId(id bson.ObjectId) {
-	date.Id = id
-}
+			if weekday == time.Sunday {
+				date = date.AddDate(0, 0, 7*(event.Weekly.Interval-1))
+			}
 
-func (date *Date) Url() string {
+			date = date.AddDate(0, 0, 1)
 
-	targetNames := make([]string, len(date.Targets))
-	for i, id := range date.Targets {
-		targetNames[i] = TargetIdMap[id]
+			weekday = date.Weekday()
+			for _, dateWeekday := range event.Weekly.Weekdays {
+				if dateWeekday == weekday {
+					dates = append(dates, date)
+					break
+				}
+			}
+		}
+
+	} else if Monthly == event.Recurrency {
+
+		for (event.RecurrencyEnd.IsZero() || date.Before(event.RecurrencyEnd)) && date.Before(until) {
+
+			var day int
+			month := date.Month()
+			year := date.Year()
+			if event.Monthly.Week != LastWeek {
+				day = 7*int(event.Monthly.Week) + 1
+			} else {
+				day = lengthOfMonth(month, year) - 6
+			}
+
+			date = time.Date(year, month, day, event.Start.Hour(), event.Start.Minute(), 0, 0, time.Local)
+			for i := 0; i < 7; i++ {
+				if date.Weekday() == event.Monthly.Weekday {
+					if date.After(event.Start) && (event.RecurrencyEnd.IsZero() || date.Before(event.RecurrencyEnd)) && date.Before(until) {
+						dates = append(dates, date)
+					}
+				}
+				date = date.AddDate(0, 0, 1)
+			}
+
+			date = time.Date(year, month, 1, 6, 0, 0, 0, time.Local).AddDate(0, event.Monthly.Interval, 0)
+		}
 	}
-	categoryNames := make([]string, len(date.Categories))
-	for i, id := range date.Categories {
-		categoryNames[i] = CategoryIdMap[id]
+
+	return dates
+}
+
+func (event *Event) RecurresIn(from, until time.Time) bool {
+
+	if until.IsZero() || until.Equal(from) {
+		if !from.After(event.Start) {
+			return true
+		} else if Weekly == event.Recurrency || Monthly == event.Recurrency {
+			return event.RecurrencyEnd.IsZero() || !from.After(event.RecurrencyEnd)
+		}
+	} else {
+		for _, date := range event.Dates(until) {
+			if !from.After(date) && !date.After(until) {
+				return true
+			}
+		}
 	}
 
-	return "/veranstaltung/" + sanitizePath(citypartName(date.Addr)) + "/" + sanitizePath(strings.Join(targetNames, "-")) + "/" + sanitizePath(strings.Join(categoryNames, "-")) + "/" + date.Id.Hex() + "/" + date.EventId.Hex() + "/" + sanitizePath(date.Title) + ".html"
+	return false
 }
 
-func (date *Date) HtmlDescription() template.HTML {
+func (event *Event) NextDate(from time.Time) time.Time {
 
-	return noescape(sanitizeHtml(date.Descr))
+	if !event.Start.After(from) && (Weekly == event.Recurrency || Monthly == event.Recurrency) {
+		var until time.Time
+		if Weekly == event.Recurrency {
+			until = from.AddDate(0, 0, 7*(event.Weekly.Interval+1))
+		} else if Monthly == event.Recurrency {
+			until = from.AddDate(0, event.Monthly.Interval+1, 0)
+		}
+
+		for _, date := range event.Dates(until) {
+			if !date.Before(from) {
+				return date
+			}
+		}
+	}
+
+	return event.Start
 }
 
-func (date *Date) PlainDescription() string {
+func (list EventList) Len() int {
+	return len(list.events)
+}
 
-	return whiteSpace.ReplaceAllString(sanitize.HTML(date.Descr), " ")
+func (list EventList) Swap(i, j int) {
+	list.events[i], list.events[j] = list.events[j], list.events[i]
+}
+
+func (list EventList) Less(i, j int) bool {
+	return list.events[i].NextDate(list.start).Before(list.events[j].NextDate(list.start))
 }
 
 func (session *Session) GetId() bson.ObjectId {
@@ -549,26 +593,6 @@ func (result *EventSearchResult) GetSize() int {
 
 func (result *EventSearchResult) GetItem(i int) Item {
 	return result.Events[i]
-}
-
-func (result *DateSearchResult) SetCount(count int) {
-	result.Count = count
-}
-
-func (result *DateSearchResult) SetStart(start int) {
-	result.Start = start
-}
-
-func (result *DateSearchResult) GetData() interface{} {
-	return &result.Dates
-}
-
-func (result *DateSearchResult) GetSize() int {
-	return len(result.Dates)
-}
-
-func (result *DateSearchResult) GetItem(i int) Item {
-	return result.Dates[i]
 }
 
 func (result *OrganizerSearchResult) SetCount(count int) {

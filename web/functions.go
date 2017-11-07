@@ -86,6 +86,19 @@ func iso8601Format(t time.Time) string {
 	}
 }
 
+func lengthOfMonth(m time.Month, y int) int {
+
+	day := 28
+	date := time.Date(y, m, day, 1, 0, 0, 0, time.Local)
+
+	for date.Month() == m {
+		date = date.AddDate(0, 0, 1)
+		day++
+	}
+
+	return day - 1
+}
+
 func noescape(s string) template.HTML {
 
 	return template.HTML(s)
@@ -103,17 +116,17 @@ func sanitizeHtml(s string) string {
 }
 
 func sanitizePath(s string) string {
-	
+
 	if isEmpty(s) {
 		return ""
 	}
-	
-	s = strings.Replace(s, "ä", "ae", -1);
-	s = strings.Replace(s, "ö", "oe", -1);
-	s = strings.Replace(s, "ü", "ue", -1);
-	s = strings.Replace(s, "Ä", "ae", -1);
-	s = strings.Replace(s, "Ö", "oe", -1);
-	s = strings.Replace(s, "Ü", "ie", -1);
+
+	s = strings.Replace(s, "ä", "ae", -1)
+	s = strings.Replace(s, "ö", "oe", -1)
+	s = strings.Replace(s, "ü", "ue", -1)
+	s = strings.Replace(s, "Ä", "ae", -1)
+	s = strings.Replace(s, "Ö", "oe", -1)
+	s = strings.Replace(s, "Ü", "ie", -1)
 	return sanitize.Path(s)
 }
 
@@ -148,17 +161,8 @@ func strConcat(s []string) string {
 	} else if len(s) == 1 {
 		return s[0]
 	}
-	
+
 	return strings.Join(s[:len(s)-1], ", ") + " und " + s[len(s)-1]
-}
-
-func dates2RSSItems(dates []*Date) []rssItem {
-
-	items := make([]rssItem, len(dates))
-	for i, date := range dates {
-		items[i] = rssItem{date.Id.Hex(), date.Title, citypartName(date.Addr) + ", " + datetimeFormat(date.Start) + " - " + date.PlainDescription(), date.Url()}
-	}
-	return items
 }
 
 func events2RSSItems(events []*Event) []rssItem {
@@ -214,7 +218,7 @@ func eventSearchUrl(place string, targetIds, categoryIds, dateIds []int, radius 
 	for i, id := range dateIds {
 		dateNames[i] = DateIdMap[id]
 	}
-	
+
 	targetNames := make([]string, len(targetIds))
 	for i, id := range targetIds {
 		targetNames[i] = TargetIdMap[id]
@@ -225,12 +229,12 @@ func eventSearchUrl(place string, targetIds, categoryIds, dateIds []int, radius 
 		categoryNames[i] = CategoryIdMap[id]
 	}
 
-	return place + "/" + sanitizePath(strings.Join(dateNames, "-")) + "/" + strings.Join(int2Str(dateIds), ",") + "/" + strings.Join(int2Str(targetIds), ",")  + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + sanitizePath(strings.Join(targetNames, "-")) + "/" + sanitizePath(strings.Join(categoryNames, "-")) + "/0"
+	return place + "/" + sanitizePath(strings.Join(dateNames, "-")) + "/" + strings.Join(int2Str(dateIds), ",") + "/" + strings.Join(int2Str(targetIds), ",") + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + strconv.Itoa(radius) + "/" + sanitizePath(strings.Join(targetNames, "-")) + "/" + sanitizePath(strings.Join(categoryNames, "-")) + "/0"
 }
 
 func eventSearchUrlWithQuery(place string, targetIds, categoryIds []int, dateIds []int, radius int, query string) string {
 
-	return eventSearchUrl(place, targetIds, categoryIds, dateIds, radius) + "?query=" + query;
+	return eventSearchUrl(place, targetIds, categoryIds, dateIds, radius) + "?query=" + query
 }
 
 func simpleEventSearchUrl(place string) string {
@@ -294,7 +298,7 @@ func inArray(a []int, n int) bool {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -308,12 +312,12 @@ func min(m, n int) int {
 }
 
 func dayStart(now time.Time) time.Time {
-	
+
 	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 }
 
 func dayEnd(now time.Time) time.Time {
-	
+
 	return time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
 }
 
@@ -397,5 +401,5 @@ func isEmpty(s string) bool {
 
 func intSlice(args ...int) []int {
 
-    return args
+	return args
 }
