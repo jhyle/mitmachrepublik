@@ -29,8 +29,9 @@ func NewEventService(database Database, tablename, indexDir string) (*EventServi
 	}
 
 	err = database.Table(tablename).EnsureIndices([][]string{
+		{"start"},
 		{"organizerid", "start"},
-		{"recurrency"},
+		{"recurrency", "recurrencyend"},
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating indices of event service database")
@@ -179,10 +180,9 @@ func (events *EventService) LoadBySource(source, sourceId string) (*Event, error
 	return &event, nil
 }
 
-func (events *EventService) buildQuery(search, place string, targetIds, categoryIds []int, withImagesOnly bool) bson.M {
+func (events *EventService) futureQuery() bson.M {
 
-	query := make([]bson.M, 1, 6)
-	query[0] = bson.M{
+	return bson.M{
 		"$or": []bson.M{
 			bson.M{"start": bson.M{"$gte": time.Now()}},
 			bson.M{
@@ -198,6 +198,11 @@ func (events *EventService) buildQuery(search, place string, targetIds, category
 			},
 		},
 	}
+}
+
+func (events *EventService) buildQuery(search, place string, targetIds, categoryIds []int, withImagesOnly bool) bson.M {
+
+	query := []bson.M{events.futureQuery()}
 
 	if !isEmpty(search) {
 		fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewMatchPhraseQuery(search), 1000, 0, false)
@@ -308,10 +313,11 @@ func (events *EventService) Count(query, place string, dates [][]time.Time, targ
 
 func (events *EventService) SearchFutureEventsOfUser(userId bson.ObjectId, page, pageSize int) (*EventSearchResult, error) {
 
-	// TODO correct start parameter
+	query := []bson.M{events.futureQuery()}
+	query = append(query, bson.M{"organizerid": userId})
+
 	var eventList []*Event
-	query := bson.M{"$and": []bson.M{bson.M{"organizerid": userId}, bson.M{"start": bson.M{"$gte": time.Now()}}}}
-	err := events.table().Find(query, &eventList, "start")
+	err := events.table().Find(bson.M{"$and": query}, &eventList, "start")
 	if err != nil {
 		return nil, errors.Wrapf(err, "error searching future event ids of user: %s", userId.String())
 	}
@@ -348,26 +354,9 @@ func (events *EventService) FindEvents() ([]Event, error) {
 
 func (events *EventService) FindSimilarEvents(event *Event, count int) ([]*Event, error) {
 
-	query := []bson.M{
-		bson.M{"eventid": bson.M{"$ne": event.Id}},
-		bson.M{"addr.city": event.Addr.City},
-		bson.M{
-			"$or": []bson.M{
-				bson.M{"start": bson.M{"$gte": time.Now()}},
-				bson.M{
-					"$and": []bson.M{
-						bson.M{"recurrency": bson.M{"$gt": 0}},
-						bson.M{
-							"$or": []bson.M{
-								bson.M{"recurrencyend": time.Time{}},
-								bson.M{"recurrencyend": bson.M{"$gt": time.Now()}},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
+	query := []bson.M{events.futureQuery()}
+	query = append(query, bson.M{"eventid": bson.M{"$ne": event.Id}})
+	query = append(query, bson.M{"addr.city": event.Addr.City})
 
 	categories := make([]bson.M, 0)
 	for _, category := range event.Categories {
@@ -385,16 +374,14 @@ func (events *EventService) FindSimilarEvents(event *Event, count int) ([]*Event
 		query = append(query, bson.M{"$or": targets})
 	}
 
-	eventsList := make([]*Event, 0)
-	query1 := bson.M{"$and": query}
-
 	page := 0
 	pageSize := 10
 	var err error
 	var result EventSearchResult
+	eventsList := make([]*Event, 0)
 
 	for len(eventsList) < count {
-		err = events.table().Search(query1, page*pageSize, pageSize, &result, "start")
+		err = events.table().Search(bson.M{"$and": query}, page*pageSize, pageSize, &result, "start")
 		if err != nil || len(result.Events) == 0 {
 			break
 		}
