@@ -452,13 +452,25 @@ func (event *Event) PlainDescription() string {
 	return whiteSpace.ReplaceAllString(sanitize.HTML(event.Descr), " ")
 }
 
-func (event *Event) Dates(until time.Time) []time.Time {
+func (event *Event) Dates(from, until time.Time) []time.Time {
 
-	dates := make([]time.Time, 1)
-	dates[0] = event.Start
+	dates := make([]time.Time, 0)
+	if !from.After(event.Start) && !until.Before(event.Start) {
+		dates = append(dates, event.Start)
+	}
 
 	date := event.Start
 	if Weekly == event.Recurrency {
+
+		eventDays := make(map[time.Weekday]bool)
+		for _, day := range event.Weekly.Weekdays {
+			eventDays[day] = true
+		}
+
+		for date.Before(from) {
+			date = date.AddDate(0, 0, 7*event.Weekly.Interval)
+		}
+		date = date.AddDate(0, 0, -7*event.Weekly.Interval)
 
 		weekday := date.Weekday()
 		for (event.RecurrencyEnd.IsZero() || date.Before(event.RecurrencyEnd)) && date.Before(until) {
@@ -468,13 +480,10 @@ func (event *Event) Dates(until time.Time) []time.Time {
 			}
 
 			date = date.AddDate(0, 0, 1)
-
 			weekday = date.Weekday()
-			for _, dateWeekday := range event.Weekly.Weekdays {
-				if dateWeekday == weekday {
-					dates = append(dates, date)
-					break
-				}
+
+			if eventDays[weekday] && !date.Before(from) {
+				dates = append(dates, date)
 			}
 		}
 
@@ -494,7 +503,7 @@ func (event *Event) Dates(until time.Time) []time.Time {
 			date = time.Date(year, month, day, event.Start.Hour(), event.Start.Minute(), 0, 0, time.Local)
 			for i := 0; i < 7; i++ {
 				if date.Weekday() == event.Monthly.Weekday {
-					if date.After(event.Start) && (event.RecurrencyEnd.IsZero() || date.Before(event.RecurrencyEnd)) && date.Before(until) {
+					if !date.Before(from) && date.After(event.Start) && (event.RecurrencyEnd.IsZero() || date.Before(event.RecurrencyEnd)) && date.Before(until) {
 						dates = append(dates, date)
 					}
 				}
@@ -517,11 +526,7 @@ func (event *Event) RecurresIn(from, until time.Time) bool {
 			return event.RecurrencyEnd.IsZero() || !from.After(event.RecurrencyEnd)
 		}
 	} else {
-		for _, date := range event.Dates(until) {
-			if !from.After(date) && !date.After(until) {
-				return true
-			}
-		}
+		return len(event.Dates(from, until)) > 0
 	}
 
 	return false
@@ -537,10 +542,9 @@ func (event *Event) NextDate(from time.Time) time.Time {
 			until = from.AddDate(0, event.Monthly.Interval+1, 0)
 		}
 
-		for _, date := range event.Dates(until) {
-			if !date.Before(from) {
-				return date
-			}
+		dates := event.Dates(from, until)
+		if len(dates) > 0 {
+			return dates[0]
 		}
 	}
 
