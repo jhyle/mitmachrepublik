@@ -9,6 +9,7 @@
 </div>
 {{else}}
 {{range .events}}
+{{if (index $.organizers .OrganizerId).Approved}}
 <div class="row-tile">
 	{{if not $.user }}
 		<a href="{{.Url}}?from={{(index (index $.timespans 0) 0).Unix}}" title="Infos zu {{.Title}} anschauen">
@@ -39,6 +40,7 @@
 		</a>
 	{{end}}
 </div>
+{{end}}
 {{end}}
 <div class="pages">
 	<a href="{{if $.altPage}}?p={{else}}./{{end}}0{{if $.query}}?query={{$.query}}{{end}}#events" title="Zum Anfang der Liste"><div class="page">Anfang</div></a>

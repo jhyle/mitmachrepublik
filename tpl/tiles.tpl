@@ -12,6 +12,7 @@
 		</div>
 	{{end}}
 	{{range $event := index $.events $path}}
+		{{if (index $.organizers .OrganizerId).Approved}}
 		<div class="col-md-3 col-sm-4 col-xs-6 col-tile">
 			<div class="tile">
 				<a href="{{.Url}}?from={{(index (index $.timespans 0) 0).Unix}}" style="display:block" title="Infos zu {{.Title}} anschauen">
@@ -30,6 +31,7 @@
 				</a>
 			</div>
 		</div>
+		{{end}}
 	{{end}}
 {{end}}
 </div>

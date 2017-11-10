@@ -361,7 +361,6 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 				if err != nil {
 					return &appResult{Status: http.StatusInternalServerError, Error: err}
 				}
-				// TODO publish events
 			}
 		} else {
 			err = errors.New("No organizer id given.")

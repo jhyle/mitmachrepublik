@@ -13,6 +13,7 @@
 <h1 style="color: #ff5100; font-size: 27px; margin: 10px 0 0 0; line-height: 2em">Deine Veranstaltungen</h1>
 <p style="margin: 0 0 10px 0">Klicke auf die Veranstaltungen für weitere Infos.</p>  
 {{range .events}}
+{{if (index $.organizers .OrganizerId).Approved}}
 <div style="border: 1px solid #e6e6e6; margin-bottom: 15px; overflow: hidden; ">
 	<a style="color: #2f3030; text-decoration: none;" href="http://{{$.hostname}}{{.Url}}" title="Veranstaltung anzeigen">
 	{{if or (.Image) ((index $.organizers .OrganizerId).Image)}}
@@ -28,6 +29,7 @@
 	</div>
 	</a>
 </div>
+{{end}}
 {{end}}
 <div style="background-color: #303030; color: white; font-size: 13px; line-height: 2; padding: 30px">
 	@ <a style="color: white; font-weight: bold; text-decoration: none;" href="http://www.mitmachrepublik">www.mitmachrepublik.de</a> | Klicke <a style="color: white; font-weight: bold; text-decoration: none;" href="http://{{.hostname}}/newsletter/unsubscribe/{{.alertId}}">hier</a>, wenn Du diese E-Mail nicht mehr erhalten möchtest. 
