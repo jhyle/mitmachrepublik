@@ -23,6 +23,7 @@
 				<div class="tile-text">
 					<h3>{{.Title}}</h3>
 					<p class="datetime">{{longDatetimeFormat (.NextDate (index (index $.timespans 0) 0))}}</p>
+					{{if .Recurrence}}<p class="datetime">{{.Recurrence}}</p>{{end}}
 					{{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}}<p class="datetime">{{(index $.organizers .OrganizerId).Name}}</p>{{end}}{{end}}
 					<p class="place">{{if .Addr.Name}}{{.Addr.Name}}{{if .Addr.City}}, {{end}}{{end}}{{citypartName .Addr}}</p>
 					<p class="description">{{strClip .PlainDescription 150}}</p>

@@ -21,7 +21,7 @@
 	{{end}}
 	<div style="margin: 10px;">
 		<h3 style="color: #ff5100; font-size: 23px; font-weight: lighter; margin: 10px 0; line-height: 1.1;">{{.Title}}</h3>
-		<p style="margin: 0 0 3px 0; font-size: 13px; font-weight: bold;">{{longDatetimeFormat (.NextDate (index (index $.timespans 0) 0))}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}} {{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}} - {{(index $.organizers .OrganizerId).Name}}{{end}}{{end}}</p>
+		<p style="margin: 0 0 3px 0; font-size: 13px; font-weight: bold;">{{longDatetimeFormat (.NextDate (index (index $.timespans 0) 0))}}{{if dateFormat .End}}<span> bis {{if eq (dateFormat .Start) (dateFormat .End)}}{{timeFormat .End}}{{else}}{{datetimeFormat .End}}{{end}}</span>{{end}}{{if .Recurrence}}, {{.Recurrence}}{{end}} {{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}} - {{(index $.organizers .OrganizerId).Name}}{{end}}{{end}}</p>
 		<p style="margin: 0 0 3px 0;">{{strClip .PlainDescription 100}}</p>
 		{{ if not .Addr.IsEmpty }}
 			<p style="margin: 0 0 3px 0; float: left !important; color: #7a7d7d; font-size: 13px;">{{ if .Addr.Name }}<span>{{.Addr.Name}}</span><br />{{ end }}<span class="address">{{ if .Addr.Street }}<span>{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span>{{.Addr.Pcode}}</span> {{ end }}<span>{{citypartName .Addr}}</span></span></p>

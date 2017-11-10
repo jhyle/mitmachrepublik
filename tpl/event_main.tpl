@@ -43,6 +43,10 @@
 			{{end}}
 		{{end}}{{end}}
 		{{end}}
+		{{if gt .Recurrency 0}}
+			<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
+			<p class="icon-text date">{{.Recurrence}}</p>
+		{{end}}
 		{{if not .Addr.IsEmpty}}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
 			<p class="icon-text">{{ if .Addr.Name }}<span>{{.Addr.Name}}</span><br />{{ end }}<span class="address">{{ if .Addr.Street }}<span>{{.Addr.Street}}</span>, {{ end }}{{ if .Addr.Pcode }}<span>{{.Addr.Pcode}}</span> {{ end }}<span>{{.Addr.City}}</span></span></p>
@@ -55,10 +59,6 @@
 			<p class="small-icon pull-left"><span class="fa fa-{{categoryIcon .}} fa-fw" title="Kategorien"></span></p>{{end}}
 			<p class="icon-text">{{range $i, $category := .Categories}}{{if $i}}, {{end}}{{categoryTitle $category}}{{end}}</p>
 		{{end}}
-		{{/*{{if gt (len $.recurrences) 1}}
-			<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
-			<p class="icon-text">{{range $i, $date := $.recurrences}}{{if $i}}, {{end}}<a class="highlight" title="{{$date.Title}} am {{dateFormat $date.Start}} in {{citypartName $date.Addr}}" href="{{$date.Url}}" rel="nofollow">{{cut (dateFormat $date.Start) 1}}</a>{{end}}</p>
-		{{end}}*/}}
 		{{if .Web}}
 			<p class="small-icon pull-left"><span class="fa fa-external-link fa-fw" title="Webseite"></span></p>
 			<p class="icon-text date"><a href="{{.Web}}" class="highlight" title="Webseite von {{.Title}}" target="_blank">{{strClip .Web 30}}</a></p>
@@ -87,6 +87,7 @@
 				<div class="tile-text">
 					<h3>{{.Title}}</h3>
 					<p class="datetime">{{longDatetimeFormat (.NextDate $.from)}}</p>
+					{{if .Recurrence}}<p class="datetime">{{.Recurrence}}</p>{{end}}
 					{{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}}<p class="datetime">{{(index $.organizers .OrganizerId).Name}}</p>{{end}}{{end}}
 					<p class="place">{{if .Addr.Name}}{{.Addr.Name}}{{if .Addr.City}}, {{end}}{{end}}{{citypartName .Addr}}</p>
 					<p class="description">{{strClip .PlainDescription 150}}</p>

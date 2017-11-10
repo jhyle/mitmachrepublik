@@ -1,6 +1,7 @@
 package mmr
 
 import (
+	"fmt"
 	"html/template"
 	"regexp"
 	"strings"
@@ -450,6 +451,56 @@ func (event *Event) HtmlDescription() template.HTML {
 func (event *Event) PlainDescription() string {
 
 	return whiteSpace.ReplaceAllString(sanitize.HTML(event.Descr), " ")
+}
+
+var weekdayShort map[time.Weekday]string = map[time.Weekday]string{
+	time.Monday:    "Mo",
+	time.Tuesday:   "Di",
+	time.Wednesday: "Mi",
+	time.Thursday:  "Do",
+	time.Friday:    "Fr",
+	time.Saturday:  "Sa",
+	time.Sunday:    "So",
+}
+
+func (event *Event) Recurrence() string {
+
+	if Weekly == event.Recurrency {
+
+		days := make([]string, 0)
+		for _, weekday := range event.Weekly.Weekdays {
+			days = append(days, weekdayShort[weekday])
+		}
+
+		text := ""
+		if event.Weekly.Interval == 1 && len(days) < 7 {
+			text += "jeden "
+		} else if event.Weekly.Interval > 1 {
+			text += fmt.Sprintf("alle %d Wochen ", event.Weekly.Interval)
+			if len(days) == 1 {
+				text += "am "
+			}
+		}
+		if len(days) == 1 {
+			text += fmt.Sprintf("%s", weekday[int(event.Weekly.Weekdays[0])])
+		} else if len(days) == 2 && event.Weekly.Interval == 1 {
+			text += fmt.Sprintf("%s und %s", weekday[int(event.Weekly.Weekdays[0])], weekday[int(event.Weekly.Weekdays[1])])
+		} else if len(days) < 7 {
+			text += fmt.Sprintf("%s", strConcat(days))
+		} else if event.Weekly.Interval == 1 {
+			text += "Montag bis Sonntag"
+		} else {
+			text += "Mo - So"
+		}
+
+		return text
+
+	} else if Monthly == event.Recurrency {
+
+		return fmt.Sprintf("jeden %d. %s", event.Monthly.Week, weekday[int(event.Monthly.Weekday)])
+	} else {
+		return ""
+	}
 }
 
 func (event *Event) Dates(from, until time.Time) []time.Time {
