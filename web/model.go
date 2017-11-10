@@ -465,6 +465,8 @@ var weekdayShort map[time.Weekday]string = map[time.Weekday]string{
 
 func (event *Event) Recurrence() string {
 
+	text := ""
+
 	if Weekly == event.Recurrency {
 
 		days := make([]string, 0)
@@ -472,7 +474,6 @@ func (event *Event) Recurrence() string {
 			days = append(days, weekdayShort[weekday])
 		}
 
-		text := ""
 		if event.Weekly.Interval == 1 && len(days) < 7 {
 			text += "jeden "
 		} else if event.Weekly.Interval > 1 {
@@ -493,14 +494,25 @@ func (event *Event) Recurrence() string {
 			text += "Mo - So"
 		}
 
-		return text
-
 	} else if Monthly == event.Recurrency {
 
-		return fmt.Sprintf("jeden %d. %s", event.Monthly.Week, weekday[int(event.Monthly.Weekday)])
-	} else {
-		return ""
+		day := ""
+		if event.Monthly.Interval > 1 {
+			text += fmt.Sprintf("jeden %d. Monat am ", event.Monthly.Interval)
+			day = weekdayShort[event.Monthly.Weekday]
+		} else {
+			text += "jeden "
+			day = weekday[int(event.Monthly.Weekday)]
+		}
+
+		if event.Monthly.Week != LastWeek {
+			text += fmt.Sprintf("%d. %s", (event.Monthly.Week + 1), day)
+		} else {
+			text += fmt.Sprintf("letzten %s", day)
+		}
 	}
+
+	return text
 }
 
 func (event *Event) Dates(from, until time.Time) []time.Time {
