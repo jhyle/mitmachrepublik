@@ -86,8 +86,7 @@
 				{{ end }}
 				<div class="tile-text">
 					<h3>{{.Title}}</h3>
-					<p class="datetime">{{longDatetimeFormat (.NextDate $.from)}}</p>
-					{{if .Recurrence}}<p class="datetime">{{.Recurrence}}</p>{{end}}
+					<p class="datetime">{{if .Recurrence}}{{.Recurrence}}{{else}}{{longDatetimeFormat (.NextDate $.from)}}{{end}}</p>
 					{{if $.organizers}}{{if ne ((index $.organizers .OrganizerId).Name) ("Mitmach-Republik")}}<p class="datetime">{{(index $.organizers .OrganizerId).Name}}</p>{{end}}{{end}}
 					<p class="place">{{if .Addr.Name}}{{.Addr.Name}}{{if .Addr.City}}, {{end}}{{end}}{{citypartName .Addr}}</p>
 					<p class="description">{{strClip .PlainDescription 150}}</p>

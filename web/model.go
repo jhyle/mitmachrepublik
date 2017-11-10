@@ -510,6 +510,10 @@ func (event *Event) Recurrence() string {
 		} else {
 			text += fmt.Sprintf("letzten %s", day)
 		}
+
+		if event.Monthly.Interval == 1 {
+			text += " im Monat"
+		}
 	}
 
 	return text
