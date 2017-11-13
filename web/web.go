@@ -54,6 +54,10 @@ type (
 		Text    string
 	}
 
+	sendPassword struct {
+		Email string
+	}
+
 	appResult struct {
 		Status      int
 		Error       error
@@ -75,6 +79,8 @@ const (
 	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der Mitmach-Republik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
 	password_subject = "Deine neue E-Mail-Adresse bei mitmachrepublik.de"
 	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
+	resetpwd_subject = "Neues Kennwort für mitmachrepublik.de"
+	resetpwd_message = "Liebe/r Organisator/in von %s,\r\n\r\nDu hast auf unserer Webseite einen Link zur Neueingabe Deines Kennworts angefordet. Bitte klicke dazu auf den folgenden Link:\r\n\r\nhttp://%s/?auth=%s#newpwd\r\n\r\nDas Team der Mitmach-Republik"
 	ga_dev           = "UA-61290824-1"
 	ga_test          = "UA-61290824-2"
 	ga_www           = "UA-61290824-3"
@@ -1009,7 +1015,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 		maxPage := pageCount - 1
 
-		return app.view("admin.tpl", w, &meta, bson.M{"user": user, "query": search, "results": result.Count, "organizers": organizers, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events})
+		return app.view("admin.tpl", w, &meta, bson.M{"user": user, "query": search, "results": result.Count, "organizers": organizers, "page": page, "pages": pages, "maxPage": maxPage, "events": result.Events, "timespans": [][]time.Time{[]time.Time{time.Time{}, time.Time{}}}})
 	}()
 
 	app.handle(w, result)
@@ -1464,6 +1470,36 @@ func (app *MmrApp) sendContactMailHandler(w traffic.ResponseWriter, r *traffic.R
 	app.handle(w, result)
 }
 
+func (app *MmrApp) sendPasswordMailHandler(w traffic.ResponseWriter, r *traffic.Request) {
+
+	result := func() *appResult {
+
+		form, err := (&Request{r}).ReadSendPassword()
+		if err != nil {
+			return resultBadRequest
+		}
+
+		user, err := app.users.LoadByEmail(form.Email)
+		if err != nil {
+			return resultNotFound
+		}
+
+		sessionId, err := app.database.CreateSession(user.GetId())
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		err = app.sendEmail(app.emailAccount.From, &EmailAddress{user.Name, user.Email}, resetpwd_subject, fmt.Sprintf(resetpwd_message, user.Name, app.hostname, sessionId.Hex()))
+		if err != nil {
+			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		return resultOK
+	}()
+
+	app.handle(w, result)
+}
+
 func (app *MmrApp) emailAlertHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *appResult {
@@ -1685,6 +1721,7 @@ func (app *MmrApp) Start() {
 	router.Get("/dialog/registered", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "registered.tpl", "") })
 	router.Get("/dialog/login", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "login.tpl", "") })
 	router.Get("/dialog/register", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "register.tpl", "") })
+	router.Get("/dialog/password", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "password_reset.tpl", "") })
 	router.Get("/dialog/sendevent/:id", app.sendEventPage)
 	router.Get("/dialog/emailalert/:place/:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.emailAlertPage)
 	router.Get("/dialog/emailalert//:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.emailAlertPage)
@@ -1699,6 +1736,7 @@ func (app *MmrApp) Start() {
 	router.Post("/event", app.eventHandler)
 	router.Post("/sendeventmail", app.sendEventMailHandler)
 	router.Post("/sendcontactmail", app.sendContactMailHandler)
+	router.Post("/sendpasswordmail", app.sendPasswordMailHandler)
 	router.Post("/emailalert", app.emailAlertHandler)
 	router.Get("/newsletter/unsubscribe/:id", app.nlUnsubscribe)
 

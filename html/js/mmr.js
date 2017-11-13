@@ -3,6 +3,19 @@ var DateTimePattern = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2})\:(\d{2})$/;
 var EmailPattern = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 var WebPattern = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/;
 
+function getUrlVars()
+{
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
+
 function zeroFill( number, width )
 {
 	width -= number.toString().length;
@@ -522,19 +535,22 @@ $(function() {
 	$("#login").on('shown.bs.modal', function () {
 		$("#login-form").submit(function(e) {
 			e.preventDefault();
+			$("#login-submit").button('loading');
 			var data = {"Email": $("#login-Email").val(), "Pwd": $("#login-Pwd").val()};
 			$.ajax({cache: false, url : "/login", type: "POST", dataType : "json", data : JSON.stringify(data),
 				success: function(sessionid) {
 					$("#login").modal("hide");
+					$("#login-submit").button('reset');
 					$.cookie("SESSIONID", sessionid, {path: '/'});
 					window.location.href = "/veranstalter/verwaltung/0";
 				},
-				error : function(result) {
+				error: function(result) {
 					if (result.status == 404) {
-						alert("Diese Anmeldedaten sind uns nicht bekannt.");
+						alert("Diese Anmeldedaten sind leider nicht bekannt.");
 					} else {
 						alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
 					}
+					$("#login-submit").button('reset');
 				}
 			});
 		});
@@ -589,7 +605,7 @@ $(function() {
 				},
 				error: function(result) {
 					if (result.status == 409) {
-						alert("Die E-Mail-Adresse ist schon registriert. Bitte wähle eine andere.");
+						alert("Die E-Mail-Adresse ist schon registriert. Bitte wähle eine andere aus.");
 					} else if (result.status == 400) {
 						alert("Bitte stimme den Allgemeinen Geschäftsbedingungen zu.");
 					} else {
@@ -603,6 +619,27 @@ $(function() {
 	    $("#register input").first().focus();
 	});
 	
+	$("#send-password").on('shown.bs.modal', function () {
+		$("#send-password-form").submit(function(e) {
+			e.preventDefault();
+			$("#send-password-submit").button('loading');
+			var data = {"Email": $("#send-password-email").val()};
+			$.ajax({cache: false, url : "/sendpasswordmail", type: "POST", data: JSON.stringify(data),
+				success: function() {
+					alert("Die E-Mail mit dem Link zur Neueingabe Deines Kennworts wurde an die angegebene E-Mail-Adresse versendet.");
+					$("#send-password").modal("hide");
+					$("#send-password-submit").button('reset');
+				},
+				error: function() {
+					alert("Es gab ein Problem in der Kommunikation mit dem Server. Bitte versuche es später noch einmal.");
+					$("#send-password-submit").button('reset');
+				}
+			});
+		});
+		
+	    $("#send-password input").first().focus();
+	});
+
 	$("#mail").on('shown.bs.modal', function () {
 		initSendMailForm("send-mail");
 		
@@ -613,9 +650,9 @@ $(function() {
 			var data = {"Name": $("#send-mail-Name").val(), "Email": $("#send-mail-Email").val(), "Subject": $("#send-mail-Subject").val(), "Text": $("#send-mail-Text").val()};
 			$.ajax({cache: false, url : "/sendcontactmail", type: "POST", data : JSON.stringify(data),
 				success: function() {
-					$("#send-mail-submit").button('reset');
 					alert("Deine Nachricht wurde verschickt.")
 					$("#mail").modal("hide");
+					$("#send-mail-submit").button('reset');
 				},
 				error: function() {
 					$("#send-mail-submit").button('reset');
@@ -637,9 +674,9 @@ $(function() {
 			var data = {"Name": $("#send-event-Name").val(), "Email": $("#send-event-Email").val(), "Subject": $("#send-event-Subject").val(), "Text": $("#send-event-Text").val()};
 			$.ajax({cache: false, url : "/sendeventmail", type: "POST", data : JSON.stringify(data),
 				success: function() {
-					$("#send-event-submit").button('reset');
 					alert("Deine Nachricht wurde verschickt.")
 					$("#share").modal("hide");
+					$("#send-event-submit").button('reset');
 				},
 				error: function() {
 					$("#send-event-submit").button('reset');
@@ -822,11 +859,19 @@ $(function() {
         $this.attr("href", $this.attr("data-href"));
     });
 
+	var auth = getUrlVars()["auth"]
+	if (auth) {
+		auth = auth.split("#")
+		$.cookie("SESSIONID", auth[0], {path: '/'});
+	}
+
 	var hash = window.location.hash;
 	if (hash.substring(1) == "login") {
 		$.removeCookie("SESSIONID", {path: '/'});
 		$("#login .modal-content").load("/dialog/login");
 		$("#login").modal("show");
+	} else if (hash.substring(1) == "newpwd") {
+		window.location.href = "/veranstalter/verwaltung/kennwort"
 	}
 
 	if ($.cookie("SESSIONID")) {

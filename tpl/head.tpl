@@ -49,13 +49,13 @@
 			</div>
 		</div>
 	</div>
-	<div class="modal fade" id="register" tabindex="-3" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
+	<div class="modal fade" id="register" tabindex="-3" role="dialog" aria-labelledby="register-dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 			</div>
 		</div>
 	</div>
-	<div class="modal fade" id="registered" tabindex="-4" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">
+	<div class="modal fade" id="registered" tabindex="-4" role="dialog" aria-labelledby="registered-dialog" aria-hidden="true">
 	</div>
 	<div class="modal fade" id="mail" tabindex="-5" role="dialog" aria-labelledby="email-dialog" aria-hidden="true">
 		<div class="modal-dialog">
@@ -64,6 +64,12 @@
 		</div>
 	</div>
 	<div class="modal fade" id="email-alert" tabindex="-5" role="dialog" aria-labelledby="email-alert-dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="send-password" tabindex="-7" role="dialog" aria-labelledby="password-dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 			</div>

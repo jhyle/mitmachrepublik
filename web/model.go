@@ -501,7 +501,7 @@ func (event *Event) Recurrence() string {
 			text += fmt.Sprintf("jeden %d. Monat am ", event.Monthly.Interval)
 			day = weekdayShort[event.Monthly.Weekday]
 		} else {
-			text += "jeden "
+			text += "am "
 			day = weekday[int(event.Monthly.Weekday)]
 		}
 
