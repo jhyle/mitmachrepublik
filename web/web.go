@@ -288,7 +288,7 @@ func (app *MmrApp) sitemapPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	pageSize := 8
+	pageSize := 16
 	query := ""
 	place := ""
 	dateIds := []int{TwoWeeks}
@@ -331,6 +331,16 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		organizers, err := app.users.FindForEvents(eventList)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
+		}
+
+		for topic, topicEvents := range events {
+			approvedEvents := make([]*Event, 0)
+			for _, event := range topicEvents {
+				if organizers[event.OrganizerId].Approved {
+					approvedEvents = append(approvedEvents, event)
+				}
+			}
+			events[topic] = approvedEvents
 		}
 
 		if r.Param("fmt") == "RSS" {
@@ -1481,7 +1491,8 @@ func (app *MmrApp) sendPasswordMailHandler(w traffic.ResponseWriter, r *traffic.
 
 		user, err := app.users.LoadByEmail(form.Email)
 		if err != nil {
-			return resultNotFound
+			// we don't tell if the email was not found
+			return resultOK
 		}
 
 		sessionId, err := app.database.CreateSession(user.GetId())
