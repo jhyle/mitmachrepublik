@@ -7,7 +7,7 @@
 	{{end}}
 	{{if gt (len (index $.events $path)) 0}}
 		<div class="col-xs-12 row-topic">
-			<a href="{{$path}}">{{$topic.Name}}</a>
+			<a href="{{$path}}">{{$topic.Name}}</a> <a class="highlight small" href="{{$path}}"><span class="fa fa-caret-right"></span> alle Veranstaltungen</a>
 		</div>
 	{{end}}
 	{{range $event := index $.events $path}}

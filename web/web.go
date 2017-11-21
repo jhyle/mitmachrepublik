@@ -339,6 +339,9 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 				if organizers[event.OrganizerId].Approved {
 					approvedEvents = append(approvedEvents, event)
 				}
+				if len(approvedEvents) == 8 {
+					break
+				}
 			}
 			events[topic] = approvedEvents
 		}
