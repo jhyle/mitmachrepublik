@@ -1731,6 +1731,10 @@ func (app *MmrApp) Start() {
 	router.Get("/agbs", func(w traffic.ResponseWriter, r *traffic.Request) {
 		app.staticPage(w, "agbs.tpl", "Allgemeine Geschäftsbedingungen")
 	})
+	router.Get("/wir-ueber-uns", func(w traffic.ResponseWriter, r *traffic.Request) {
+		app.staticPage(w, "aboutus.tpl", "Wir über uns")
+	})
+
 	router.Get("/dialog/contact", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "contact.tpl", "") })
 	router.Get("/dialog/registered", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "registered.tpl", "") })
 	router.Get("/dialog/login", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "login.tpl", "") })

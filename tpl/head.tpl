@@ -98,7 +98,8 @@
 				<a class="highlight" title="Like uns auf Facebook." href="https://www.facebook.com/mitmachrepublik" target="_blank"><span class="fa fa-facebook"></span></a>
 				<a class="highlight" title="Folge uns auf twitter." href="https://twitter.com/mitmachrepublik" target="_blank"><span class="fa fa-twitter"></span></a>
 				| <a href="javascript:void(0)" data-href="/dialog/contact" rel="nofollow" title="Schreibe uns eine Nachricht." data-toggle="modal" data-target="#mail">Kontakt</a>
-				| <a id="head-login" href="javascript:void(0)" data-href="/dialog/login" rel="nofollow" data-toggle="modal" data-target="#login" title="Melde Dich an, um Deine Veranstaltungen einzutragen."><span class="fa fa-user highlight"></span> Veranstalter-Login</a><br>
+				| <a id="head-login" href="javascript:void(0)" data-href="/dialog/login" rel="nofollow" data-toggle="modal" data-target="#login" title="Melde Dich an, um Deine Veranstaltungen einzutragen.">Login</a>
+				| <a href="/wir-ueber-uns" title="Wer wir sind und warum wir das machen.">Wir über uns</a><br>
 				<form id="fulltextsearch" role="form" action="/suche" method="POST" class="form-inline"><input class="form-control form-search" style="width: 83%" name="fulltextsearch" placeholder="Veranstaltungen suchen" autocomplete="off"> <button type="submit" class="btn btn-mmr form-search" style="margin-left: 5px" name="search" title="Veranstaltungen suchen" value="query"><span class="fa fa-search"></span></button></form>
 			</div>
 		</div>
