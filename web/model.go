@@ -549,7 +549,7 @@ func (event *Event) Dates(from, until time.Time) []time.Time {
 			date = date.AddDate(0, 0, 1)
 			weekday = date.Weekday()
 
-			if eventDays[weekday] && !date.Before(from) {
+			if eventDays[weekday] && !date.Before(from) && !date.After(until) {
 				dates = append(dates, date)
 			}
 		}
@@ -570,7 +570,7 @@ func (event *Event) Dates(from, until time.Time) []time.Time {
 			date = time.Date(year, month, day, event.Start.Hour(), event.Start.Minute(), 0, 0, time.Local)
 			for i := 0; i < 7; i++ {
 				if date.Weekday() == event.Monthly.Weekday {
-					if !date.Before(from) && date.After(event.Start) && (event.RecurrencyEnd.IsZero() || date.Before(event.RecurrencyEnd)) && date.Before(until) {
+					if !date.Before(from) && date.After(event.Start) && (event.RecurrencyEnd.IsZero() || date.Before(event.RecurrencyEnd)) && !date.After(until) {
 						dates = append(dates, date)
 					}
 				}

@@ -251,37 +251,43 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 	return &event, nil
 }
 
-func (service *ScrapersService) scrapeUmweltKalender() error {
+func (service *ScrapersService) scrapeUmweltKalender() []error {
 
 	page, err := service.getWebPage(UK_LIST_URL)
 	if err != nil {
-		return errors.Wrapf(err, "error loading Umweltkalender event list at %s", UK_LIST_URL)
+		return []error{errors.Wrapf(err, "error loading Umweltkalender event list at %s", UK_LIST_URL)}
 	}
 
 	ids := uk_list.FindAllSubmatch(page, -1)
 	if ids == nil {
-		return errors.New("no events found at Umweltkalender")
+		return []error{errors.New("no events found at Umweltkalender")}
 	}
 
+	errs := []error{}
 	for i := range ids {
 		event, err := service.scrapeUmweltKalenderEvent(string(ids[i][1]))
 		if err != nil {
-			return errors.Wrapf(err, "error reading Umweltkalender event: %s", ids[i][1])
-		}
-		err = service.saveScraped(event)
-		if err != nil {
-			return errors.Wrapf(err, "error importing Umweltkalender event: %s %s", event.Source, event.SourceId)
+			errs = append(errs, errors.Wrapf(err, "error reading Umweltkalender event: %s", ids[i][1]))
+		} else {
+			err = service.saveScraped(event)
+			if err != nil {
+				errs = append(errs, errors.Wrapf(err, "error importing Umweltkalender event: %s %s", event.Source, event.SourceId))
+			}
 		}
 	}
 
-	return nil
+	return errs
 }
 
 func (service *ScrapersService) Run() error {
 
-	err := service.scrapeUmweltKalender()
-	if err != nil {
-		return errors.Wrap(err, "error scraping Umweltkalender")
+	errs := service.scrapeUmweltKalender()
+	if len(errs) > 0 {
+		msg := ""
+		for _, err := range errs {
+			msg += "\n" + err.Error()
+		}
+		return errors.Errorf("error scraping Umweltkalender: %s", msg)
 	}
 
 	return nil
