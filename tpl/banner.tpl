@@ -1,6 +1,6 @@
 <div class="row">
 	<div class="col-xs-12 col-banner">
-		<h1 class="text-center hidden-xs">Willkommen in der Mitmach-Republik!</h1>
+		<h1 class="text-center hidden-xs">Veranstaltungen zum Mitmachen!</h1>
 		<h2 class="text-center"><span>Gemeinsam</span> aktiv werden.</h2>
 		<h4 class="text-center">{{.meta.FB_Descr}}</h4>
 		<form role="form" action="/suche" method="POST" class="form-inline text-center">

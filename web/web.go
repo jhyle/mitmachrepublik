@@ -295,7 +295,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	timespans := timeSpans(dateIds)
 
 	meta := metaTags{
-		"Gemeinschaftliche Veranstaltungen zum Mitmachen",
+		"Gemeinschaftliche Veranstaltungen zum Mitmachen!",
 		"Gemeinschaftliche Veranstaltungen und Organisationen in Berlin und anderswo. Finde Veranstaltungen von Nachbarschaftszentren, Umweltverbänden, Bürgerinitiativen, Vereinen und Aktionsbündnissen für heute, morgen und am Wochenende in Deiner Umgebung.",
 		"Gemeinsam aktiv werden.",
 		"http://" + app.hostname + "/images/mitmachrepublik.png",
