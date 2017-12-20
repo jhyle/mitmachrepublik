@@ -168,14 +168,15 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		return nil, errors.New("init of database failed: " + err.Error())
 	}
 
+	var adminId bson.ObjectId
 	admin, err := users.LoadByEmail(ADMIN_EMAIL)
-	if err != nil {
-		return nil, errors.New(ADMIN_EMAIL + " " + err.Error())
+	if err == nil {
+		adminId = admin.GetId()
 	}
 
 	services := make([]Service, 0)
 	services = append(services, NewSessionService(3, emailAccount, database))
-	services = append(services, NewScrapersService(3, emailAccount, events, admin.Id))
+	services = append(services, NewScrapersService(3, emailAccount, events, adminId))
 	services = append(services, NewUnusedImgService(4, emailAccount, database, imgServer))
 	services = append(services, NewSendAlertsService(5, emailAccount, hostname, emailAccount, alerts))
 	if env == "dev" {
@@ -1780,11 +1781,12 @@ func (app *MmrApp) Start() {
 
 func (app *MmrApp) RunScrapers() error {
 
-	organizer, err := app.users.LoadByEmail(ADMIN_EMAIL)
-	if err != nil {
-		return errors.New(ADMIN_EMAIL + " " + err.Error())
+	var adminId bson.ObjectId
+	admin, err := app.users.LoadByEmail(ADMIN_EMAIL)
+	if err == nil {
+		adminId = admin.Id
 	}
-	scrapers := NewScrapersService(0, app.emailAccount, app.events, organizer.Id)
+	scrapers := NewScrapersService(0, app.emailAccount, app.events, adminId)
 	return scrapers.Run()
 }
 

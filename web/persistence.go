@@ -159,6 +159,23 @@ func (db *mongoDb) LoadUserBySessionId(sessionId bson.ObjectId) (*User, error) {
 
 func (table *mongoTable) DropIndices() error {
 
+	names, err := table.collection.Database.CollectionNames()
+	if err != nil {
+		return errors.Wrap(err, "error loading collection names")
+	}
+
+	exists := false
+	for _, name := range names {
+		if name == table.collection.Name {
+			exists = true
+			break
+		}
+	}
+
+	if !exists {
+		return nil
+	}
+
 	indices, err := table.collection.Indexes()
 	if err != nil {
 		return errors.Wrapf(err, "error loading indices of %s", table.collection.Name)

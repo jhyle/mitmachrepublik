@@ -281,6 +281,10 @@ func (service *ScrapersService) scrapeUmweltKalender() []error {
 
 func (service *ScrapersService) Run() error {
 
+	if !service.organizerId.Valid() {
+		return errors.New("no valid organizerId set, exiting")
+	}
+
 	errs := service.scrapeUmweltKalender()
 	if len(errs) > 0 {
 		msg := ""

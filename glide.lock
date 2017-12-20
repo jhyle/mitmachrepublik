@@ -1,10 +1,10 @@
 hash: 2860d66f1526f0038b2064e48d8f12591a49ac63de3f8527664312996421ff55
-updated: 2017-10-28T13:21:10.84415025+02:00
+updated: 2017-12-20T17:00:47.324293439+01:00
 imports:
 - name: github.com/armon/go-radix
   version: 1fca145dffbcaa8fe914309b1ec0cfc67500fe61
 - name: github.com/blevesearch/bleve
-  version: 6eea5b78da004393b1d06b8c88d1bed9ca0a94b2
+  version: def77cb5485838fb317686cd23e2d0da1d6b8491
   subpackages:
   - analysis
   - analysis/analyzer/standard
@@ -72,7 +72,7 @@ imports:
   - html
   - html/atom
 - name: golang.org/x/sys
-  version: 661970f62f5897bc0cd5fdca7e087ba8a98a8fa1
+  version: fb4cac33e3196ff7f507ab9b2d2a44b0142f5b5a
   subpackages:
   - unix
 - name: gopkg.in/alexcesaro/quotedprintable.v3
@@ -80,7 +80,7 @@ imports:
 - name: gopkg.in/gomail.v2
   version: 81ebce5c23dfd25c6c67194b37d3dd3f338c98b1
 - name: gopkg.in/mgo.v2
-  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  version: b6121c6199b7beecde08e6853f256a6475fe8031
   subpackages:
   - bson
   - internal/json
