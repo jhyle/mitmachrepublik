@@ -9,7 +9,7 @@
     <image>
       <url>{{.meta.FB_Image}}</url>
       <title>Mitmach-Republik</title>
-      <link>http://{{.hostname}}/</link>
+      <link>{{.hostname}}/</link>
     </image>
  
  	{{range .items}}
@@ -17,7 +17,7 @@
       <guid>{{.Id}}</guid>
       <title>{{.Title}}</title>
       <description>{{.Description}}</description>
-      <link>http://{{$.hostname}}{{.Link}}</link>
+      <link>{{$.hostname}}{{.Link}}</link>
     </item>
     {{end}}
  

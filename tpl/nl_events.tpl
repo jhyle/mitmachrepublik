@@ -3,21 +3,21 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta charset="utf-8">
 	<title>Veranstaltungen aus der Mitmach-Republik</title>
-	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
 </head>
 <body style="font-family: 'Open Sans',sans-serif; font-size: 15px; line-height: 1.42857; width: 650px; margin-left: auto; margin-right: auto">
 {{$n := len .events}}
-<a style="float: left !important; text-decoration: none;" href="http://{{$.hostname}}/" title="www.mitmachrepublik.de">
-	<img style="margin: 13px 30px 10px 0; vertical-align: middle; border: 0 none; width: 200px" src="http://{{$.hostname}}/images/mitmachrepublik.png" alt="Logo Mitmach-Republik">
+<a style="float: left !important; text-decoration: none;" href="{{$.hostname}}/" title="www.mitmachrepublik.de">
+	<img style="margin: 13px 30px 10px 0; vertical-align: middle; border: 0 none; width: 200px" src="{{$.hostname}}/images/mitmachrepublik.png" alt="Logo Mitmach-Republik">
 </a>
 <h1 style="color: #ff5100; font-size: 27px; margin: 10px 0 0 0; line-height: 2em">Deine Veranstaltungen</h1>
 <p style="margin: 0 0 10px 0">Klicke auf die Veranstaltungen für weitere Infos.</p>  
 {{range .events}}
 {{if (index $.organizers .OrganizerId).Approved}}
 <div style="border: 1px solid #e6e6e6; margin-bottom: 15px; overflow: hidden; ">
-	<a style="color: #2f3030; text-decoration: none;" href="http://{{$.hostname}}{{.Url}}" title="Veranstaltung anzeigen">
+	<a style="color: #2f3030; text-decoration: none;" href="{{$.hostname}}{{.Url}}" title="Veranstaltung anzeigen">
 	{{if or (.Image) ((index $.organizers .OrganizerId).Image)}}
-		<img style="margin-right: 10px; float: left !important; vertical-align: middle; border: 0 none; " src="http://{{$.hostname}}/bild/{{if .Image}}{{.Image}}{{else}}{{(index $.organizers .OrganizerId).Image}}{{end}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
+		<img style="margin-right: 10px; float: left !important; vertical-align: middle; border: 0 none; " src="{{$.hostname}}/bild/{{if .Image}}{{.Image}}{{else}}{{(index $.organizers .OrganizerId).Image}}{{end}}?width=220&height=165" alt="Veranstaltung {{.Title}}">
 	{{end}}
 	<div style="margin: 10px;">
 		<h3 style="color: #ff5100; font-size: 23px; font-weight: lighter; margin: 10px 0; line-height: 1.1;">{{.Title}}</h3>
@@ -32,7 +32,7 @@
 {{end}}
 {{end}}
 <div style="background-color: #303030; color: white; font-size: 13px; line-height: 2; padding: 30px">
-	@ <a style="color: white; font-weight: bold; text-decoration: none;" href="http://www.mitmachrepublik">www.mitmachrepublik.de</a> | Klicke <a style="color: white; font-weight: bold; text-decoration: none;" href="http://{{.hostname}}/newsletter/unsubscribe/{{.alertId}}">hier</a>, wenn Du diese E-Mail nicht mehr erhalten möchtest. 
+	@ <a style="color: white; font-weight: bold; text-decoration: none;" href="{{.hostname}}">www.mitmachrepublik.de</a> | Klicke <a style="color: white; font-weight: bold; text-decoration: none;" href="{{.hostname}}/newsletter/unsubscribe/{{.alertId}}">hier</a>, wenn Du diese E-Mail nicht mehr erhalten möchtest. 
 </div>
 </body>
 </html>

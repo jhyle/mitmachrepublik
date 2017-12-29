@@ -13,15 +13,15 @@
 	<meta name="robots" content="noindex, follow">
 {{end}}
 {{if and (.event) (not .user)}}
-	<meta property="og:url" content="http://{{.hostname}}{{.event.Url}}">
-	<link rel="canonical" href="http://{{.hostname}}{{.event.Url}}">
+	<meta property="og:url" content="{{.hostname}}{{.event.Url}}">
+	<link rel="canonical" href="{{.hostname}}{{.event.Url}}">
 {{end}}
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">
 	{{if .meta.RSS}}
 		<link rel="alternate" type="application/rss+xml" title="RSS" href="?fmt=RSS">
 	{{end}}
-	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
 	<link href="/css/styles-17.css" rel="stylesheet">
 </head>
 <body>

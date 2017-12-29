@@ -181,7 +181,7 @@ func (service *SendAlertsService) Start() {
 func getNewsletter(hostname string, alert Alert) (string, error) {
 
 	path := "/newsletter/veranstaltungen/" + eventSearchUrlWithQuery(alert.Place, alert.Targets, alert.Categories, alert.Dates, alert.Radius, alert.Query)
-	url := "http://" + hostname + path[0:strings.LastIndex(path, "/")+1] + alert.Id.Hex()
+	url := hostname + path[0:strings.LastIndex(path, "/")+1] + alert.Id.Hex()
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", errors.Wrapf(err, "error getting newsletter: %s", url)

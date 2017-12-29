@@ -76,11 +76,11 @@ type (
 
 const (
 	register_subject = "Deine Registrierung bei mitmachrepublik.de"
-	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der Mitmach-Republik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
+	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der Mitmach-Republik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\n%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
 	password_subject = "Deine neue E-Mail-Adresse bei mitmachrepublik.de"
-	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\nhttp://%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
+	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\n%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
 	resetpwd_subject = "Neues Kennwort für mitmachrepublik.de"
-	resetpwd_message = "Liebe/r Organisator/in von %s,\r\n\r\nDu hast auf unserer Webseite einen Link zur Neueingabe Deines Kennworts angefordet. Bitte klicke dazu auf den folgenden Link:\r\n\r\nhttp://%s/?auth=%s#newpwd\r\n\r\nDas Team der Mitmach-Republik"
+	resetpwd_message = "Liebe/r Organisator/in von %s,\r\n\r\nDu hast auf unserer Webseite einen Link zur Neueingabe Deines Kennworts angefordet. Bitte klicke dazu auf den folgenden Link:\r\n\r\n%s/?auth=%s#newpwd\r\n\r\nDas Team der Mitmach-Republik"
 	ga_dev           = "UA-61290824-1"
 	ga_test          = "UA-61290824-2"
 	ga_www           = "UA-61290824-3"
@@ -154,13 +154,13 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 	emailAccount := &EmailAccount{"smtp.gmail.com", 465, "mitmachrepublik", smtpPass, &EmailAddress{"Mitmach-Republik", "mitmachrepublik@gmail.com"}}
 
 	ga_code := ga_dev
-	hostname := "dev.mitmachrepublik.de"
+	hostname := "http://dev.mitmachrepublik.de"
 	if env == "www" {
 		ga_code = ga_www
-		hostname = "www.mitmachrepublik.de"
+		hostname = "https://www.mitmachrepublik.de"
 	} else if env == "test" {
 		ga_code = ga_test
-		hostname = "test.mitmachrepublik.de"
+		hostname = "http://test.mitmachrepublik.de"
 	}
 
 	cities, err := events.Cities()
@@ -299,7 +299,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		"Gemeinschaftliche Veranstaltungen zum Mitmachen!",
 		"Gemeinschaftliche Veranstaltungen und Organisationen in Berlin und anderswo. Finde Veranstaltungen von Nachbarschaftszentren, Umweltverbänden, Bürgerinitiativen, Vereinen und Aktionsbündnissen für heute, morgen und am Wochenende in Deiner Umgebung.",
 		"Gemeinsam aktiv werden.",
-		"http://" + app.hostname + "/images/mitmachrepublik.png",
+		app.hostname + "/images/mitmachrepublik.png",
 		"Deine Seite für gemeinschaftliche Veranstaltungen und Organisationen. Finde Veranstaltungen von Nachbarschaftszentren, Umweltverbänden, Bürgerinitiativen und Vereinen in Deiner Umgebung. Mach mit bei gemeinsamen Projekten und Ideen!",
 		true,
 	}
@@ -363,7 +363,7 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 		"Registrierung bestätigen | Mitmach-Republik",
 		"",
 		"Registrierung bestätigen",
-		"http://" + app.hostname + "/images/mitmachrepublik.png",
+		app.hostname + "/images/mitmachrepublik.png",
 		"",
 		false,
 	}
@@ -398,7 +398,7 @@ func (app *MmrApp) nlUnsubscribe(w traffic.ResponseWriter, r *traffic.Request) {
 		"Benachrichtigung abbestellen | Mitmach-Republik",
 		"",
 		"Benachrichtigung abbestellen",
-		"http://" + app.hostname + "/images/mitmachrepublik.png",
+		app.hostname + "/images/mitmachrepublik.png",
 		"",
 		false,
 	}
@@ -504,7 +504,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 		title + " | Mitmach-Republik",
 		descr,
 		title,
-		"http://" + app.hostname + "/images/mitmachrepublik.png",
+		app.hostname + "/images/mitmachrepublik.png",
 		descr,
 		true,
 	}
@@ -611,7 +611,7 @@ func (app *MmrApp) landingPage(w traffic.ResponseWriter, r *traffic.Request) {
 		title + " | Mitmach-Republik",
 		descr,
 		title,
-		"http://" + app.hostname + "/images/mitmachrepublik.png",
+		app.hostname + "/images/mitmachrepublik.png",
 		descr,
 		true,
 	}
@@ -739,7 +739,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		imageUrl := ""
 		if !isEmpty(event.Image) {
-			imageUrl = "http://" + app.hostname + "/bild/" + event.Image
+			imageUrl = app.hostname + "/bild/" + event.Image
 		}
 
 		title := event.Title
@@ -861,7 +861,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 		title + " | Mitmach-Republik",
 		descr,
 		title,
-		"http://" + app.hostname + "/images/mitmachrepublik.png",
+		app.hostname + "/images/mitmachrepublik.png",
 		descr,
 		false,
 	}
@@ -945,7 +945,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		imageUrl := ""
 		if !isEmpty(organizer.Image) {
-			imageUrl = "http://" + app.hostname + "/bild/" + organizer.Image
+			imageUrl = app.hostname + "/bild/" + organizer.Image
 		}
 		title := "Veranstaltungen"
 		if organizer.Name != "Mitmach-Republik" {

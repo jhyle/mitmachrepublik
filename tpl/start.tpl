@@ -6,8 +6,8 @@
 	"@context": "http://schema.org",
 	"@type": "Organization",
 	"name" : "Mitmach-Republik",
-	"url": "http://www.mitmachrepublik.de",
-	"logo": "http://www.mitmachrepublik.de/images/mitmachrepublik.png",
+	"url": "{{.hostname}}",
+	"logo": "{{.hostname}}/images/mitmachrepublik.png",
 	"sameAs" : [
 		"https://www.facebook.com/mitmach-republik",
 		"https://twitter.com/mitmachrepublik"

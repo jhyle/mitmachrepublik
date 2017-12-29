@@ -25,8 +25,8 @@ vor.</p><br />
 Die Facebook-Plugins erkennen Sie an dem Facebook-Logo oder
 dem "Like-Button" ("Gefällt mir") auf unserer Seite. Eine Übersicht
 über die Facebook-Plugins finden Sie hier:
-<a href="http://developers.facebook.com/docs/plugins/" 
-target="_blank">http://developers.facebook.com/docs/plugins/</a>.<br />
+<a href="https://developers.facebook.com/docs/plugins/" 
+target="_blank">https://developers.facebook.com/docs/plugins/</a>.<br />
 Wenn Sie unsere Seiten
 besuchen, wird über das Plugin eine direkte Verbindung zwischen Ihrem
 Browser und dem Facebook-Server hergestellt. Facebook erhält dadurch
@@ -39,15 +39,15 @@ weisen darauf hin, dass wir als Anbieter der Seiten keine Kenntnis vom
 Inhalt der übermittelten Daten sowie deren Nutzung durch Facebook
 erhalten. Weitere Informationen hierzu finden Sie in der
 Datenschutzerklärung von facebook unter
-<a href="http://de-de.facebook.com/policy.php" target="_blank">
-http://de-de.facebook.com/policy.php</a></p>
+<a href="https://de-de.facebook.com/policy.php" target="_blank">
+https://de-de.facebook.com/policy.php</a></p>
 <p>Wenn Sie nicht wünschen, dass Facebook den Besuch unserer Seiten Ihrem 
 Facebook-Nutzerkonto zuordnen kann, loggen Sie sich bitte aus Ihrem
 Facebook-Benutzerkonto aus.</p><br />
 <p><strong>Datenschutzerklärung für die Nutzung von Google Analytics</strong></p>
 <p>Diese Website benutzt Google Analytics, einen Webanalysedienst der Google Inc. ("Google"). Google Analytics verwendet sog. "Cookies", Textdateien, die auf Ihrem Computer gespeichert werden und die eine Analyse der Benutzung der Website durch Sie ermöglichen. Die durch den Cookie erzeugten Informationen über Ihre Benutzung dieser Website werden in der Regel an einen Server von Google in den USA übertragen und dort gespeichert. Im Falle der Aktivierung der IP-Anonymisierung auf dieser Webseite wird Ihre IP-Adresse von Google jedoch innerhalb von Mitgliedstaaten der Europäischen Union oder in anderen Vertragsstaaten des Abkommens über den Europäischen Wirtschaftsraum zuvor gekürzt.</p>
 <p>Nur in Ausnahmefällen wird die volle IP-Adresse an einen Server von Google in den USA übertragen und dort gekürzt. Im Auftrag des Betreibers dieser Website wird Google diese Informationen benutzen, um Ihre Nutzung der Website auszuwerten, um Reports über die Websiteaktivitäten zusammenzustellen und um weitere mit der Websitenutzung und der Internetnutzung verbundene Dienstleistungen gegenüber dem Websitebetreiber zu erbringen. Die im Rahmen von Google Analytics von Ihrem Browser übermittelte IP-Adresse wird nicht mit anderen Daten von Google zusammengeführt.</p>
-<p>Sie können die Speicherung der Cookies durch eine entsprechende Einstellung Ihrer Browser-Software verhindern; wir weisen Sie jedoch darauf hin, dass Sie in diesem Fall gegebenenfalls nicht sämtliche Funktionen dieser Website vollumfänglich werden nutzen können. Sie können darüber hinaus die Erfassung der durch das Cookie erzeugten und auf Ihre Nutzung der Website bezogenen Daten (inkl. Ihrer IP-Adresse) an Google sowie die Verarbeitung dieser Daten durch Google verhindern, indem sie das unter dem folgenden Link verfügbare Browser-Plugin herunterladen und installieren: <a href="http://tools.google.com/dlpage/gaoptout?hl=de">http://tools.google.com/dlpage/gaoptout?hl=de</a>.<br />
+<p>Sie können die Speicherung der Cookies durch eine entsprechende Einstellung Ihrer Browser-Software verhindern; wir weisen Sie jedoch darauf hin, dass Sie in diesem Fall gegebenenfalls nicht sämtliche Funktionen dieser Website vollumfänglich werden nutzen können. Sie können darüber hinaus die Erfassung der durch das Cookie erzeugten und auf Ihre Nutzung der Website bezogenen Daten (inkl. Ihrer IP-Adresse) an Google sowie die Verarbeitung dieser Daten durch Google verhindern, indem sie das unter dem folgenden Link verfügbare Browser-Plugin herunterladen und installieren: <a href="https://tools.google.com/dlpage/gaoptout?hl=de">https://tools.google.com/dlpage/gaoptout?hl=de</a>.<br />
 <p><strong>Datenschutzerklärung für die Nutzung von Google Adsense</strong></p>
 <p>Diese Website benutzt Google AdSense, einen Dienst zum Einbinden 
 von Werbeanzeigen der Google Inc. ("Google"). Google AdSense 
@@ -110,16 +110,16 @@ Nutzern bekannt gegeben. Dabei werden auch Daten an Twitter übertragen.</p>
 Kenntnis vom Inhalt der übermittelten Daten sowie deren Nutzung durch
 Twitter erhalten. Weitere Informationen hierzu finden Sie in der
 Datenschutzerklärung von Twitter unter
-<a href="http://twitter.com/privacy" target="_blank">http://twitter.com/privacy</a>.</p>
+<a href="https://twitter.com/privacy" target="_blank">https://twitter.com/privacy</a>.</p>
 <p>Ihre Datenschutzeinstellungen bei Twitter können Sie in den
 Konto-Einstellungen unter
-<a href="http://twitter.com/account/settings" target="_blank">http://twitter.com/account/settings</a> ändern.</p><br />
+<a href="https://twitter.com/account/settings" target="_blank">https://twitter.com/account/settings</a> ändern.</p><br />
 <p><strong>Auskunft, Löschung, Sperrung</strong></p>
 <p>Sie haben jederzeit das Recht auf unentgeltliche Auskunft über Ihre gespeicherten personenbezogenen Daten,
 deren Herkunft und Empfänger und den Zweck der Datenverarbeitung sowie ein Recht auf Berichtigung, Sperrung
 oder Löschung dieser Daten. Hierzu sowie zu weiteren Fragen zum Thema personenbezogene Daten können Sie sich
 jederzeit über die im Impressum angegeben Adresse des Webseitenbetreibers an uns wenden.</p><br />
-<p><i>Quellenangabe: <a rel="nofollow" href="http://www.e-recht24.de/muster-datenschutzerklaerung.html" target="_blank">eRecht24</a>, <a rel="nofollow" href="http://www.e-recht24.de/artikel/datenschutz/6590-facebook-like-button-datenschutz-disclaimer.html" target="_blank">Facebook-Disclaimer von eRecht24</a>, <a rel="nofollow" href="http://www.google.com/intl/de/analytics/learn/privacy.html" target="_blank">Google Analytics Datenschutzerklärung</a>, <a rel="nofollow" href="http://www.e-recht24.de/artikel/datenschutz/6635-datenschutz-rechtliche-risiken-bei-der-nutzung-von-google-analytics-und-googleadsense.html" target="_blank">Google Adsense Datenschutzerklärung</a>, <a rel="nofollow" href="http://www.google.com/intl/de/+/policy/+1button.html" target="_blank">Datenschutzerklärung Google +1</a>, <a rel="nofollow" href="http://twitter.com/privacy" target="_blank">Datenschutzerklärung für Twitter</a></i></p>	</div>
+<p><i>Quellenangabe: <a rel="nofollow" href="http://www.e-recht24.de/muster-datenschutzerklaerung.html" target="_blank">eRecht24</a>, <a rel="nofollow" href="http://www.e-recht24.de/artikel/datenschutz/6590-facebook-like-button-datenschutz-disclaimer.html" target="_blank">Facebook-Disclaimer von eRecht24</a>, <a rel="nofollow" href="https://www.google.com/intl/de/analytics/learn/privacy.html" target="_blank">Google Analytics Datenschutzerklärung</a>, <a rel="nofollow" href="http://www.e-recht24.de/artikel/datenschutz/6635-datenschutz-rechtliche-risiken-bei-der-nutzung-von-google-analytics-und-googleadsense.html" target="_blank">Google Adsense Datenschutzerklärung</a>, <a rel="nofollow" href="https://www.google.com/intl/de/+/policy/+1button.html" target="_blank">Datenschutzerklärung Google +1</a>, <a rel="nofollow" href="https://twitter.com/privacy" target="_blank">Datenschutzerklärung für Twitter</a></i></p>	</div>
 
 	<div class="col-xs-1">&nbsp;</div>
 </div>
