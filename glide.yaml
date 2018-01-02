@@ -17,3 +17,4 @@ import:
   - bson
 - package: github.com/pkg/errors
   version: ^0.8.0
+- package: github.com/benbjohnson/phantomjs

@@ -247,7 +247,8 @@ function gatherEventForm(id)
 		delete data["RecurrencyEnd"];
 	}
 
-	data["Rsvp"] = $("#" + id + "-Rsvp").is(':checked');	
+	data["Rsvp"] = $("#" + id + "-Rsvp").is(':checked');
+	data["Facebook"] = $("#" + id + "-Facebook").is(':checked');
 	
 	var recurrency = $("input[type=radio][name=recurrency]:checked").val();
 	if (recurrency == "weekly") {

@@ -27,6 +27,9 @@ var (
 	mongoServerFlag *string = flag.String("mongoServer", "localhost", "url of mongoDb server")
 	databaseFlag    *string = flag.String("database", "mitmachrepublik", "name of the database")
 	smtpPassFlag    *string = flag.String("smtpPassword", "", "password for mitmachrepublik@gmail.com")
+	fbAppSecret     *string = flag.String("fbAppSecret", "", "Facebook App Secret")
+	fbUser          *string = flag.String("fbUser", "", "Facebook user")
+	fbPassword      *string = flag.String("fbPassword", "", "Facebook password")
 	scrapersFlag    *bool   = flag.Bool("s", false, "run scrapers")
 )
 
@@ -97,7 +100,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	app, err := mmr.NewMmrApp(*envFlag, *hostFlag, *portFlag, *templateDirFlag, *indexDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag, *smtpPassFlag)
+	app, err := mmr.NewMmrApp(*envFlag, *hostFlag, *portFlag, *templateDirFlag, *indexDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag, *smtpPassFlag, *fbAppSecret, *fbUser, *fbPassword)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(2)
@@ -121,7 +124,7 @@ func main() {
 		app.Start()
 	} else {
 		err = app.RunScrapers()
-		if err != nil  {
+		if err != nil {
 			fmt.Println(err)
 		}
 		app.Stop()

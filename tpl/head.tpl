@@ -5,8 +5,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=0.75">
 	<title>{{.meta.Title}}</title>
 	<meta name="description" content="{{.meta.Descr}}">
+	<meta property="og:type" content="website">
 	<meta property="og:title" content="{{.meta.FB_Title}}">
-	<meta property="og:site_name" content="Mitmach-Republik">
+	<meta property="og:site_name" content="Mitmach-Republik e.V.">
+	<meta property="fb:app_id" content="138725613479008">
 	<meta property="og:image" content="{{.meta.FB_Image}}">
 	<meta property="og:description" content="{{.meta.FB_Descr}}">
 {{if .noindex}}

@@ -79,6 +79,8 @@ type (
 		Weekly        WeeklyRecurrence  `json:",omitempty"`
 		Monthly       MonthlyRecurrence `json:",omitempty"`
 		Rsvp          bool
+		Facebook      bool   `bson:"-"`
+		FacebookId    string `json:"-"`
 		Addr          Address
 	}
 

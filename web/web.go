@@ -31,6 +31,9 @@ type (
 		emailAccount *EmailAccount
 		locations    *LocationTree
 		services     []Service
+		fbAppSecret  string
+		fbUser       string
+		fbPass       string
 	}
 
 	metaTags struct {
@@ -76,7 +79,7 @@ type (
 
 const (
 	register_subject = "Deine Registrierung bei mitmachrepublik.de"
-	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für die Registrierung bei der Mitmach-Republik. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\n%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
+	register_message = "Liebe/r Organisator/in von %s,\r\n\r\nvielen Dank für Deine Registrierung beim Mitmach-Republik e.V. Bitte bestätige Deine Registrierung, in dem Du auf den folgenden Link klickst:\r\n\r\n%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
 	password_subject = "Deine neue E-Mail-Adresse bei mitmachrepublik.de"
 	password_message = "Liebe/r Organisator/in von %s,\r\n\r\nbitte bestätige Deine neue E-Mail-Adresse, in dem Du auf den folgenden Link klickst:\r\n\r\n%s/approve/%s\r\n\r\nDas Team der Mitmach-Republik"
 	resetpwd_subject = "Neues Kennwort für mitmachrepublik.de"
@@ -85,6 +88,7 @@ const (
 	ga_test          = "UA-61290824-2"
 	ga_www           = "UA-61290824-3"
 	google_api_key   = "AIzaSyAFzwmkGATzuHpcqV3g0yQEO77Vk66zXUM"
+	facebook_app_id  = "138725613479008"
 )
 
 var (
@@ -98,7 +102,7 @@ var (
 	sendAlertsService *SendAlertsService
 )
 
-func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass string) (*MmrApp, error) {
+func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass, fbAppSecret, fbUser, fbPass string) (*MmrApp, error) {
 
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
@@ -151,7 +155,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		return nil, errors.New("init of templates failed: " + err.Error())
 	}
 
-	emailAccount := &EmailAccount{"smtp.gmail.com", 465, "mitmachrepublik", smtpPass, &EmailAddress{"Mitmach-Republik", "mitmachrepublik@gmail.com"}}
+	emailAccount := &EmailAccount{"smtp.gmail.com", 465, "mitmachrepublik", smtpPass, &EmailAddress{"Mitmach-Republik e.V.", "mitmachrepublik@gmail.com"}}
 
 	ga_code := ga_dev
 	hostname := "http://dev.mitmachrepublik.de"
@@ -183,7 +187,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		services = append(services, NewSpawnEventsService(12, emailAccount, database, events, imgServer))
 	}
 
-	return &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services}, nil
+	return &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services, fbAppSecret, fbUser, fbPass}, nil
 }
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, data bson.M) *appResult {
@@ -360,7 +364,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	meta := metaTags{
-		"Registrierung bestätigen | Mitmach-Republik",
+		"Registrierung bestätigen | Mitmach-Republik e.V.",
 		"",
 		"Registrierung bestätigen",
 		app.hostname + "/images/mitmachrepublik.png",
@@ -395,7 +399,7 @@ func (app *MmrApp) approvePage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) nlUnsubscribe(w traffic.ResponseWriter, r *traffic.Request) {
 
 	meta := metaTags{
-		"Benachrichtigung abbestellen | Mitmach-Republik",
+		"Benachrichtigung abbestellen | Mitmach-Republik e.V.",
 		"",
 		"Benachrichtigung abbestellen",
 		app.hostname + "/images/mitmachrepublik.png",
@@ -501,7 +505,7 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	descr += "."
 
 	meta := metaTags{
-		title + " | Mitmach-Republik",
+		title + " | Mitmach-Republik e.V.",
 		descr,
 		title,
 		app.hostname + "/images/mitmachrepublik.png",
@@ -608,7 +612,7 @@ func (app *MmrApp) landingPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	meta := metaTags{
-		title + " | Mitmach-Republik",
+		title + " | Mitmach-Republik e.V.",
 		descr,
 		title,
 		app.hostname + "/images/mitmachrepublik.png",
@@ -751,7 +755,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		meta := metaTags{
-			title + " | Mitmach-Republik",
+			title + " am " + dateFormat(event.Start) + " | Mitmach-Republik e.V.",
 			strClip(event.PlainDescription(), 160),
 			title,
 			imageUrl,
@@ -782,7 +786,7 @@ func (app *MmrApp) sendEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		from = time.Now().Unix()
 	}
 
-	meta := metaTags{"Veranstaltung empfehlen | Mitmach-Republik", "", "", "", "", false}
+	meta := metaTags{"Veranstaltung empfehlen | Mitmach-Republik e.V.", "", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -803,7 +807,7 @@ func (app *MmrApp) sendEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) emailAlertPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"E-Mail-Benachrichtung | Mitmach-Republik", "", "", "", "", false}
+	meta := metaTags{"E-Mail-Benachrichtung | Mitmach-Republik e.V.", "", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -858,7 +862,7 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	descr += "."
 
 	meta := metaTags{
-		title + " | Mitmach-Republik",
+		title + " | Mitmach-Republik e.V.",
 		descr,
 		title,
 		app.hostname + "/images/mitmachrepublik.png",
@@ -948,14 +952,14 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			imageUrl = app.hostname + "/bild/" + organizer.Image
 		}
 		title := "Veranstaltungen"
-		if organizer.Name != "Mitmach-Republik" {
+		if organizer.Name != "Mitmach-Republik e.V." {
 			title += " von " + organizer.Name
 			if !isEmpty(place) {
 				title += " aus " + place
 			}
 		}
 		meta := metaTags{
-			title + " | Mitmach-Republik",
+			title + " | Mitmach-Republik e.V.",
 			strClip(organizer.PlainDescription(), 160),
 			title,
 			imageUrl,
@@ -1003,7 +1007,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	search := strings.Trim(r.Param("query"), " ")
-	meta := metaTags{"Verwaltung | Mitmach-Republik", "", "", "", "", false}
+	meta := metaTags{"Verwaltung | Mitmach-Republik e.V.", "", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -1037,7 +1041,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"Profil bearbeiten | Mitmach-Republik", "", "", "", "", false}
+	meta := metaTags{"Profil bearbeiten | Mitmach-Republik e.V.", "", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -1054,7 +1058,7 @@ func (app *MmrApp) profilePage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"E-Mail-Adresse oder Kennwort ändern | Mitmach-Republik", "", "", "", "", false}
+	meta := metaTags{"E-Mail-Adresse oder Kennwort ändern | Mitmach-Republik e.V.", "", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -1071,7 +1075,7 @@ func (app *MmrApp) passwordPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
-	meta := metaTags{"Veranstaltung bearbeiten | Mitmach-Republik", "", "", "", "", false}
+	meta := metaTags{"Veranstaltung bearbeiten | Mitmach-Republik e.V.", "", "", "", "", false}
 
 	result := func() *appResult {
 
@@ -1138,7 +1142,7 @@ func (app *MmrApp) editEventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 func (app *MmrApp) staticPage(w traffic.ResponseWriter, template, headline string) {
 
-	meta := metaTags{headline + " | Mitmach-Republik", headline, "", "", "", false}
+	meta := metaTags{headline + " | Mitmach-Republik e.V.", headline, "", "", "", false}
 
 	result := func() *appResult {
 		return app.view(template, w, &meta, nil)
@@ -1409,6 +1413,7 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 			} else {
 				event.Source = oldEvent.Source
 				event.SourceId = oldEvent.SourceId
+				event.FacebookId = oldEvent.FacebookId
 			}
 		} else {
 			created = true
@@ -1432,7 +1437,50 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		app.locations.Add(event.Addr.City)
+		go func() {
+			app.locations.Add(event.Addr.City)
+			if app.fbAppSecret != "" && app.fbUser != "" && app.fbPass != "" {
+				if event.Facebook == true && event.FacebookId == "" {
+					client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+					event.FacebookId, err = client.PostEvent(event)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+					err = app.events.Store(event)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+				} else if event.Facebook == false && event.FacebookId != "" {
+					client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+					err = client.DeletePost(event.FacebookId)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+					event.FacebookId = ""
+					err = app.events.Store(event)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+				}
+			}
+		}()
 
 		if created {
 			return resultCreated
