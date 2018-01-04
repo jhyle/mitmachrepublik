@@ -769,7 +769,11 @@ $(function() {
 			});
 		},
 		afterSelect: function(item) {
-			$('#fulltextsearch').submit();
+			if (item.url) {
+				window.location.href = item.url;
+			} else {
+				$('#fulltextsearch').submit();
+			}
 		}
 	});
 
@@ -883,7 +887,7 @@ $(function() {
 		$("#head-events").attr("data-target", "");
 		$("#head-events").attr("href", "/veranstalter/verwaltung/0");
 		$("#head-events").attr("title", "Verwalte Deine Veranstaltungen und Profileinstellungen.");
-		$("#head-login").html("<span class='fa fa-user highlight'></span> Abmelden");
+		$("#head-login").html("Abmelden");
 		$("#head-login").attr("data-toggle", "");
 		$("#head-login").attr("data-target", "");
 		$("#head-login").attr("href", "#");

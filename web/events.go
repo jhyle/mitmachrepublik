@@ -110,13 +110,18 @@ func (events *EventService) Locations() ([]string, error) {
 	return locations, nil
 }
 
-func (events *EventService) SearchText(query string) ([]string, error) {
+type SearchHit struct {
+	Name string `json:"name"`
+	Url  string `json:"url,omitempty"`
+}
+
+func (events *EventService) SearchText(query string) ([]SearchHit, error) {
 
 	if isEmpty(query) {
-		return make([]string, 0), nil
+		return nil, nil
 	}
 
-	resultMap := make(map[string]string)
+	resultMap := make(map[string]SearchHit)
 	tokenStream, err := events.index.Mapping().(*mapping.IndexMappingImpl).AnalyzeText("de", []byte(query))
 	if err != nil {
 		return nil, errors.Wrapf(err, "error tokenizing full text query: %s", query)
@@ -136,9 +141,9 @@ func (events *EventService) SearchText(query string) ([]string, error) {
 				}
 				for field := range hit.Locations {
 					if field == "title" {
-						resultMap[event.Title] = event.Title
+						resultMap[event.Title] = SearchHit{Name: event.Title, Url: event.Url()}
 					} else if field == "location" {
-						resultMap[event.Addr.Name] = event.Addr.Name
+						resultMap[event.Addr.Name] = SearchHit{Name: event.Addr.Name}
 					}
 				}
 			}
@@ -146,9 +151,9 @@ func (events *EventService) SearchText(query string) ([]string, error) {
 	}
 
 	i := 0
-	result := make([]string, len(resultMap))
-	for text := range resultMap {
-		result[i] = text
+	result := make([]SearchHit, len(resultMap))
+	for _, hit := range resultMap {
+		result[i] = hit
 		i++
 	}
 
@@ -355,7 +360,7 @@ func (events *EventService) FindEvents() ([]Event, error) {
 func (events *EventService) FindSimilarEvents(event *Event, count int) ([]*Event, error) {
 
 	query := []bson.M{events.futureQuery()}
-	query = append(query, bson.M{"eventid": bson.M{"$ne": event.Id}})
+	query = append(query, bson.M{"_id": bson.M{"$ne": event.Id}})
 	query = append(query, bson.M{"addr.city": event.Addr.City})
 
 	categories := make([]bson.M, 0)
@@ -459,6 +464,11 @@ func (events *EventService) Store(event *Event) error {
 	_, err := events.table().UpsertById(event.Id, event)
 	if err != nil {
 		return errors.Wrapf(err, "error upserting event: %s", event.Id.String())
+	}
+
+	err = events.index.Index(event.Id.Hex(), bson.M{"title": event.Title, "location": event.Addr.Name})
+	if err != nil {
+		return errors.Wrapf(err, "error adding event %s to full text index", event.Id.String())
 	}
 
 	return nil
