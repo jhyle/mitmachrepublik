@@ -1,12 +1,12 @@
-hash: 4eb4856f0063897c374246ca0e7be14046362834c8ce831c6ea9cee9d37392e9
-updated: 2017-12-31T13:15:05.335837761+01:00
+hash: 7574ebc7340edf3ca5cb092ea5bfa7fe1ca403423ae54d1e832ea5f294b444ca
+updated: 2018-01-04T21:33:25.147396611+01:00
 imports:
 - name: github.com/armon/go-radix
   version: 1fca145dffbcaa8fe914309b1ec0cfc67500fe61
 - name: github.com/benbjohnson/phantomjs
   version: 1b81734f7877b51cadd82ee32663ae88f630469c
 - name: github.com/blevesearch/bleve
-  version: def77cb5485838fb317686cd23e2d0da1d6b8491
+  version: 53a7575530550d8f7a397f25a0f8332f8df051df
   subpackages:
   - analysis
   - analysis/analyzer/standard
@@ -48,11 +48,25 @@ imports:
 - name: github.com/boltdb/bolt
   version: 144418e1475d8bf7abbdc48583500f1a20c62ea7
   repo: https://github.com/boltdb/bolt
+- name: github.com/cenkalti/backoff
+  version: 2ea60e5f094469f9e65adb9cd103795b73ae743e
+- name: github.com/dghubble/go-twitter
+  version: c4115fa44a928413e0b857e0eb47376ffde3a61a
+  subpackages:
+  - twitter
+- name: github.com/dghubble/oauth1
+  version: 70562a5920ad9b6ff03ef697c0f90ae569abbd2b
+- name: github.com/dghubble/sling
+  version: 80ec33c6152a53edb5545864ca37567b506c4ca5
 - name: github.com/golang/protobuf
   version: 655cdfa588ea190e901bc5590e65d5621688847c
   repo: https://github.com/golang/protobuf
   subpackages:
   - proto
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
 - name: github.com/google/uuid
   version: 064e2069ce9c359c118179501254f67d7d37ba24
 - name: github.com/kennygrant/sanitize
@@ -74,7 +88,7 @@ imports:
   - html
   - html/atom
 - name: golang.org/x/sys
-  version: 83801418e1b59fb1880e363299581ee543af32ca
+  version: fb4cac33e3196ff7f507ab9b2d2a44b0142f5b5a
   subpackages:
   - unix
 - name: gopkg.in/alexcesaro/quotedprintable.v3
@@ -82,7 +96,7 @@ imports:
 - name: gopkg.in/gomail.v2
   version: 81ebce5c23dfd25c6c67194b37d3dd3f338c98b1
 - name: gopkg.in/mgo.v2
-  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  version: b6121c6199b7beecde08e6853f256a6475fe8031
   subpackages:
   - bson
   - internal/json

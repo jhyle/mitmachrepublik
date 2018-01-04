@@ -81,6 +81,8 @@ type (
 		Rsvp          bool
 		Facebook      bool   `bson:"-"`
 		FacebookId    string `json:"-"`
+		Twitter       bool   `bson:"-"`
+		TwitterId     int64  `json:"-"`
 		Addr          Address
 	}
 

@@ -249,6 +249,7 @@ function gatherEventForm(id)
 
 	data["Rsvp"] = $("#" + id + "-Rsvp").is(':checked');
 	data["Facebook"] = $("#" + id + "-Facebook").is(':checked');
+	data["Twitter"] = $("#" + id + "-Twitter").is(':checked');
 	
 	var recurrency = $("input[type=radio][name=recurrency]:checked").val();
 	if (recurrency == "weekly") {

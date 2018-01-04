@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	hostname = "https://www.mitmachrepublik.de"
-	appId    = "138725613479008"
+	hostname      = "https://www.mitmachrepublik.de"
+	facebookAppId = "138725613479008"
 )
 
 var (
@@ -38,7 +38,7 @@ var (
 
 func TestFacebookPost(t *testing.T) {
 
-	client, err := mmr.NewFacebookClient(hostname, appId, *fbAppSecret, *fbUser, *fbPassword)
+	client, err := mmr.NewFacebookClient(hostname, facebookAppId, *fbAppSecret, *fbUser, *fbPassword)
 	if err != nil {
 		t.Fatal(err)
 	}

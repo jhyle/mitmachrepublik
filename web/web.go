@@ -31,9 +31,13 @@ type (
 		emailAccount *EmailAccount
 		locations    *LocationTree
 		services     []Service
-		fbAppSecret  string
-		fbUser       string
-		fbPass       string
+
+		fbAppSecret string
+		fbUser      string
+		fbPass      string
+
+		twitterApiSecret         string
+		twitterAccessTokenSecret string
 	}
 
 	metaTags struct {
@@ -102,7 +106,7 @@ var (
 	sendAlertsService *SendAlertsService
 )
 
-func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass, fbAppSecret, fbUser, fbPass string) (*MmrApp, error) {
+func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass, fbAppSecret, fbUser, fbPass, twitterApiSecret, twitterAccessTokenSecret string) (*MmrApp, error) {
 
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
@@ -187,7 +191,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		services = append(services, NewSpawnEventsService(12, emailAccount, database, events, imgServer))
 	}
 
-	return &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services, fbAppSecret, fbUser, fbPass}, nil
+	return &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services, fbAppSecret, fbUser, fbPass, twitterApiSecret, twitterAccessTokenSecret}, nil
 }
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, data bson.M) *appResult {
@@ -1414,6 +1418,7 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 				event.Source = oldEvent.Source
 				event.SourceId = oldEvent.SourceId
 				event.FacebookId = oldEvent.FacebookId
+				event.TwitterId = oldEvent.TwitterId
 			}
 		} else {
 			created = true
@@ -1439,8 +1444,42 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 		go func() {
 			app.locations.Add(event.Addr.City)
+
+			if app.twitterApiSecret != "" && app.twitterAccessTokenSecret != "" {
+				if event.Twitter == true && event.TwitterId == 0 {
+
+					event.TwitterId, err = NewTwitterClient(app.hostname, app.twitterApiSecret, app.twitterAccessTokenSecret).PostEvent(event)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+					err = app.events.Store(event)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+				} else if event.Twitter == false && event.TwitterId != 0 {
+
+					err = NewTwitterClient(app.hostname, app.twitterApiSecret, app.twitterAccessTokenSecret).DeletePost(event.TwitterId)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+					event.TwitterId = 0
+					err = app.events.Store(event)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+				}
+			}
+
 			if app.fbAppSecret != "" && app.fbUser != "" && app.fbPass != "" {
 				if event.Facebook == true && event.FacebookId == "" {
+
 					client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
 					if err != nil {
 						traffic.Logger().Print(err.Error())
@@ -1460,6 +1499,7 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 					}
 
 				} else if event.Facebook == false && event.FacebookId != "" {
+
 					client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
 					if err != nil {
 						traffic.Logger().Print(err.Error())
