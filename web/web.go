@@ -757,9 +757,9 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(event.Addr.Name) {
 			title += " (" + event.Addr.Name + ")"
 		}
-
+		title += " am " + dateFormat(event.Start)
 		meta := metaTags{
-			title + " am " + dateFormat(event.Start) + " | Mitmach-Republik e.V.",
+			title + " | Mitmach-Republik e.V.",
 			strClip(event.PlainDescription(), 160),
 			title,
 			imageUrl,

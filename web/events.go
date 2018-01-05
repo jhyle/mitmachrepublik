@@ -466,20 +466,26 @@ func (events *EventService) Store(event *Event) error {
 		return errors.Wrapf(err, "error upserting event: %s", event.Id.String())
 	}
 
-	err = events.index.Index(event.Id.Hex(), bson.M{"title": event.Title, "location": event.Addr.Name})
-	if err != nil {
-		return errors.Wrapf(err, "error adding event %s to full text index", event.Id.String())
-	}
+	go func() {
+		events.index.Delete(event.Id.Hex())
+		events.index.Index(event.Id.Hex(), bson.M{"title": event.Title, "location": event.Addr.Name})
+	}()
 
 	return nil
 }
 
 func (events *EventService) DeleteOfUser(userId bson.ObjectId) error {
 
-	query := bson.M{"organizerid": userId}
-	err := events.table().Delete(query)
+	eventsOfUser, err := events.FindEventsOfUser(userId, "start")
 	if err != nil {
 		return errors.Wrapf(err, "error deleting events of user: %s", userId.String())
+	}
+
+	for _, event := range eventsOfUser {
+		err = events.Delete(event.Id)
+		if err != nil {
+			return errors.Wrapf(err, "error deleting events of user: %s", userId.String())
+		}
 	}
 
 	return nil
