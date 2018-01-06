@@ -326,7 +326,8 @@ p.small-icon {
 	position: relative;
 }
 p.small-icon span {
-	margin-left: 2px;
+	margin-left: 3px;
+	line-height: 1.55;
 }
 .datetime {
 	font-weight: bold;

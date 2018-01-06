@@ -1,5 +1,5 @@
 <div class="row tiles">
-	<div class="col-xs-12"><h1>{{.meta.FB_Title}}</h1></div>
+	<div class="col-xs-12"><h1>{{.event.Title}}{{if $.place}} in {{$.place}}{{end}}</h1></div>
 </div>
 <div class="row tiles">
 	<div class="col-lg-3 col-sm-4 col-xs-5 col-box">
@@ -21,7 +21,6 @@
 			</a>
 			{{end}}
 		</div>
-		{{with $.event}}
 		<div class="social">
 			<a style="margin-right: 10px" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2F{{$.hostname}}{{.Url}}%3Ffrom%3D{{$.start.Unix}}" target="_blank"><img src="/images/facebook_share.png"></a>
 			<a style="margin-right: 10px" href="https://plus.google.com/share?url=http%3A%2F%2F{{$.hostname}}{{.Url}}%3Ffrom%3D{{$.start.Unix}}" target="_blank"><img src="/images/google_share.png"></a>
@@ -42,7 +41,6 @@
 				<p class="icon-text date">{{timeFormat $.end}} Uhr</p>
 			{{end}}
 		{{end}}{{end}}
-		{{end}}
 		{{if gt .Recurrency 0}}
 			<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
 			<p class="icon-text date">{{.Recurrence}}</p>
