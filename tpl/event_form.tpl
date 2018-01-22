@@ -14,6 +14,7 @@
 					<label class="checkbox-inline" style="margin-left: 12px; padding-bottom: 9px"><input type="checkbox" name="rsvp" id="event-Rsvp" {{if .event.Rsvp}}checked{{end}}> Anmeldung erforderlich</label>
 					<label class="checkbox-inline" style="margin-left: 12px; padding-bottom: 9px"><input type="checkbox" name="facebook" id="event-Facebook" {{if .event.FacebookId}}checked{{end}}> Auf Facebook teilen</label>
 					<label class="checkbox-inline" style="margin-left: 12px; padding-bottom: 9px"><input type="checkbox" name="twitter" id="event-Twitter" {{if .event.TwitterId}}checked{{end}}> Auf Twitter teilen</label>
+					<label class="checkbox-inline" style="margin-left: 12px; padding-bottom: 9px"><input type="checkbox" name="gib" id="event-GiB" {{if .event.GiB}}checked{{end}}> Auf Gratis in Berlin teilen</label>
 				</div>
 				<div class="col-xs-4">
 					<span id="event-thumbnail-message" class="help-block" style="text-align: center">Wähle ein Bild im Format jpg, jpeg, png oder gif aus.</span>

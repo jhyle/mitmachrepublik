@@ -38,6 +38,9 @@ type (
 
 		twitterApiSecret         string
 		twitterAccessTokenSecret string
+
+		gibUser     string
+		gibPassword string
 	}
 
 	metaTags struct {
@@ -106,7 +109,7 @@ var (
 	sendAlertsService *SendAlertsService
 )
 
-func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass, fbAppSecret, fbUser, fbPass, twitterApiSecret, twitterAccessTokenSecret string) (*MmrApp, error) {
+func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass, fbAppSecret, fbUser, fbPass, twitterApiSecret, twitterAccessTokenSecret, gibUser, gibPassword string) (*MmrApp, error) {
 
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
@@ -191,7 +194,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		services = append(services, NewSpawnEventsService(12, emailAccount, database, events, imgServer))
 	}
 
-	return &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services, fbAppSecret, fbUser, fbPass, twitterApiSecret, twitterAccessTokenSecret}, nil
+	return &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services, fbAppSecret, fbUser, fbPass, twitterApiSecret, twitterAccessTokenSecret, gibUser, gibPassword}, nil
 }
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, data bson.M) *appResult {
@@ -300,7 +303,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 	pageSize := 16
 	query := ""
 	place := ""
-	dateIds := []int{TwoWeeks}
+	dateIds := []int{FromNow}
 	timespans := timeSpans(dateIds)
 
 	meta := metaTags{
@@ -704,7 +707,7 @@ func (app *MmrApp) nlEventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	radius := 2
-	dateIds := []int{TwoWeeks}
+	dateIds := []int{FromNow}
 	from, _ := strconv.ParseInt(r.Param("from"), 10, 64)
 	if from == 0 {
 		from = time.Now().Unix()
@@ -757,7 +760,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(event.Addr.Name) {
 			title += " (" + event.Addr.Name + ")"
 		}
-		title += " am " + dateFormat(event.Start)
+		title += " am " + dateFormat(start)
 		meta := metaTags{
 			title + " | Mitmach-Republik e.V.",
 			strClip(event.PlainDescription(), 160),
@@ -1410,6 +1413,8 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		created := false
+		postGib := false
+		deleteGib := false
 		if event.Id.Valid() {
 			oldEvent, err := app.events.Load(event.Id)
 			if err != nil || oldEvent.OrganizerId != user.Id {
@@ -1419,6 +1424,12 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 				event.SourceId = oldEvent.SourceId
 				event.FacebookId = oldEvent.FacebookId
 				event.TwitterId = oldEvent.TwitterId
+				event.GiBId = oldEvent.GiBId
+				if event.GiB == true {
+					postGib = true
+				} else if oldEvent.GiBId != "" && oldEvent.GiB == true {
+					deleteGib = true
+				}
 			}
 		} else {
 			created = true
@@ -1514,6 +1525,46 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 					event.FacebookId = ""
 					err = app.events.Store(event)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+				}
+			}
+
+			if app.gibUser != "" && app.gibPassword != "" {
+
+				if postGib {
+					client, err := NewGibClient(app.hostname, app.gibUser, app.gibPassword)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+					gibId, err := client.PostEvent(event)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+					if gibId != event.GiBId {
+						event.GiBId = gibId
+						err = app.events.Store(event)
+						if err != nil {
+							traffic.Logger().Print(err.Error())
+							return
+						}
+					}
+				}
+
+				if deleteGib {
+					client, err := NewGibClient(app.hostname, app.gibUser, app.gibPassword)
+					if err != nil {
+						traffic.Logger().Print(err.Error())
+						return
+					}
+
+					err = client.DeletePost(event)
 					if err != nil {
 						traffic.Logger().Print(err.Error())
 						return

@@ -32,6 +32,8 @@ var (
 	fbPassword               *string = flag.String("fbPassword", "", "Facebook password")
 	twitterApiSecret         *string = flag.String("twitterApiSecret", "", "Twitter Api Secret")
 	twitterAccessTokenSecret *string = flag.String("twitterAccessTokenSecret", "", "Twitter Api Access Token Secret")
+	gibUser                  *string = flag.String("gibUser", "", "Gratis in Berlin user")
+	gibPassword              *string = flag.String("gibPassword", "", "Gratis in Berlin password")
 	scrapersFlag             *bool   = flag.Bool("s", false, "run scrapers")
 )
 
@@ -102,7 +104,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	app, err := mmr.NewMmrApp(*envFlag, *hostFlag, *portFlag, *templateDirFlag, *indexDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag, *smtpPassFlag, *fbAppSecret, *fbUser, *fbPassword, *twitterApiSecret, *twitterAccessTokenSecret)
+	app, err := mmr.NewMmrApp(*envFlag, *hostFlag, *portFlag, *templateDirFlag, *indexDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag, *smtpPassFlag, *fbAppSecret, *fbUser, *fbPassword, *twitterApiSecret, *twitterAccessTokenSecret, *gibUser, *gibPassword)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(2)

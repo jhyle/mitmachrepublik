@@ -1,4 +1,6 @@
 package: github.com/jhyle/mmr
+ignore:
+- math/bits
 import:
 - package: github.com/armon/go-radix
 - package: github.com/blevesearch/bleve

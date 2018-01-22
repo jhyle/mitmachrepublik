@@ -1,12 +1,12 @@
-hash: 7574ebc7340edf3ca5cb092ea5bfa7fe1ca403423ae54d1e832ea5f294b444ca
-updated: 2018-01-04T21:33:25.147396611+01:00
+hash: d687a120a1b253652bd727737d140b92bdc7b790f4820c13235adc56fb27b26f
+updated: 2018-01-22T14:16:20.674280001+01:00
 imports:
 - name: github.com/armon/go-radix
   version: 1fca145dffbcaa8fe914309b1ec0cfc67500fe61
 - name: github.com/benbjohnson/phantomjs
   version: 1b81734f7877b51cadd82ee32663ae88f630469c
 - name: github.com/blevesearch/bleve
-  version: 53a7575530550d8f7a397f25a0f8332f8df051df
+  version: cb6391e75ee5cf6314330f4c1a9ca533f3acb4ca
   subpackages:
   - analysis
   - analysis/analyzer/standard
@@ -21,6 +21,11 @@ imports:
   - document
   - geo
   - index
+  - index/scorch
+  - index/scorch/mergeplan
+  - index/scorch/segment
+  - index/scorch/segment/mem
+  - index/scorch/segment/zap
   - index/store
   - index/store/boltdb
   - index/store/gtreap
@@ -46,10 +51,15 @@ imports:
   version: db70c57796cc8c310613541dfade3dce627d09c7
   repo: https://github.com/blevesearch/segment
 - name: github.com/boltdb/bolt
-  version: 144418e1475d8bf7abbdc48583500f1a20c62ea7
+  version: 9da31745363232bc1e27dbab3569e77383a51585
   repo: https://github.com/boltdb/bolt
 - name: github.com/cenkalti/backoff
   version: 2ea60e5f094469f9e65adb9cd103795b73ae743e
+- name: github.com/couchbase/vellum
+  version: ed84a675e24ed0a0bf6859b1ddec7e7c858354bd
+  subpackages:
+  - regexp
+  - utf8
 - name: github.com/dghubble/go-twitter
   version: c4115fa44a928413e0b857e0eb47376ffde3a61a
   subpackages:
@@ -58,11 +68,18 @@ imports:
   version: 70562a5920ad9b6ff03ef697c0f90ae569abbd2b
 - name: github.com/dghubble/sling
   version: 80ec33c6152a53edb5545864ca37567b506c4ca5
+- name: github.com/edsrzf/mmap-go
+  version: 935e0e8a636ca4ba70b713f3e38a19e1b77739e8
+- name: github.com/glycerine/go-unsnap-stream
+  version: 62a9a9eb44fd8932157b1a8ace2149eff5971af6
 - name: github.com/golang/protobuf
   version: 655cdfa588ea190e901bc5590e65d5621688847c
   repo: https://github.com/golang/protobuf
   subpackages:
   - proto
+- name: github.com/golang/snappy
+  version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
+  repo: https://github.com/golang/snappy
 - name: github.com/google/go-querystring
   version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
@@ -71,15 +88,30 @@ imports:
   version: 064e2069ce9c359c118179501254f67d7d37ba24
 - name: github.com/kennygrant/sanitize
   version: 2e6820834a1f36c626bf19a253b7d3cc060e9b8b
+- name: github.com/mschoch/smat
+  version: 90eadee771aeab36e8bf796039b8c261bebebe4f
+- name: github.com/philhofer/fwd
+  version: bb6d471dc95d4fe11e432687f8b70ff496cf3136
 - name: github.com/pilu/config
   version: 3eb99e6c0b9a2dae0f56f05552c06ca5a643919b
 - name: github.com/pilu/traffic
   version: 19ea6534e33472fb79059e2cdbe1d36f80a11526
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: github.com/RoaringBitmap/roaring
+  version: 5930de397dc5823f13e026b6094668c2dd526530
+- name: github.com/Smerity/govarint
+  version: 7265e41f48f15fd61751e16da866af3c704bb3ab
 - name: github.com/steveyen/gtreap
   version: 0abe01ef9be25c4aedc174758ec2d917314d6d70
   repo: https://github.com/steveyen/gtreap
+- name: github.com/tinylib/msgp
+  version: 428e467e72ad3e435f398b9b148f581c69444410
+  subpackages:
+  - msgp
+- name: github.com/willf/bitset
+  version: 2e6e8094ef4745224150c88c16191c7dceaad16f
+  repo: https://github.com/willf/bitset
 - name: golang.org/x/net
   version: e45385e9b226f570b1f086bf287b25d3d4117776
   repo: https://go.googlesource.com/net
@@ -88,7 +120,7 @@ imports:
   - html
   - html/atom
 - name: golang.org/x/sys
-  version: fb4cac33e3196ff7f507ab9b2d2a44b0142f5b5a
+  version: af50095a40f9041b3b38960738837185c26e9419
   subpackages:
   - unix
 - name: gopkg.in/alexcesaro/quotedprintable.v3
@@ -96,7 +128,7 @@ imports:
 - name: gopkg.in/gomail.v2
   version: 81ebce5c23dfd25c6c67194b37d3dd3f338c98b1
 - name: gopkg.in/mgo.v2
-  version: b6121c6199b7beecde08e6853f256a6475fe8031
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
   - bson
   - internal/json

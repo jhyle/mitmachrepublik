@@ -86,6 +86,15 @@ func iso8601Format(t time.Time) string {
 	}
 }
 
+func iso8601DateFormat(t time.Time) string {
+
+	if t.IsZero() {
+		return ""
+	} else {
+		return fmt.Sprintf("%04d-%02d-%02d", t.Year(), int(t.Month()), t.Day())
+	}
+}
+
 func lengthOfMonth(m time.Month, y int) int {
 
 	day := 28

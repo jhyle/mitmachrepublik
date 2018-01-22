@@ -83,7 +83,13 @@ type (
 		FacebookId    string `json:"-"`
 		Twitter       bool   `bson:"-"`
 		TwitterId     int64  `json:"-"`
+		GiB           bool
+		GiBId         string `json:"-"`
 		Addr          Address
+		// GiB == true && GiBId == 0 -> create
+		// GiB == true && GiBId > 0 -> update
+		// GiB == false && GiBId == 0 -> not exists
+		// GiB == false && GiBId > 0 -> delete, but keep GiBId
 	}
 
 	EventList struct {
@@ -465,6 +471,16 @@ var weekdayShort map[time.Weekday]string = map[time.Weekday]string{
 	time.Friday:    "Fr",
 	time.Saturday:  "Sa",
 	time.Sunday:    "So",
+}
+
+var weekdayLong map[time.Weekday]string = map[time.Weekday]string{
+	time.Monday:    "Montag",
+	time.Tuesday:   "Dienstag",
+	time.Wednesday: "Mittwoch",
+	time.Thursday:  "Donnerstag",
+	time.Friday:    "Freitag",
+	time.Saturday:  "Samstag",
+	time.Sunday:    "Sonntag",
 }
 
 func (event *Event) Recurrence() string {

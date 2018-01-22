@@ -29,6 +29,7 @@ var (
 		},
 		Targets:    []int{2, 3, 4, 5, 1, 6},
 		Categories: []int{7, 13, 14, 23, 15},
+		GiBId:      "2022206",
 	}
 
 	fbAppSecret *string = flag.String("fbAppSecret", "", "Facebook App Secret")
