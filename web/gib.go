@@ -52,10 +52,11 @@ const (
 )
 
 var (
-	hiddenExp      = regexp.MustCompile(`type="hidden"[^>]+name="([^\"]+)"[^>]+value="([^\"]+)"`)
-	formExp        = regexp.MustCompile(`<form[^>]+action="([^\"]+)"`)
-	selectedCatExp = regexp.MustCompile(`(?s)<select[^>]+name="jform\[catid\]".+?<option[^>]+value="([^\"]+)"[^>]+selected`)
-	idInUrlExp     = regexp.MustCompile(`/(\d+)-[^/]+$`)
+	hiddenExp       = regexp.MustCompile(`type="hidden"[^>]+name="([^\"]+)"[^>]+value="([^\"]+)"`)
+	formExp         = regexp.MustCompile(`<form[^>]+action="([^\"]+)"`)
+	selectedCatExp  = regexp.MustCompile(`(?s)<select[^>]+name="jform\[catid\]".+?<option[^>]+value="([^\"]+)"[^>]+selected`)
+	idInUrlExp      = regexp.MustCompile(`/(\d+)-[^/]+$`)
+	paragraphEndExp = regexp.MustCompile(`</p>`)
 
 	category2GibCat map[int]int = map[int]int{
 		7:  GIB_CAT_MEETUPS,
@@ -240,7 +241,9 @@ func (client *GibClient) PostEvent(event *Event) (string, error) {
 
 	fields["jform[title]"] = event.Title
 	fields["jform[catid]"] = category
-	fields["jform[text]"] = string(event.HtmlDescription())
+	descr := string(event.HtmlDescription())
+	descr = paragraphEndExp.ReplaceAllString(descr, "</p><br />")
+	fields["jform[text]"] = descr
 
 	fields["custom[tip_url][]"] = client.hostname + event.Url()
 	fields["__fcfld_valcnt__[tip_image]"] = "0"
