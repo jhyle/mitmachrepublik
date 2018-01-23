@@ -93,8 +93,9 @@ type (
 	}
 
 	EventList struct {
-		start  time.Time
-		events []*Event
+		start     time.Time
+		events    []*Event
+		dateCache map[bson.ObjectId]time.Time
 	}
 
 	Alert struct {
@@ -638,6 +639,11 @@ func (event *Event) NextDate(from time.Time) time.Time {
 	return event.Start
 }
 
+func NewEventList(events []*Event, start time.Time) *EventList {
+
+	return &EventList{start: start, events: events, dateCache: map[bson.ObjectId]time.Time{}}
+}
+
 func (list EventList) Len() int {
 	return len(list.events)
 }
@@ -647,7 +653,20 @@ func (list EventList) Swap(i, j int) {
 }
 
 func (list EventList) Less(i, j int) bool {
-	return list.events[i].NextDate(list.start).Before(list.events[j].NextDate(list.start))
+
+	dateI, exists := list.dateCache[list.events[i].Id]
+	if !exists {
+		dateI = list.events[i].NextDate(list.start)
+		list.dateCache[list.events[i].Id] = dateI
+	}
+
+	dateJ, exists := list.dateCache[list.events[j].Id]
+	if !exists {
+		dateJ = list.events[j].NextDate(list.start)
+		list.dateCache[list.events[j].Id] = dateJ
+	}
+
+	return dateI.Before(dateJ)
 }
 
 func (session *Session) GetId() bson.ObjectId {

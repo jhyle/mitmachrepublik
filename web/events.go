@@ -291,7 +291,7 @@ func (events *EventService) Search(query, place string, dates [][]time.Time, tar
 	} else {
 		start = time.Now()
 	}
-	eventList := EventList{start: start, events: filteredEvents}
+	eventList := NewEventList(filteredEvents, start)
 	sort.Sort(eventList)
 
 	var result EventSearchResult
