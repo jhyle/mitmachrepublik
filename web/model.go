@@ -290,7 +290,7 @@ var (
 	}
 
 	DateIdMap map[int]string = map[int]string{
-		FromNow:       "alle ab jetzt",
+		FromNow:       "jederzeit",
 		Today:         "heute",
 		Tomorrow:      "morgen",
 		AfterTomorrow: "übermorgen",
@@ -300,7 +300,7 @@ var (
 		TwoWeeks:      "14 Tage",
 	}
 
-	DateOrder []int = []int{TwoWeeks, Today, Tomorrow, AfterTomorrow, ThisWeek, NextWeekend, NextWeek, FromNow}
+	DateOrder []int = []int{FromNow, Today, Tomorrow, AfterTomorrow, ThisWeek, NextWeekend, NextWeek, TwoWeeks}
 
 	whiteSpace = regexp.MustCompile(`\s+`)
 
