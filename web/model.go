@@ -141,18 +141,19 @@ type (
 	}
 )
 
+// iota is not reset to zero within a const block!
 const (
 	NoRecurrence Recurrence = iota
 	Weekly
 	Monthly
+)
 
+const (
 	FirstWeek WeekOfMonth = iota
 	SecondWeek
 	ThirdWeek
 	FourthWeek
 	LastWeek
-
-	ADMIN_EMAIL = "mitmachrepublik@gmail.com"
 )
 
 const (
@@ -164,6 +165,10 @@ const (
 	NextWeek
 	TwoWeeks
 	AfterTomorrow
+)
+
+const (
+	ADMIN_EMAIL = "mitmachrepublik@gmail.com"
 )
 
 var (
