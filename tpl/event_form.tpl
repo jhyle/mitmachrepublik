@@ -102,7 +102,7 @@
 					</span>
 				</div>
 			</div>
-			<div id="event-recurrencyEnd" class="form-group" style="{{if not (eq .event.Recurrency 1)}}display: none{{end}}">
+			<div id="event-recurrencyEnd" class="form-group" style="{{if eq .event.Recurrency 0}}display: none{{end}}">
 				<div class="col-xs-7">
 					<span><input name="recurrencyEnd" type="text" id="event-RecurrencyEnd" class="form-control form-datetime" placeholder="Wiederholung endet" value="{{datetimeFormat .event.RecurrencyEnd}}"></span>
 				</div>
