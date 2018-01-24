@@ -1030,10 +1030,7 @@ func (app *MmrApp) adminPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 		organizers := map[bson.ObjectId]*User{user.Id: user}
 
-		pageCount := result.Count / pageSize
-		if pageCount == 0 {
-			pageCount = 1
-		}
+		pageCount := pageCount(result.Count, pageSize)
 		pages := make([]int, pageCount)
 		for i := 0; i < pageCount; i++ {
 			pages[i] = i
