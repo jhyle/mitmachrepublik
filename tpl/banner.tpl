@@ -9,19 +9,19 @@
 				<option value="0">alle Zielgruppen</option>
 				{{ range .targets }}
 					{{ $id := index $.targetMap . }}
-					<option value="{{$id}}">{{.}}</option>					
+					<option value="{{$id}}">{{.}}</option>
 				{{ end }}
 			</select>
 			<select name="category" class="form-control">
 				<option value="0">alle Kategorien</option>
 				{{ range .categories }}
 					{{ $id := index $.categoryMap . }}
-					<option value="{{$id}}">{{.}}</option>					
+					<option value="{{$id}}">{{.}}</option>
 				{{ end }}
 			</select>
 			<select name="date" class="form-control">
 				{{ range .dates }}
-					<option value="{{.}}">{{index $.dateMap .}}</option>					
+					<option value="{{.}}">{{index $.dateMap .}}</option>
 				{{ end }}
 			</select>
 			<!--select name="radius" class="form-control">

@@ -1677,7 +1677,12 @@ func (app *MmrApp) typeAheadHandler(w traffic.ResponseWriter, r *traffic.Request
 
 	result := func() *appResult {
 
-		events, err := app.events.SearchText(strings.Trim(r.Param("query"), " "))
+		var userId bson.ObjectId
+		if user, err := app.checkSession(&Request{r}); err == nil {
+			userId = user.Id
+		}
+
+		events, err := app.events.SearchText(userId, strings.Trim(r.Param("query"), " "))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		} else {

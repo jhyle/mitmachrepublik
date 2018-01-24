@@ -115,7 +115,7 @@ type SearchHit struct {
 	Url  string `json:"url,omitempty"`
 }
 
-func (events *EventService) SearchText(query string) ([]SearchHit, error) {
+func (events *EventService) SearchText(organizerId bson.ObjectId, query string) ([]SearchHit, error) {
 
 	if isEmpty(query) {
 		return nil, nil
@@ -138,6 +138,9 @@ func (events *EventService) SearchText(query string) ([]SearchHit, error) {
 				event, err := events.Load(bson.ObjectIdHex(hit.ID))
 				if err != nil {
 					return nil, errors.Wrapf(err, "error loading event by full text search result: %s", hit.ID)
+				}
+				if organizerId.Valid() && event.OrganizerId != organizerId {
+					continue
 				}
 				for field := range hit.Locations {
 					if field == "title" {
