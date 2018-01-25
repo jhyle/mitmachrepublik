@@ -342,15 +342,14 @@ func timeSpans(dateIds []int) [][]time.Time {
 			timespan[0] = now
 			timespan[1] = now
 		} else if dateId == Today {
-			timespan[0] = now
+			timespan[0] = dayStart(now)
 			timespan[1] = dayEnd(now)
 		} else if dateId == Tomorrow {
 			now = now.AddDate(0, 0, 1)
 			timespan[0] = dayStart(now)
 			timespan[1] = dayEnd(now)
 		} else if dateId == AfterTomorrow {
-			now = now.AddDate(0, 0, 1)
-			now = now.AddDate(0, 0, 1)
+			now = now.AddDate(0, 0, 2)
 			timespan[0] = dayStart(now)
 			timespan[1] = dayEnd(now)
 		} else if dateId == ThisWeek {

@@ -43,18 +43,18 @@
 {{end}}
 {{end}}
 <div class="pages">
-	<a href="{{if $.altPage}}?p={{else}}./{{end}}0{{if $.query}}?query={{$.query}}{{end}}#events" title="Zum Anfang der Liste"><div class="page">Anfang</div></a>
-	{{if gt $.page 0}}<a href="{{if $.altPage}}?p={{dec $.page}}{{else}}./{{dec $.page}}{{end}}{{if $.query}}?query={{$.query}}{{end}}#events" title="Vorherige Seite">{{end}}<div class="page">&lt;</div>{{if gt $.page 0}}</a>{{end}}
+	<a href="{{if $.altPage}}?p={{else}}./{{end}}0{{if $.query}}?query={{$.query}}{{end}}" title="Zum Anfang der Liste"><div class="page">Anfang</div></a>
+	{{if gt $.page 0}}<a href="{{if $.altPage}}?p={{dec $.page}}{{else}}./{{dec $.page}}{{end}}{{if $.query}}?query={{$.query}}{{end}}" title="Vorherige Seite">{{end}}<div class="page">&lt;</div>{{if gt $.page 0}}</a>{{end}}
 	{{range $.pages}}
 		{{if or (and (ge . (dec (dec $.page))) (le . (inc (inc $.page)))) (or (eq $.page .) (or (le . 1) (ge . (dec $.maxPage))))}}
-			<a href="{{if $.altPage}}?p={{.}}{{else}}./{{.}}{{end}}{{if $.query}}?query={{$.query}}{{end}}#events" title="Zu Seite {{inc .}}"><div class="page {{if eq . $.page}}cur-page{{end}}">{{inc .}}</div></a>
+			<a href="{{if $.altPage}}?p={{.}}{{else}}./{{.}}{{end}}{{if $.query}}?query={{$.query}}{{end}}" title="Zu Seite {{inc .}}"><div class="page {{if eq . $.page}}cur-page{{end}}">{{inc .}}</div></a>
 		{{else}}
 			{{if or (eq . (dec (dec (dec $.page)))) (eq . (inc (inc (inc $.page))))}}
 				<div class="page">..</div>
 			{{end}}
 		{{end}}
 	{{end}}
-	{{if lt $.page $.maxPage}}<a href="{{if $.altPage}}?p={{inc $.page}}{{else}}./{{inc $.page}}{{end}}{{if $.query}}?query={{$.query}}{{end}}#events" title="Nächste Seite">{{end}}<div class="page">&gt;</div>{{if lt $.page $.maxPage}}</a>{{end}}
-	<a href="{{if $.altPage}}?p={{$.maxPage}}{{else}}./{{$.maxPage}}{{end}}{{if $.query}}?query={{$.query}}{{end}}#events" title="Ans Ende der Liste"><div class="page">Ende</div></a>
+	{{if lt $.page $.maxPage}}<a href="{{if $.altPage}}?p={{inc $.page}}{{else}}./{{inc $.page}}{{end}}{{if $.query}}?query={{$.query}}{{end}}" title="Nächste Seite">{{end}}<div class="page">&gt;</div>{{if lt $.page $.maxPage}}</a>{{end}}
+	<a href="{{if $.altPage}}?p={{$.maxPage}}{{else}}./{{$.maxPage}}{{end}}{{if $.query}}?query={{$.query}}{{end}}" title="Ans Ende der Liste"><div class="page">Ende</div></a>
 </div>
 {{end}}

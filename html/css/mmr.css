@@ -76,13 +76,12 @@ a:hover, a:focus {
 }
 .search-form {
 	position: absolute;
-	top: 33%;
-	width: 90%;
-	margin-left: 5%;
+	top: 12%;
+	width: 99%;
 }
 .col-search-banner {
 	padding: 0;
-	height: 140px;
+	height: 80px;
 	background-image: url(../images/hintergrund.jpg);
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
@@ -267,6 +266,10 @@ a:hover, a:focus {
 	font-weight: lighter;
 	margin: 10px 0;
 }
+.box-headline a {
+	display: inline-block;
+	width: 99%;
+}
 .box h2 {
 	font-size: 23px;
 	font-weight: normal;
@@ -406,5 +409,8 @@ p.small-icon span {
 	}
 	.event-images img {
 		width: 100%;
+	}
+	.box-body {
+		display: none;
 	}
 }

@@ -24,7 +24,7 @@
 		<link rel="alternate" type="application/rss+xml" title="RSS" href="?fmt=RSS">
 	{{end}}
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
-	<link href="/css/styles-18.css" rel="stylesheet">
+	<link href="/css/styles-19.css" rel="stylesheet">
 </head>
 <body>
 <script>
@@ -88,7 +88,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-3 col-sm-3 col-xs-6 col-logo">
-				<span class="logo-helper"></span><a href="/" title="Zur Startseite"><img src="/images/mitmachrepublik.png" style="width: 100%" alt="Logo"></a>
+				<span class="logo-helper"></span><a href="/" title="Zur Startseite"><img src="/images/mitmachrepublik.png" style="width: 100%" alt="Mitmach-Republik e.V. - Gemeinschaftliche Veranstaltungen"></a>
 			</div>
 			<div class="col-lg-2 visible-lg-block col-md-1 visible-md-block">&nbsp;</div>
 			<div class="col-lg-3 col-sm-4 col-xs-6 col-head">

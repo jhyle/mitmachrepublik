@@ -1194,7 +1194,7 @@ func (app *MmrApp) searchHandler(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 	}
 
-	w.Header().Set("Location", path+"#events")
+	w.Header().Set("Location", path)
 	w.WriteHeader(http.StatusFound)
 }
 
