@@ -93,9 +93,11 @@ func (service *ScrapersService) saveScraped(event *Event) error {
 
 	oldEvent, err := service.events.LoadBySource(event.Source, event.SourceId)
 	if err == nil {
-		if oldEvent.Start != event.Start || oldEvent.End != event.End {
+		if oldEvent.Start != event.Start || oldEvent.End != event.End || oldEvent.Descr != event.Descr || oldEvent.Title != event.Title {
 			oldEvent.Start = event.Start
 			oldEvent.End = event.End
+			oldEvent.Title = event.Title
+			oldEvent.Descr = event.Descr
 			err = service.events.Store(oldEvent)
 			if err != nil {
 				return errors.Wrapf(err, "error updating imported event: %s %s", event.Source, event.SourceId)
@@ -200,6 +202,7 @@ func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, er
 	if err != nil {
 		return nil, errors.Wrapf(err, "error sanitizing HTML of Umweltkalende page: %s", id)
 	}
+	event.Descr = strings.Replace(event.Descr, "»»»", "", -1)
 	event.Descr += "<p class=\"small\">Text von der Veranstaltungswebseite übernommen</p>"
 
 	location := uk_locations.FindSubmatch(page)

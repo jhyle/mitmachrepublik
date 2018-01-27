@@ -348,7 +348,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		for topic, topicEvents := range events {
 			approvedEvents := make([]*Event, 0)
 			for _, event := range topicEvents {
-				if organizers[event.OrganizerId].Approved {
+				if organizers[event.OrganizerId].Approved && (event.Image != "" || organizers[event.OrganizerId].Image != "") {
 					approvedEvents = append(approvedEvents, event)
 				}
 				if len(approvedEvents) == 8 {
