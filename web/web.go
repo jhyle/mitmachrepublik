@@ -731,6 +731,8 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		start := event.NextDate(time.Unix(from, 0))
 		end := start.Add(duration)
 
+		showDate := event.Recurrency == NoRecurrence || !start.Before(time.Now())
+
 		organizer, err := app.users.Load(event.OrganizerId)
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
@@ -760,7 +762,9 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		if !isEmpty(event.Addr.Name) {
 			title += " (" + event.Addr.Name + ")"
 		}
-		title += " am " + dateFormat(start)
+		if showDate {
+			title += " am " + dateFormat(start)
+		}
 		meta := metaTags{
 			title + " | Mitmach-Republik e.V.",
 			strClip(event.PlainDescription(), 160),
@@ -780,7 +784,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "from": time.Unix(from, 0), "start": start, "end": end, "organizer": organizer, "similiars": similiars, "organizers": organizers})
+		return app.view("event.tpl", w, &meta, bson.M{"eventCnt": eventCnt, "organizerCnt": organizerCnt, "place": place, "radius": radius, "event": event, "from": time.Unix(from, 0), "showDate": showDate, "start": start, "end": end, "organizer": organizer, "similiars": similiars, "organizers": organizers})
 	}()
 
 	app.handle(w, result)

@@ -28,22 +28,26 @@
 			<div class="recommend"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="javascript:void(0)" data-href="/dialog/sendevent/{{.Id.Hex}}?from={{$.start.Unix}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
 		</div>
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
-		<p class="icon-text date">{{dateFormat $.start}}</p>
-		{{if ne (timeFormat $.start) ("00:00")}}
-			<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
-			<p class="icon-text date">{{timeFormat $.start}}{{if timeFormat $.end}}{{if eq (dateFormat $.start) (dateFormat $.end)}}{{if ne (timeFormat $.end) (timeFormat $.start)}} bis {{timeFormat $.end}}{{end}}{{end}}{{end}} Uhr</p>
-		{{end}}
-		{{if dateFormat $.end}}{{if ne (dateFormat $.start) (dateFormat $.end)}}
-			<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Enddatum"></span></p>
-			<p class="icon-text date">{{dateFormat $.end}}</p>
-			{{if ne (timeFormat $.end) ("23:59")}}
+		{{if $.showDate}}
+			<p class="icon-text date">{{dateFormat $.start}}</p>
+			{{if ne (timeFormat $.start) ("00:00")}}
 				<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
-				<p class="icon-text date">{{timeFormat $.end}} Uhr</p>
+				<p class="icon-text date">{{timeFormat $.start}}{{if timeFormat $.end}}{{if eq (dateFormat $.start) (dateFormat $.end)}}{{if ne (timeFormat $.end) (timeFormat $.start)}} bis {{timeFormat $.end}}{{end}}{{end}}{{end}} Uhr</p>
 			{{end}}
-		{{end}}{{end}}
-		{{if gt .Recurrency 0}}
-			<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
-			<p class="icon-text date">{{.Recurrence}}</p>
+			{{if dateFormat $.end}}{{if ne (dateFormat $.start) (dateFormat $.end)}}
+				<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Enddatum"></span></p>
+				<p class="icon-text date">{{dateFormat $.end}}</p>
+				{{if ne (timeFormat $.end) ("23:59")}}
+					<p class="small-icon pull-left"><span class="fa fa-clock-o fa-fw" title="Uhrzeit"></span></p>
+					<p class="icon-text date">{{timeFormat $.end}} Uhr</p>
+				{{end}}
+			{{end}}{{end}}
+			{{if gt .Recurrency 0}}
+				<p class="small-icon pull-left"><span class="fa fa-repeat fa-fw" title="Wiederholungen"></span></p>
+				<p class="icon-text date">{{.Recurrence}}</p>
+			{{end}}
+		{{else}}
+			<p class="icon-text date">findet zurzeit nicht statt</p>
 		{{end}}
 		{{if not .Addr.IsEmpty}}
 			<p class="small-icon pull-left"><span class="fa fa-map-marker fa-fw" title="Ort"></span></p>
@@ -158,7 +162,9 @@
 		"image": "/bild/{{.event.Image}}?width=300",
 {{end}}
 		"url": {{.event.Url}},
-		"startDate": {{iso8601Format .start}},
+{{if $.showDate}}
+		"startDate": {{iso8601Format $.start}},
+{{end}}
 		"description": {{.event.PlainDescription}}
 	}
  </script>
