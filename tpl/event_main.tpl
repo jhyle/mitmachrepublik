@@ -65,7 +65,7 @@
 			<p class="small-icon pull-left"><span class="fa fa-external-link fa-fw" title="Webseite"></span></p>
 			<p class="icon-text date"><a href="{{.Web}}" class="highlight" title="Webseite von {{.Title}}" target="_blank">{{strClip .Web 30}}</a></p>
 		{{end}}
-		{{if $.date}}
+		{{if $.showDate}}
 			<p style="font-weight: bolder">{{if .Rsvp}}Anmeldung erforderlich!{{if .Web}} Melde Dich auf der Webseite der Veranstaltung an.{{end}}{{else}}Keine Anmeldung erforderlich! Schaue einfach beim Treffen vorbei.{{end}}</p>
 		{{end}}
 		<div class="description" style="margin: 15px 0 15px 0">{{.HtmlDescription}}</div>
