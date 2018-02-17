@@ -327,7 +327,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		eventList := make([]*Event, 0)
+		eventList := make([]*Event, 0, pageSize*len(Topics))
 		events := make(map[string][]*Event)
 		for path, topic := range Topics {
 			if topic.FrontPage == true {
@@ -346,7 +346,7 @@ func (app *MmrApp) startPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		for topic, topicEvents := range events {
-			approvedEvents := make([]*Event, 0)
+			approvedEvents := make([]*Event, 0, 8)
 			for _, event := range topicEvents {
 				if organizers[event.OrganizerId].Approved && (event.Image != "" || organizers[event.OrganizerId].Image != "") {
 					approvedEvents = append(approvedEvents, event)

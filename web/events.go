@@ -268,7 +268,7 @@ func (events *EventService) search(query, place string, dates [][]time.Time, tar
 		return nil, errors.Wrap(err, "error searching events")
 	}
 
-	filteredEvents := make([]*Event, 0)
+	filteredEvents := make([]*Event, 0, len(sourceEvents))
 	for _, event := range sourceEvents {
 		for _, dateRange := range dates {
 			if event.RecurresIn(dateRange[0], dateRange[1]) {
@@ -300,7 +300,7 @@ func (events *EventService) Search(query, place string, dates [][]time.Time, tar
 	var result EventSearchResult
 	result.SetCount(len(filteredEvents))
 	result.SetStart(page * pageSize)
-	result.Events = make([]*Event, 0)
+	result.Events = make([]*Event, 0, pageSize)
 
 	for i := page * pageSize; i < len(filteredEvents) && i < (page+1)*pageSize; i++ {
 		result.Events = append(result.Events, filteredEvents[i])

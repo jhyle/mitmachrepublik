@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/kennygrant/sanitize"
@@ -93,9 +94,8 @@ type (
 	}
 
 	EventList struct {
-		start     time.Time
-		events    []*Event
-		dateCache map[bson.ObjectId]time.Time
+		events []*Event
+		dates  []time.Time
 	}
 
 	Alert struct {
@@ -646,7 +646,19 @@ func (event *Event) NextDate(from time.Time) time.Time {
 
 func NewEventList(events []*Event, start time.Time) *EventList {
 
-	return &EventList{start: start, events: events, dateCache: map[bson.ObjectId]time.Time{}}
+	var wg sync.WaitGroup
+	dates := make([]time.Time, len(events))
+
+	for i, event := range events {
+		wg.Add(1)
+		go func() {
+			dates[i] = event.NextDate(start)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	return &EventList{events: events, dates: dates}
 }
 
 func (list EventList) Len() int {
@@ -654,24 +666,13 @@ func (list EventList) Len() int {
 }
 
 func (list EventList) Swap(i, j int) {
+	list.dates[i], list.dates[j] = list.dates[j], list.dates[i]
 	list.events[i], list.events[j] = list.events[j], list.events[i]
 }
 
 func (list EventList) Less(i, j int) bool {
 
-	dateI, exists := list.dateCache[list.events[i].Id]
-	if !exists {
-		dateI = list.events[i].NextDate(list.start)
-		list.dateCache[list.events[i].Id] = dateI
-	}
-
-	dateJ, exists := list.dateCache[list.events[j].Id]
-	if !exists {
-		dateJ = list.events[j].NextDate(list.start)
-		list.dateCache[list.events[j].Id] = dateJ
-	}
-
-	return dateI.Before(dateJ)
+	return list.dates[i].Before(list.dates[j])
 }
 
 func (session *Session) GetId() bson.ObjectId {
