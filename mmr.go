@@ -34,7 +34,8 @@ var (
 	twitterAccessTokenSecret *string = flag.String("twitterAccessTokenSecret", "", "Twitter Api Access Token Secret")
 	gibUser                  *string = flag.String("gibUser", "", "Gratis in Berlin user")
 	gibPassword              *string = flag.String("gibPassword", "", "Gratis in Berlin password")
-	scrapersFlag             *bool   = flag.Bool("s", false, "run scrapers")
+	scrapersFlag             *bool   = flag.Bool("scrapers", false, "run scrapers")
+	postEventFlag            *bool   = flag.Bool("postEvent", false, "run post event")
 )
 
 func IsFolder(path string) bool {
@@ -110,7 +111,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	if *scrapersFlag == false {
+	if *scrapersFlag == false && *postEventFlag == false {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt)
 		signal.Notify(c, syscall.SIGTERM)
@@ -126,8 +127,14 @@ func main() {
 		}()
 
 		app.Start()
-	} else {
+	} else if *scrapersFlag {
 		err = app.RunScrapers()
+		if err != nil {
+			fmt.Println(err)
+		}
+		app.Stop()
+	} else if *postEventFlag {
+		err = app.RunPostEvent()
 		if err != nil {
 			fmt.Println(err)
 		}

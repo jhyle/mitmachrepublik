@@ -1935,6 +1935,12 @@ func (app *MmrApp) RunScrapers() error {
 	return scrapers.Run()
 }
 
+func (app *MmrApp) RunPostEvent() error {
+
+	postEvent := NewPostEventService(0, app.emailAccount, app.database)
+	return postEvent.Run()
+}
+
 func (app *MmrApp) Stop() error {
 	return app.events.Stop()
 }

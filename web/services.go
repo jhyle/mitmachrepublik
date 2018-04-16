@@ -2,6 +2,7 @@ package mmr
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -27,6 +28,11 @@ type (
 		hour  int
 		timer *time.Timer
 		email *EmailAccount
+	}
+
+	PostEventService struct {
+		BasicService
+		database Database
 	}
 
 	SessionService struct {
@@ -73,9 +79,47 @@ var (
 	}
 )
 
+func NewPostEventService(hour int, email *EmailAccount, database Database) Service {
+
+	return &PostEventService{NewBasicService("SessionService", hour, email), database}
+}
+
 func NewSessionService(hour int, email *EmailAccount, database Database) Service {
 
 	return &SessionService{NewBasicService("SessionService", hour, email), database}
+}
+
+func (service *PostEventService) Start() {
+
+	service.start(service.Run)
+}
+
+func (service *PostEventService) Run() error {
+
+	now := time.Now()
+	query := bson.M{"$and": []bson.M{
+		bson.M{"$or": []bson.M{
+			bson.M{"facebookid": bson.M{"$exists": false}},
+			bson.M{"facebookid": ""},
+		}},
+		bson.M{"start": bson.M{"$gte": now}},
+		bson.M{"start": bson.M{"$lt": now.AddDate(0, 0, 3)}},
+	}}
+	var events []*Event
+	err := service.database.Table("event").Find(query, &events, "start")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(len(events))
+	if len(events) == 0 {
+		return nil
+	}
+
+	event := events[rand.Intn(len(events))]
+	fmt.Printf("%+v\n", event)
+
+	return nil
 }
 
 func (service *SessionService) Start() {
