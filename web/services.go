@@ -2,7 +2,6 @@ package mmr
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -32,7 +31,7 @@ type (
 
 	PostEventService struct {
 		BasicService
-		database Database
+		app *MmrApp
 	}
 
 	SessionService struct {
@@ -79,14 +78,9 @@ var (
 	}
 )
 
-func NewPostEventService(hour int, email *EmailAccount, database Database) Service {
+func NewPostEventService(hour int, app *MmrApp) Service {
 
-	return &PostEventService{NewBasicService("SessionService", hour, email), database}
-}
-
-func NewSessionService(hour int, email *EmailAccount, database Database) Service {
-
-	return &SessionService{NewBasicService("SessionService", hour, email), database}
+	return &PostEventService{NewBasicService("SessionService", hour, app.emailAccount), app}
 }
 
 func (service *PostEventService) Start() {
@@ -104,22 +98,28 @@ func (service *PostEventService) Run() error {
 		}},
 		bson.M{"start": bson.M{"$gte": now}},
 		bson.M{"start": bson.M{"$lt": now.AddDate(0, 0, 3)}},
+		bson.M{"source": UK_SOURCE},
 	}}
 	var events []*Event
-	err := service.database.Table("event").Find(query, &events, "start")
+	err := service.app.database.Table("event").Find(query, &events, "start")
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(len(events))
 	if len(events) == 0 {
 		return nil
 	}
 
 	event := events[rand.Intn(len(events))]
-	fmt.Printf("%+v\n", event)
+	event.Facebook = true
+	event.Twitter = true
+	event.GiB = true
+	return service.app.postEvent(event, true, false)
+}
 
-	return nil
+func NewSessionService(hour int, email *EmailAccount, database Database) Service {
+
+	return &SessionService{NewBasicService("SessionService", hour, email), database}
 }
 
 func (service *SessionService) Start() {

@@ -36,8 +36,8 @@ type (
 		fbUser      string
 		fbPass      string
 
-		twitterApiSecret         string
-		twitterAccessTokenSecret string
+		twApiSecret         string
+		twAccessTokenSecret string
 
 		gibUser     string
 		gibPassword string
@@ -109,7 +109,7 @@ var (
 	sendAlertsService *SendAlertsService
 )
 
-func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass, fbAppSecret, fbUser, fbPass, twitterApiSecret, twitterAccessTokenSecret, gibUser, gibPassword string) (*MmrApp, error) {
+func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass, fbAppSecret, fbUser, fbPass, twApiSecret, twAccessTokenSecret, gibUser, gibPassword string) (*MmrApp, error) {
 
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
@@ -194,7 +194,9 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		services = append(services, NewSpawnEventsService(12, emailAccount, database, events, imgServer))
 	}
 
-	return &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services, fbAppSecret, fbUser, fbPass, twitterApiSecret, twitterAccessTokenSecret, gibUser, gibPassword}, nil
+	app := &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services, fbAppSecret, fbUser, fbPass, twApiSecret, twAccessTokenSecret, gibUser, gibPassword}
+	app.services = append(app.services, NewPostEventService(7, app))
+	return app, nil
 }
 
 func (app *MmrApp) view(tpl string, w traffic.ResponseWriter, meta *metaTags, data bson.M) *appResult {
@@ -1395,6 +1397,113 @@ func (app *MmrApp) unregisterHandler(w traffic.ResponseWriter, r *traffic.Reques
 	app.logoutHandler(w, r)
 }
 
+func (app *MmrApp) postEvent(event *Event, postGib, deleteGib bool) error {
+
+	var err error
+	if app.twApiSecret != "" && app.twAccessTokenSecret != "" {
+		if event.Twitter == true && event.TwitterId == 0 {
+
+			event.TwitterId, err = NewTwitterClient(app.hostname, app.twApiSecret, app.twAccessTokenSecret).PostEvent(event)
+			if err != nil {
+				return err
+			}
+
+			err = app.events.Store(event)
+			if err != nil {
+				return err
+			}
+
+		} else if event.Twitter == false && event.TwitterId != 0 {
+
+			err = NewTwitterClient(app.hostname, app.twApiSecret, app.twAccessTokenSecret).DeletePost(event.TwitterId)
+			if err != nil {
+				return err
+			}
+
+			event.TwitterId = 0
+			err = app.events.Store(event)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if app.fbAppSecret != "" && app.fbUser != "" && app.fbPass != "" {
+		if event.Facebook == true && event.FacebookId == "" {
+
+			client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
+			if err != nil {
+				return err
+			}
+
+			event.FacebookId, err = client.PostEvent(event)
+			if err != nil {
+				return err
+			}
+
+			err = app.events.Store(event)
+			if err != nil {
+				return err
+			}
+
+		} else if event.Facebook == false && event.FacebookId != "" {
+
+			client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
+			if err != nil {
+				return err
+			}
+
+			err = client.DeletePost(event.FacebookId)
+			if err != nil {
+				return err
+			}
+
+			event.FacebookId = ""
+			err = app.events.Store(event)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if app.gibUser != "" && app.gibPassword != "" {
+
+		if postGib {
+			client, err := NewGibClient(app.hostname, app.gibUser, app.gibPassword)
+			if err != nil {
+				return err
+			}
+
+			gibId, err := client.PostEvent(event)
+			if err != nil {
+				return err
+			}
+
+			if gibId != event.GiBId {
+				event.GiBId = gibId
+				err = app.events.Store(event)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if deleteGib {
+			client, err := NewGibClient(app.hostname, app.gibUser, app.gibPassword)
+			if err != nil {
+				return err
+			}
+
+			err = client.DeletePost(event)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 	result := func() *appResult {
@@ -1456,121 +1565,10 @@ func (app *MmrApp) eventHandler(w traffic.ResponseWriter, r *traffic.Request) {
 
 		go func() {
 			app.locations.Add(event.Addr.City)
-
-			if app.twitterApiSecret != "" && app.twitterAccessTokenSecret != "" {
-				if event.Twitter == true && event.TwitterId == 0 {
-
-					event.TwitterId, err = NewTwitterClient(app.hostname, app.twitterApiSecret, app.twitterAccessTokenSecret).PostEvent(event)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-					err = app.events.Store(event)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-				} else if event.Twitter == false && event.TwitterId != 0 {
-
-					err = NewTwitterClient(app.hostname, app.twitterApiSecret, app.twitterAccessTokenSecret).DeletePost(event.TwitterId)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-					event.TwitterId = 0
-					err = app.events.Store(event)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-				}
-			}
-
-			if app.fbAppSecret != "" && app.fbUser != "" && app.fbPass != "" {
-				if event.Facebook == true && event.FacebookId == "" {
-
-					client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-					event.FacebookId, err = client.PostEvent(event)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-					err = app.events.Store(event)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-				} else if event.Facebook == false && event.FacebookId != "" {
-
-					client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-					err = client.DeletePost(event.FacebookId)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-					event.FacebookId = ""
-					err = app.events.Store(event)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-				}
-			}
-
-			if app.gibUser != "" && app.gibPassword != "" {
-
-				if postGib {
-					client, err := NewGibClient(app.hostname, app.gibUser, app.gibPassword)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-					gibId, err := client.PostEvent(event)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-					if gibId != event.GiBId {
-						event.GiBId = gibId
-						err = app.events.Store(event)
-						if err != nil {
-							traffic.Logger().Print(err.Error())
-							return
-						}
-					}
-				}
-
-				if deleteGib {
-					client, err := NewGibClient(app.hostname, app.gibUser, app.gibPassword)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-
-					err = client.DeletePost(event)
-					if err != nil {
-						traffic.Logger().Print(err.Error())
-						return
-					}
-				}
+			err := app.postEvent(event, postGib, deleteGib)
+			if err != nil {
+				traffic.Logger().Print(err.Error())
+				return
 			}
 		}()
 
@@ -1937,7 +1935,7 @@ func (app *MmrApp) RunScrapers() error {
 
 func (app *MmrApp) RunPostEvent() error {
 
-	postEvent := NewPostEventService(0, app.emailAccount, app.database)
+	postEvent := NewPostEventService(0, app)
 	return postEvent.Run()
 }
 
