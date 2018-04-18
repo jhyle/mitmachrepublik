@@ -80,7 +80,7 @@ var (
 
 func NewPostEventService(hour int, app *MmrApp) Service {
 
-	return &PostEventService{NewBasicService("SessionService", hour, app.emailAccount), app}
+	return &PostEventService{NewBasicService("PostEventService", hour, app.emailAccount), app}
 }
 
 func (service *PostEventService) Start() {

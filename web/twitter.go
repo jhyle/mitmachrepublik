@@ -30,7 +30,7 @@ func NewTwitterClient(hostname, apiSecret, accessTokenSecret string) *TwitterCli
 func (twttr *TwitterClient) PostEvent(event *Event) (int64, error) {
 
 	nextDate := event.NextDate(time.Now())
-	message := event.Title + " am " + dateFormat(nextDate) + " um " + timeFormat(nextDate) + " in " + event.Addr.City + ": " + twttr.hostname + event.Url()
+	message := event.Title + " am " + dateFormat(nextDate) + " um " + timeFormat(nextDate) + " in " + event.Addr.City + ": " + twttr.hostname + event.Url() + " #mitmachen"
 
 	tweet, _, err := twttr.client.Statuses.Update(message, nil)
 	if err != nil {
