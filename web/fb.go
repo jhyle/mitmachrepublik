@@ -54,8 +54,8 @@ func NewFacebookClient(hostname, appId, appSecret, user, password string) (*Face
 
 	_, err = page.Evaluate(`
 		function() {
-			document.body.querySelector('#email').setAttribute('value', '` + user + `');
-			document.body.querySelector('#pass').setAttribute('value', '` + password + `');
+			document.body.querySelector('input[name="email"]').setAttribute('value', '` + user + `');
+			document.body.querySelector('input[name="pass"]').setAttribute('value', '` + password + `');
 
 		    var ev = document.createEvent("MouseEvent");
 		    ev.initMouseEvent(
@@ -66,7 +66,7 @@ func NewFacebookClient(hostname, appId, appSecret, user, password string) (*Face
 		        false, false, false, false, /* modifier keys */
 		        0 /*left*/, null
 		    );
-		    document.body.querySelector('#loginbutton').dispatchEvent(ev);
+		    document.body.querySelector('input[name="login"]').dispatchEvent(ev);
 		}
 	`)
 	if err != nil {
