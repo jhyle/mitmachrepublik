@@ -360,50 +360,29 @@ func (events *EventService) FindEvents() ([]Event, error) {
 	return allEvents, nil
 }
 
-func (events *EventService) FindSimilarEvents(event *Event, count int) ([]*Event, error) {
-
-	query := []bson.M{events.futureQuery()}
-	query = append(query, bson.M{"_id": bson.M{"$ne": event.Id}})
-	query = append(query, bson.M{"addr.city": event.Addr.City})
-
-	categories := make([]bson.M, 0)
-	for _, category := range event.Categories {
-		categories = append(categories, bson.M{"categories": category})
-	}
-	if len(categories) > 0 {
-		query = append(query, bson.M{"$or": categories})
-	}
-
-	targets := make([]bson.M, 0)
-	for _, target := range event.Targets {
-		targets = append(targets, bson.M{"targets": target})
-	}
-	if len(targets) > 0 {
-		query = append(query, bson.M{"$or": targets})
-	}
+func (events *EventService) SearchDistinct(query bson.M, eventsList *[]*Event, limit int, sort ...string) error {
 
 	page := 0
-	pageSize := 10
+	pageSize := limit << 1
 	var err error
 	var result EventSearchResult
-	eventsList := make([]*Event, 0)
 
-	for len(eventsList) < count {
-		err = events.table().Search(bson.M{"$and": query}, page*pageSize, pageSize, &result, "start")
+	for len(*eventsList) < limit {
+		err = events.table().Search(query, page*pageSize, pageSize, &result, sort...)
 		if err != nil || len(result.Events) == 0 {
 			break
 		}
 		for _, event := range result.Events {
 			found := false
-			for _, have := range eventsList {
+			for _, have := range *eventsList {
 				if event.Id == have.Id {
 					found = true
 					break
 				}
 			}
 			if !found {
-				eventsList = append(eventsList, event)
-				if len(eventsList) == count {
+				*eventsList = append(*eventsList, event)
+				if len(*eventsList) == limit {
 					break
 				}
 			}
@@ -411,6 +390,62 @@ func (events *EventService) FindSimilarEvents(event *Event, count int) ([]*Event
 		page++
 	}
 
+	return err
+}
+
+func (events *EventService) FindSimilarEvents(event *Event, count int) ([]*Event, error) {
+
+	query := []bson.M{events.futureQuery(), bson.M{"_id": bson.M{"$ne": event.Id}}, bson.M{"addr.city": event.Addr.City}}
+
+	categories := make([]bson.M, 0)
+	for _, category := range event.Categories {
+		categories = append(categories, bson.M{"categories": category})
+	}
+	targets := make([]bson.M, 0)
+	for _, target := range event.Targets {
+		targets = append(targets, bson.M{"targets": target})
+	}
+
+	verySimilarQuery := make([]bson.M, len(query))
+	copy(verySimilarQuery, query)
+	if len(categories) > 0 {
+		verySimilarQuery = append(query, bson.M{"$and": categories})
+	}
+	if len(targets) > 0 {
+		verySimilarQuery = append(query, bson.M{"$and": targets})
+	}
+
+	eventsList := []*Event{}
+	err := events.SearchDistinct(bson.M{"$and": verySimilarQuery}, &eventsList, count, "recurrency", "start")
+	if err != nil {
+		return nil, errors.Wrapf(err, "error loading very similar events for event: %s", event.Id.String())
+	}
+	if len(eventsList) == count {
+		return eventsList, nil
+	}
+
+	sameOrganizerQuery := make([]bson.M, len(query))
+	copy(sameOrganizerQuery, query)
+	sameOrganizerQuery = append(sameOrganizerQuery, bson.M{"organizerid": event.OrganizerId})
+
+	err = events.SearchDistinct(bson.M{"$and": sameOrganizerQuery}, &eventsList, count, "recurrency", "start")
+	if err != nil {
+		return nil, errors.Wrapf(err, "error loading same organizer events for event: %s", event.Id.String())
+	}
+	if len(eventsList) == count {
+		return eventsList, nil
+	}
+
+	similarQuery := make([]bson.M, len(query))
+	copy(similarQuery, query)
+	if len(categories) > 0 {
+		similarQuery = append(query, bson.M{"$or": categories})
+	}
+	if len(targets) > 0 {
+		similarQuery = append(query, bson.M{"$or": targets})
+	}
+
+	err = events.SearchDistinct(bson.M{"$and": similarQuery}, &eventsList, count, "recurrency", "start")
 	if err != nil {
 		return nil, errors.Wrapf(err, "error loading similar events for event: %s", event.Id.String())
 	}
