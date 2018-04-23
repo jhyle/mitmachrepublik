@@ -651,10 +651,10 @@ func NewEventList(events []*Event, start time.Time) *EventList {
 
 	for i, event := range events {
 		wg.Add(1)
-		go func() {
+		go func(i int, event *Event) {
 			dates[i] = event.NextDate(start)
 			wg.Done()
-		}()
+		}(i, event)
 	}
 	wg.Wait()
 
