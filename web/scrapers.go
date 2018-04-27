@@ -32,7 +32,7 @@ const (
 	TAG_TITLE_REGEX     = "<title[^>]*>([^<]*)</title"
 	TAG_H1_REGEX        = "<h1[^>]*>(.*)</h1"
 	TAG_H2_REGEX        = "<h2[^>]*>(.*)</h2"
-	TAG_P_CLEAN_REGEX   = "<p>(.*)</p>"
+	TAG_P_CLEAN_REGEX   = "<p[^>]*>(.*)</p>"
 	DATE_FROM_REGEX     = "(\\d+)\\.(\\d+)\\.(\\d+), (\\d+):(\\d+)"
 	DATE_FROM_TO_REGEX  = "(\\d+)\\.(\\d+)\\.(\\d+), (\\d+):(\\d+) - (\\d+):(\\d+)"
 	POSTCODE_CITY_REGEX = "(\\d{5})\\s+(.*)"
