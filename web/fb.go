@@ -52,6 +52,13 @@ func NewFacebookClient(hostname, appId, appSecret, user, password string) (*Face
 		return nil, errors.Wrap(err, "err loading login page")
 	}
 
+	time.Sleep(3 * time.Second)
+
+	_, err = page.Content()
+	if err != nil {
+		return nil, errors.Wrap(err, "err loading login page")
+	}
+
 	_, err = page.Evaluate(`
 		function() {
 			document.body.querySelector('input[name="email"]').setAttribute('value', '` + user + `');
