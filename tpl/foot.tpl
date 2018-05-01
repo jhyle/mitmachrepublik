@@ -47,7 +47,7 @@
 	    {{end}}
 	  </ul>
 	</div>
-	<div class="col-md-2 col-foot visible-lg-block visible-md-block">
+	<div class="col-md-2 col-sm-3 col-xs-6 col-foot">
 	  <ul style="margin-bottom: 0; padding-bottom: 0">
 	    <li><h5><a href="/veranstaltungen/{{simpleEventSearchUrl "Berlin"}}">Berlin</a></h5></li>
 		<li><a href="/heute-in-berlin">Heute in Berlin</a></li>
