@@ -113,7 +113,9 @@ func (service *PostEventService) Run() error {
 	event := events[rand.Intn(len(events))]
 	event.Facebook = true
 	event.Twitter = true
-	event.GiB = true
+	if strings.Contains(event.Descr, "kostenlos") || strings.Contains(event.Descr, "kostenfrei") {
+		event.GiB = true
+	}
 	return service.app.postEvent(event, true, false)
 }
 
