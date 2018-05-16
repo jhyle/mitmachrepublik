@@ -35,9 +35,9 @@ var (
 		// Charlottenburg-Wilmersdorf
 		"Berlin Charlottenburg":      []string{"10553", "10585", "10587", "10589", "10623", "10625", "10627", "10629", "10707", "10709", "10711", "10719", "10787", "10789", "13627", "14050", "14055", "14057", "14059"},
 		"Berlin Charlottenburg-Nord": []string{"10589", "13353", "13627"},
-		"Berlin Grunewald":           []string{"10711", "14055", "14193", "14195", "14199"},
 		"Berlin Halensee":            []string{"10709", "10711", "10713"},
 		"Berlin Schmargendorf":       []string{"14193", "14195", "14197", "14199"},
+		"Berlin Grunewald":           []string{"10711", "14055", "14193", "14195", "14199"},
 		"Berlin Westend":             []string{"13597", "14050", "14052", "14053", "14055", "14057", "14059"},
 		"Berlin Wilmersdorf":         []string{"10707", "10709", "10711", "10713", "10715", "10717", "10719", "10777", "10779", "10789", "10825", "14195", "14197", "14199"},
 		// Friedrichshain-Kreuzberg
@@ -166,7 +166,7 @@ func Postcodes(location string) []string {
 	postcodes := make(map[string]string)
 
 	if isPostcode(location) {
-		if len(location) == MAX_POSTCODE_LENGTH  {
+		if len(location) == MAX_POSTCODE_LENGTH {
 			postcodes[location] = location
 		} else {
 			for _, districtCodes := range PostcodeMap {

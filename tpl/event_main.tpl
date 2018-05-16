@@ -1,5 +1,5 @@
 <div class="row tiles">
-	<div class="col-xs-12"><h1>{{.event.Title}}{{if $.place}} in {{$.place}}{{end}}</h1></div>
+	<div class="col-xs-12"><h1>{{.event.Title}}{{if .event.Addr.Pcode}} in {{citypartName .event.Addr}}{{end}}</h1></div>
 </div>
 <div class="row tiles">
 	<div class="col-lg-3 col-sm-4 col-xs-5 col-box">

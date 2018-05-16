@@ -740,7 +740,7 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		place := citypartName(event.Addr)
+		place := districtName(event.Addr)
 
 		eventCnt, err := app.events.Count("", place, timeSpans(dateIds), nil, nil)
 		if err != nil {
@@ -758,8 +758,9 @@ func (app *MmrApp) eventPage(w traffic.ResponseWriter, r *traffic.Request) {
 		}
 
 		title := event.Title
-		if !isEmpty(place) {
-			title += " in " + place
+		ciypart := citypartName(event.Addr)
+		if !isEmpty(ciypart) {
+			title += " in " + ciypart
 		}
 		if !isEmpty(event.Addr.Name) {
 			title += " (" + event.Addr.Name + ")"
@@ -941,7 +942,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 			return resultNotFound
 		}
 
-		place := citypartName(organizer.Addr)
+		place := districtName(organizer.Addr)
 
 		eventCnt, err := app.events.Count("", place, timespans, nil, nil)
 		if err != nil {
@@ -967,6 +968,7 @@ func (app *MmrApp) organizerPage(w traffic.ResponseWriter, r *traffic.Request) {
 		title := "Veranstaltungen"
 		if organizer.Name != "Mitmach-Republik e.V." {
 			title += " von " + organizer.Name
+			place := citypartName(organizer.Addr)
 			if !isEmpty(place) {
 				title += " aus " + place
 			}
