@@ -80,6 +80,7 @@ var (
 
 func NewPostEventService(hour int, app *MmrApp) Service {
 
+	rand.Seed(time.Now().UnixNano())
 	return &PostEventService{NewBasicService("PostEventService", hour, app.emailAccount), app}
 }
 
@@ -97,7 +98,7 @@ func (service *PostEventService) Run() error {
 			bson.M{"facebookid": ""},
 		}},
 		bson.M{"start": bson.M{"$gte": now}},
-		bson.M{"start": bson.M{"$lt": now.AddDate(0, 0, 3)}},
+		bson.M{"start": bson.M{"$lt": now.AddDate(0, 0, 5)}},
 		bson.M{"source": UK_SOURCE},
 	}}
 	var events []*Event
