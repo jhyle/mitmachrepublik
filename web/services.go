@@ -114,10 +114,14 @@ func (service *PostEventService) Run() error {
 	event := events[rand.Intn(len(events))]
 	event.Facebook = true
 	event.Twitter = true
+
+	postGiB := false
 	if strings.Contains(event.Descr, "kostenlos") || strings.Contains(event.Descr, "kostenfrei") {
+		postGiB = true
 		event.GiB = true
 	}
-	return service.app.postEvent(event, true, false)
+
+	return service.app.postEvent(event, postGiB, false)
 }
 
 func NewSessionService(hour int, email *EmailAccount, database Database) Service {
