@@ -2,7 +2,7 @@
 	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Schließen</span></button>
 </div>
 <div class="modal-body">
-	<div class="big-text">Trage Deine E-Mail-Adresse ein und wir senden Dir an den ausgewählten Tagen die zu Deiner Suche passenden Veranstaltungen per E-Mail. Du kannst die Zusendung jederzeit abbestellen.</div>
+	<div class="big-text">Trage Deine E-Mail-Adresse ein und wir senden Dir an den ausgewählten Tagen die zu Deiner Suche passenden Veranstaltungen per E-Mail. Du kannst die Zusendung jederzeit über einen Link am Ende des Newsletters abbestellen oder Dich über das Kontaktformular an uns wenden.</div>
 	<form role="form" id="email-alert-form" class="form-horizontal" method="POST">
 		<div class="form-group">
 			<div class="col-sm-12">

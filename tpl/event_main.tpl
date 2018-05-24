@@ -25,7 +25,7 @@
 			<a style="margin-right: 10px" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2F{{$.hostname}}{{.Url}}%3Ffrom%3D{{$.start.Unix}}" target="_blank"><img src="/images/facebook_share.png"></a>
 			<a style="margin-right: 10px" href="https://plus.google.com/share?url=http%3A%2F%2F{{$.hostname}}{{.Url}}%3Ffrom%3D{{$.start.Unix}}" target="_blank"><img src="/images/google_share.png"></a>
 			<a href="https://twitter.com/intent/tweet?url=http%3A%2F%2F{{$.hostname}}{{.Url}}%3Ffrom%3D{{$.start.Unix}}" target="_blank"><img src="/images/twitter_share.png"></a>
-			<div class="recommend"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="javascript:void(0)" data-href="/dialog/sendevent/{{.Id.Hex}}?from={{$.start.Unix}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
+			<div class="recommend"><a id="event-mail" title="Empfehle die Veranstaltung per E-Mail" class="highlight" href="#" data-href="/dialog/sendevent/{{.Id.Hex}}?from={{$.start.Unix}}" rel="nofollow" data-toggle="modal" data-target="#share"><span class="fa fa-envelope"></span> Empfehlen</a></div>
 		</div>
 		<p class="small-icon pull-left"><span class="fa fa-calendar fa-fw" title="Datum"></span></p>
 		{{if $.showDate}}
@@ -70,7 +70,6 @@
 		{{end}}
 		<div class="description" style="margin: 15px 0 15px 0">{{.HtmlDescription}}</div>
 		<div class="clearfix"></div>
-		<div class="fb-comments" data-href="{{$.hostname}}{{.Url}}" data-width="100%" data-numposts="5" data-order-by="time" data-colorscheme="light"></div>
 	</div>{{end}}
 </div>
 {{if len .similiars}}

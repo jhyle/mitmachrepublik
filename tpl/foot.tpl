@@ -8,7 +8,7 @@
 	    <li><a href="https://twitter.com/mitmachrepublik" target="_blank"><span class="fa fa-twitter fa-fw" ></span>twitter</a></li>
 	    <li><h5>Rechtliches</h5></li>
 	    <li><a rel="nofollow" href="/agbs">Allgemeine Geschäftsbedingungen</a></li>
-	    <li><a rel="nofollow" href="/datenschutz">Datenschutz</a></li>
+	    <li><a rel="nofollow" href="/datenschutz">Datenschutzerklärung</a></li>
 	    <li><a rel="nofollow" href="/impressum">Impressum</a></li>
 	    <li><a rel="nofollow" href="/disclaimer">Haftungsausschluss (Disclaimer)</a></li>
 	  </ul>
