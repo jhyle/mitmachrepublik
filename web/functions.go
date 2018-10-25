@@ -136,6 +136,7 @@ func sanitizePath(s string) string {
 	s = strings.Replace(s, "Ä", "ae", -1)
 	s = strings.Replace(s, "Ö", "oe", -1)
 	s = strings.Replace(s, "Ü", "ie", -1)
+	s = strings.Replace(s, "/", "-", -1)
 	return sanitize.Path(s)
 }
 
