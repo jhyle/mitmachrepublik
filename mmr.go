@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/jhyle/mmr/web"
+	"github.com/jhyle/mitmachrepublik/web"
 	"net/http"
 	_ "net/http/pprof"
 	"os"

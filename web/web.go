@@ -1644,7 +1644,7 @@ func (app *MmrApp) sendPasswordMailHandler(w traffic.ResponseWriter, r *traffic.
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
 
-		err = app.sendEmail(app.emailAccount.From, &EmailAddress{user.Name, user.Email}, resetpwd_subject, fmt.Sprintf(resetpwd_message, user.Name, app.hostname, sessionId.Hex()))
+		err = app.sendEmail(&EmailAddress{user.Name, user.Email}, app.emailAccount.From, resetpwd_subject, fmt.Sprintf(resetpwd_message, user.Name, app.hostname, sessionId.Hex()))
 		if err != nil {
 			return &appResult{Status: http.StatusInternalServerError, Error: err}
 		}
