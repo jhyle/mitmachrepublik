@@ -1,12 +1,12 @@
 hash: d687a120a1b253652bd727737d140b92bdc7b790f4820c13235adc56fb27b26f
-updated: 2018-11-03T23:00:52.462544938+01:00
+updated: 2018-11-06T21:37:04.763053376+01:00
 imports:
 - name: github.com/armon/go-radix
-  version: 1a2de0c21c94309923825da3df33a4381872c795
+  version: 1fca145dffbcaa8fe914309b1ec0cfc67500fe61
 - name: github.com/benbjohnson/phantomjs
   version: 1b81734f7877b51cadd82ee32663ae88f630469c
 - name: github.com/blevesearch/bleve
-  version: 0afed15e690368343373ae78086d8563f535978c
+  version: cb6391e75ee5cf6314330f4c1a9ca533f3acb4ca
   subpackages:
   - analysis
   - analysis/analyzer/standard
@@ -24,6 +24,7 @@ imports:
   - index/scorch
   - index/scorch/mergeplan
   - index/scorch/segment
+  - index/scorch/segment/mem
   - index/scorch/segment/zap
   - index/store
   - index/store/boltdb
@@ -43,7 +44,6 @@ imports:
   - search/query
   - search/scorer
   - search/searcher
-  - size
 - name: github.com/blevesearch/go-porterstemmer
   version: 23a2c8e5cf1f380f27722c6d2ae8896431dc7d0e
   repo: https://github.com/blevesearch/go-porterstemmer
@@ -54,26 +54,24 @@ imports:
   version: 9da31745363232bc1e27dbab3569e77383a51585
   repo: https://github.com/boltdb/bolt
 - name: github.com/cenkalti/backoff
-  version: 62661b46c4093e2c1f38d943e663db1a29873e80
+  version: 2ea60e5f094469f9e65adb9cd103795b73ae743e
 - name: github.com/couchbase/vellum
-  version: 01d5c56e609533acd717717c8acc0d2dea6bfb89
-  repo: https://github.com/couchbase/vellum
+  version: ed84a675e24ed0a0bf6859b1ddec7e7c858354bd
   subpackages:
-  - levenshtein
   - regexp
   - utf8
 - name: github.com/dghubble/go-twitter
-  version: e75339c4bc3d739058b5e43806e7accda132fb53
+  version: c4115fa44a928413e0b857e0eb47376ffde3a61a
   subpackages:
   - twitter
 - name: github.com/dghubble/oauth1
   version: 70562a5920ad9b6ff03ef697c0f90ae569abbd2b
 - name: github.com/dghubble/sling
-  version: a0940ae70b814015bca996150db6f03aeb274060
+  version: 80ec33c6152a53edb5545864ca37567b506c4ca5
 - name: github.com/edsrzf/mmap-go
   version: 935e0e8a636ca4ba70b713f3e38a19e1b77739e8
 - name: github.com/glycerine/go-unsnap-stream
-  version: 9f0cb55181dd3a0a4c168d3dbc72d4aca4853126
+  version: 62a9a9eb44fd8932157b1a8ace2149eff5971af6
 - name: github.com/golang/protobuf
   version: 655cdfa588ea190e901bc5590e65d5621688847c
   repo: https://github.com/golang/protobuf
@@ -83,7 +81,7 @@ imports:
   version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
   repo: https://github.com/golang/snappy
 - name: github.com/google/go-querystring
-  version: 44c6ddd0a2342c386950e880b658017258da92fc
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
   - query
 - name: github.com/google/uuid
@@ -101,26 +99,28 @@ imports:
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/RoaringBitmap/roaring
-  version: 01d244c43a7e8d1191a4f369f5908ea9eb9bc9ac
-  repo: https://github.com/RoaringBitmap/roaring
+  version: 5930de397dc5823f13e026b6094668c2dd526530
+- name: github.com/Smerity/govarint
+  version: 7265e41f48f15fd61751e16da866af3c704bb3ab
 - name: github.com/steveyen/gtreap
   version: 0abe01ef9be25c4aedc174758ec2d917314d6d70
   repo: https://github.com/steveyen/gtreap
 - name: github.com/tinylib/msgp
-  version: f65876d3ea05943d6613bca6b8ed391843044bd4
+  version: 428e467e72ad3e435f398b9b148f581c69444410
   subpackages:
   - msgp
 - name: github.com/willf/bitset
   version: 2e6e8094ef4745224150c88c16191c7dceaad16f
   repo: https://github.com/willf/bitset
 - name: golang.org/x/net
-  version: c10e9556a7bc0e7c942242b606f0acf024ad5d6a
+  version: e45385e9b226f570b1f086bf287b25d3d4117776
+  repo: https://go.googlesource.com/net
   subpackages:
   - context
   - html
   - html/atom
 - name: golang.org/x/sys
-  version: 9b800f95dbbc54abff0acf7ee32d88ba4e328c89
+  version: af50095a40f9041b3b38960738837185c26e9419
   subpackages:
   - unix
 - name: gopkg.in/alexcesaro/quotedprintable.v3
@@ -128,7 +128,7 @@ imports:
 - name: gopkg.in/gomail.v2
   version: 81ebce5c23dfd25c6c67194b37d3dd3f338c98b1
 - name: gopkg.in/mgo.v2
-  version: 9856a29383ce1c59f308dd1cf0363a79b5bef6b5
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
   - bson
   - internal/json
