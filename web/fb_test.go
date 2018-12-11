@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jhyle/mmr/web"
+	"github.com/jhyle/mitmachrepublik/web"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -39,7 +39,7 @@ var (
 
 func TestFacebookPost(t *testing.T) {
 
-	client, err := mmr.NewFacebookClient(hostname, facebookAppId, *fbAppSecret, *fbUser, *fbPassword)
+	_, err := mmr.NewFacebookClient(hostname, facebookAppId, *fbAppSecret, *fbUser, *fbPassword)
 	if err != nil {
 		t.Fatal(err)
 	}

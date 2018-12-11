@@ -4,7 +4,7 @@ import (
 	"flag"
 	"testing"
 
-	"github.com/jhyle/mmr/web"
+	"github.com/jhyle/mitmachrepublik/web"
 )
 
 var (

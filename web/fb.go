@@ -45,7 +45,12 @@ func NewFacebookClient(hostname, appId, appSecret, user, password string) (*Face
 	if err != nil {
 		return nil, errors.Wrap(err, "err loading settings")
 	}
+
 	settings.UserAgent = phantomUserAgent
+	err = page.SetSettings(settings)
+	if err != nil {
+		return nil, errors.Wrap(err, "err setting page settings")
+	}
 
 	err = page.Open(fmt.Sprintf(fbLoginPage, appId))
 	if err != nil {
@@ -73,7 +78,7 @@ func NewFacebookClient(hostname, appId, appSecret, user, password string) (*Face
 		        false, false, false, false, /* modifier keys */
 		        0 /*left*/, null
 		    );
-		    document.body.querySelector('input[name="login"]').dispatchEvent(ev);
+		    document.body.querySelector('button[name="login"]').dispatchEvent(ev);
 		}
 	`)
 	if err != nil {
