@@ -17,6 +17,7 @@ import (
 )
 
 const (
+	gibUserAgent    = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0"
 	gibBasePath     = "https://www.gratis-in-berlin.de/"
 	gibLoginPage    = gibBasePath + "login"
 	gibLoginHandler = gibLoginPage + "?task=user.login"
@@ -90,7 +91,7 @@ func (gib *GibClient) NewGetRequest(url string) (*http.Request, error) {
 		return nil, errors.Wrapf(err, "error creating GET request for %s", url)
 	}
 
-	req.Header.Set(http.CanonicalHeaderKey("User-Agent"), phantomUserAgent)
+	req.Header.Set(http.CanonicalHeaderKey("User-Agent"), gibUserAgent)
 	return req, nil
 }
 
@@ -101,7 +102,7 @@ func (gib *GibClient) NewPostRequest(url string, body io.Reader) (*http.Request,
 		return nil, errors.Wrapf(err, "error creating POST request for %s", url)
 	}
 
-	req.Header.Set(http.CanonicalHeaderKey("User-Agent"), phantomUserAgent)
+	req.Header.Set(http.CanonicalHeaderKey("User-Agent"), gibUserAgent)
 	return req, nil
 }
 

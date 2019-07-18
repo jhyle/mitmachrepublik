@@ -1,4 +1,4 @@
-package: github.com/jhyle/mmr
+package: github.com/jhyle/mitmachrepublik
 ignore:
 - math/bits
 import:
@@ -19,7 +19,6 @@ import:
   - bson
 - package: github.com/pkg/errors
   version: ^0.8.0
-- package: github.com/benbjohnson/phantomjs
 - package: github.com/dghubble/go-twitter
 - package: github.com/dghubble/oauth1
   version: ^0.4.0

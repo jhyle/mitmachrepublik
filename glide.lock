@@ -1,12 +1,10 @@
-hash: d687a120a1b253652bd727737d140b92bdc7b790f4820c13235adc56fb27b26f
-updated: 2018-11-06T21:37:04.763053376+01:00
+hash: 030b843fb5f3bf55063352771cf5a16bd3d6026c2afc04ac8f7f330f1258182d
+updated: 2019-07-18T13:25:09.856020081+02:00
 imports:
 - name: github.com/armon/go-radix
-  version: 1fca145dffbcaa8fe914309b1ec0cfc67500fe61
-- name: github.com/benbjohnson/phantomjs
-  version: 1b81734f7877b51cadd82ee32663ae88f630469c
+  version: 1a2de0c21c94309923825da3df33a4381872c795
 - name: github.com/blevesearch/bleve
-  version: cb6391e75ee5cf6314330f4c1a9ca533f3acb4ca
+  version: 4a7e6fb7547c787bbe1adf4d3ef5ff2551a50221
   subpackages:
   - analysis
   - analysis/analyzer/standard
@@ -24,7 +22,6 @@ imports:
   - index/scorch
   - index/scorch/mergeplan
   - index/scorch/segment
-  - index/scorch/segment/mem
   - index/scorch/segment/zap
   - index/store
   - index/store/boltdb
@@ -44,34 +41,37 @@ imports:
   - search/query
   - search/scorer
   - search/searcher
+  - size
 - name: github.com/blevesearch/go-porterstemmer
   version: 23a2c8e5cf1f380f27722c6d2ae8896431dc7d0e
   repo: https://github.com/blevesearch/go-porterstemmer
 - name: github.com/blevesearch/segment
   version: db70c57796cc8c310613541dfade3dce627d09c7
   repo: https://github.com/blevesearch/segment
-- name: github.com/boltdb/bolt
-  version: 9da31745363232bc1e27dbab3569e77383a51585
-  repo: https://github.com/boltdb/bolt
 - name: github.com/cenkalti/backoff
-  version: 2ea60e5f094469f9e65adb9cd103795b73ae743e
+  version: 2146c93394225c3732078705043ce9f26584d334
 - name: github.com/couchbase/vellum
-  version: ed84a675e24ed0a0bf6859b1ddec7e7c858354bd
+  version: 41f2deade2cfab59facd263e918d7c05f656c2e9
+  repo: https://github.com/couchbase/vellum
   subpackages:
+  - levenshtein2
   - regexp
   - utf8
 - name: github.com/dghubble/go-twitter
-  version: c4115fa44a928413e0b857e0eb47376ffde3a61a
+  version: dc9b50841e5b0eb73b232dc29968d1244c2fc6ac
   subpackages:
   - twitter
 - name: github.com/dghubble/oauth1
-  version: 70562a5920ad9b6ff03ef697c0f90ae569abbd2b
+  version: 19d7291ba290f420ccea50e076322aca95f27fcd
 - name: github.com/dghubble/sling
-  version: 80ec33c6152a53edb5545864ca37567b506c4ca5
+  version: 8dde57b790add982045ee44998e4925ccb421ec7
 - name: github.com/edsrzf/mmap-go
   version: 935e0e8a636ca4ba70b713f3e38a19e1b77739e8
+- name: github.com/etcd-io/bbolt
+  version: 7ee3ded59d4835e10f3e7d0f7603c42aa5e83820
+  repo: https://github.com/etcd-io/bbolt
 - name: github.com/glycerine/go-unsnap-stream
-  version: 62a9a9eb44fd8932157b1a8ace2149eff5971af6
+  version: f9677308dec2b35e76737f9713df328ad11b1fea
 - name: github.com/golang/protobuf
   version: 655cdfa588ea190e901bc5590e65d5621688847c
   repo: https://github.com/golang/protobuf
@@ -81,7 +81,7 @@ imports:
   version: cef980a12b316c5b7e5bb3a8e168eb43ae999a88
   repo: https://github.com/golang/snappy
 - name: github.com/google/go-querystring
-  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  version: c8c88dbee036db4e4808d1f2ec8c2e15e11c3f80
   subpackages:
   - query
 - name: github.com/google/uuid
@@ -97,30 +97,27 @@ imports:
 - name: github.com/pilu/traffic
   version: 19ea6534e33472fb79059e2cdbe1d36f80a11526
 - name: github.com/pkg/errors
-  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+  version: ba968bfe8b2f7e042a574c888954fccecfa385b4
 - name: github.com/RoaringBitmap/roaring
-  version: 5930de397dc5823f13e026b6094668c2dd526530
-- name: github.com/Smerity/govarint
-  version: 7265e41f48f15fd61751e16da866af3c704bb3ab
+  version: 01d244c43a7e8d1191a4f369f5908ea9eb9bc9ac
+  repo: https://github.com/RoaringBitmap/roaring
 - name: github.com/steveyen/gtreap
   version: 0abe01ef9be25c4aedc174758ec2d917314d6d70
   repo: https://github.com/steveyen/gtreap
 - name: github.com/tinylib/msgp
-  version: 428e467e72ad3e435f398b9b148f581c69444410
+  version: efe20429c9b7b2a358aba9ba2d40ad56d966ce00
   subpackages:
   - msgp
 - name: github.com/willf/bitset
   version: 2e6e8094ef4745224150c88c16191c7dceaad16f
   repo: https://github.com/willf/bitset
 - name: golang.org/x/net
-  version: e45385e9b226f570b1f086bf287b25d3d4117776
-  repo: https://go.googlesource.com/net
+  version: 5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec
   subpackages:
-  - context
   - html
   - html/atom
 - name: golang.org/x/sys
-  version: af50095a40f9041b3b38960738837185c26e9419
+  version: fae7ac547cb717d141c433a2a173315e216b64c4
   subpackages:
   - unix
 - name: gopkg.in/alexcesaro/quotedprintable.v3

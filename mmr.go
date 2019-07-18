@@ -27,9 +27,6 @@ var (
 	mongoServerFlag          *string = flag.String("mongoServer", "localhost", "url of mongoDb server")
 	databaseFlag             *string = flag.String("database", "mitmachrepublik", "name of the database")
 	smtpPassFlag             *string = flag.String("smtpPassword", "", "password for mitmachrepublik@gmail.com")
-	fbAppSecret              *string = flag.String("fbAppSecret", "", "Facebook App Secret")
-	fbUser                   *string = flag.String("fbUser", "", "Facebook user")
-	fbPassword               *string = flag.String("fbPassword", "", "Facebook password")
 	twitterApiSecret         *string = flag.String("twitterApiSecret", "", "Twitter Api Secret")
 	twitterAccessTokenSecret *string = flag.String("twitterAccessTokenSecret", "", "Twitter Api Access Token Secret")
 	gibUser                  *string = flag.String("gibUser", "", "Gratis in Berlin user")
@@ -105,7 +102,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	app, err := mmr.NewMmrApp(*envFlag, *hostFlag, *portFlag, *templateDirFlag, *indexDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag, *smtpPassFlag, *fbAppSecret, *fbUser, *fbPassword, *twitterApiSecret, *twitterAccessTokenSecret, *gibUser, *gibPassword)
+	app, err := mmr.NewMmrApp(*envFlag, *hostFlag, *portFlag, *templateDirFlag, *indexDirFlag, *imageServerFlag, *mongoServerFlag, *databaseFlag, *smtpPassFlag, *twitterApiSecret, *twitterAccessTokenSecret, *gibUser, *gibPassword)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(2)

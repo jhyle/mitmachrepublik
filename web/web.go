@@ -32,10 +32,6 @@ type (
 		locations    *LocationTree
 		services     []Service
 
-		fbAppSecret string
-		fbUser      string
-		fbPass      string
-
 		twApiSecret         string
 		twAccessTokenSecret string
 
@@ -95,7 +91,6 @@ const (
 	ga_test          = "UA-61290824-2"
 	ga_www           = "UA-61290824-3"
 	google_api_key   = "AIzaSyAFzwmkGATzuHpcqV3g0yQEO77Vk66zXUM"
-	facebook_app_id  = "138725613479008"
 )
 
 var (
@@ -109,7 +104,7 @@ var (
 	sendAlertsService *SendAlertsService
 )
 
-func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass, fbAppSecret, fbUser, fbPass, twApiSecret, twAccessTokenSecret, gibUser, gibPassword string) (*MmrApp, error) {
+func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, mongoUrl, dbName, smtpPass, twApiSecret, twAccessTokenSecret, gibUser, gibPassword string) (*MmrApp, error) {
 
 	database, err := NewMongoDb(mongoUrl, dbName)
 	if err != nil {
@@ -194,7 +189,7 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		services = append(services, NewSpawnEventsService(12, emailAccount, database, events, imgServer))
 	}
 
-	app := &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services, fbAppSecret, fbUser, fbPass, twApiSecret, twAccessTokenSecret, gibUser, gibPassword}
+	app := &MmrApp{host, port, tpls, imgServer, database, users, events, alerts, ga_code, hostname, emailAccount, NewLocationTree(cities), services, twApiSecret, twAccessTokenSecret, gibUser, gibPassword}
 	app.services = append(app.services, NewPostEventService(7, app))
 	return app, nil
 }
@@ -1430,44 +1425,6 @@ func (app *MmrApp) postEvent(event *Event, postGib, deleteGib bool) error {
 		}
 	}
 
-	if app.fbAppSecret != "" && app.fbUser != "" && app.fbPass != "" {
-		if event.Facebook == true && event.FacebookId == "" {
-
-			client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
-			if err != nil {
-				return err
-			}
-
-			event.FacebookId, err = client.PostEvent(event)
-			if err != nil {
-				return err
-			}
-
-			err = app.events.Store(event)
-			if err != nil {
-				return err
-			}
-
-		} else if event.Facebook == false && event.FacebookId != "" {
-
-			client, err := NewFacebookClient(app.hostname, facebook_app_id, app.fbAppSecret, app.fbUser, app.fbPass)
-			if err != nil {
-				return err
-			}
-
-			err = client.DeletePost(event.FacebookId)
-			if err != nil {
-				return err
-			}
-
-			event.FacebookId = ""
-			err = app.events.Store(event)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
 	if app.gibUser != "" && app.gibPassword != "" {
 
 		if postGib {
@@ -1843,28 +1800,15 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstalter/verwaltung/:page", app.adminPage)
 
 	router.Get("/veranstaltungen/:place/:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
-	router.Get("/veranstaltungen//:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
-	router.Get("/veranstaltungen/:place/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
-	router.Get("/veranstaltungen//:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
-	router.Get("/veranstaltungen/:place/:dateIds/:categoryIds/:radius/:categories/:page", app.eventsPage)
-	router.Get("/veranstaltungen//:dateIds/:categoryIds/:radius/:categories/:page", app.eventsPage)
+	router.Get("/veranstaltungen/:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.eventsPage)
 
 	router.Get("/newsletter/veranstaltungen/:place/:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
-	router.Get("/newsletter/veranstaltungen//:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
-
-	router.Get("/veranstaltung/:place/:targets/:categories/:dateId/:id/:title", app.eventPage)
-	router.Get("/veranstaltung//:targets/:categories/:dateId/:id/:title", app.eventPage)
-	router.Get("/veranstaltung/:place//:categories/:dateId/:id/:title", app.eventPage)
-	router.Get("/veranstaltung///:categories/:dateId/:id/:title", app.eventPage)
+	router.Get("/newsletter/veranstaltungen/:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:id", app.nlEventsPage)
 
 	router.Get("/veranstaltung/:place/:targets/:categories/:id/:title", app.eventPage)
-	router.Get("/veranstaltung//:targets/:categories/:id/:title", app.eventPage)
-	router.Get("/veranstaltung/:place//:categories/:id/:title", app.eventPage)
-	router.Get("/veranstaltung///:categories/:id/:title", app.eventPage)
 
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
-	router.Get("/veranstalter//:categoryIds/:categories/:page", app.organizersPage)
-	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
+	router.Get("/veranstalter/:categoryIds/:categories/:page", app.organizersPage)
 
 	router.Get("/sitemap.xml", app.sitemapPage)
 	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "impressum.tpl", "Impressum") })
@@ -1888,7 +1832,7 @@ func (app *MmrApp) Start() {
 	router.Get("/dialog/password", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "password_reset.tpl", "") })
 	router.Get("/dialog/sendevent/:id", app.sendEventPage)
 	router.Get("/dialog/emailalert/:place/:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.emailAlertPage)
-	router.Get("/dialog/emailalert//:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.emailAlertPage)
+	router.Get("/dialog/emailalert/:dates/:dateIds/:targetIds/:categoryIds/:radius/:targets/:categories/:page", app.emailAlertPage)
 
 	router.Post("/suche", app.searchHandler)
 	router.Post("/upload", app.uploadHandler)
@@ -1907,11 +1851,11 @@ func (app *MmrApp) Start() {
 	router.Get("/typeahead/:query", app.typeAheadHandler)
 	router.Get("/location/:location", app.locationHandler)
 	router.Get("/eventcount/:query/:place/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
-	router.Get("/eventcount/:query//:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
-	router.Get("/eventcount//:place/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
-	router.Get("/eventcount///:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
+	router.Get("/eventcount/:query/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
+	router.Get("/eventcount/:place/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
+	router.Get("/eventcount/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
 	router.Get("/organizercount/:place/:categoryIds", app.organizerCountHandler)
-	router.Get("/organizercount//:categoryIds", app.organizerCountHandler)
+	router.Get("/organizercount/:categoryIds", app.organizerCountHandler)
 
 	router.Post("/login", app.loginHandler)
 	router.Post("/logout", app.logoutHandler)
