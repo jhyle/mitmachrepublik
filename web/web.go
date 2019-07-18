@@ -1865,8 +1865,6 @@ func (app *MmrApp) Start() {
 
 	router.Get("/typeahead/:query", app.typeAheadHandler)
 	router.Get("/location/:location", app.locationHandler)
-	router.Get("/eventcount/:query/:place/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
-	router.Get("/eventcount/:query/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
 	router.Get("/eventcount/:place/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
 	router.Get("/eventcount/:dateIds/:targetIds/:categoryIds", app.eventCountHandler)
 	router.Get("/organizercount/:place/:categoryIds", app.organizerCountHandler)

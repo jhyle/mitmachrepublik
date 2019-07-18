@@ -362,9 +362,6 @@ function removeErrorMessage(id)
 function gatherSearchForm()
 {
 	var data = {};
-	if ($("input[name=query]").length) {
-		data["query"] = $("input[name=query]").val().trim();
-	}
 	if ($("input[name=place]").length) {
 		data["place"] = $("input[name=place]").val().trim();
 	}
@@ -414,7 +411,7 @@ function gatherSearchForm()
 function updateEventCount()
 {
 	var data = gatherSearchForm();
-	$.ajax({cache: false, url : "/eventcount/" + (data["query"] ? data["query"] : "") + "/" + data["place"] + "/" + data["date"] + "/" + data["target"]+ "/" + data["category"], type: "GET", dataType: "json",
+	$.ajax({cache: false, url : "/eventcount/" + data["place"] + "/" + data["date"] + "/" + data["target"]+ "/" + data["category"], type: "GET", dataType: "json",
 		success: function(data) {
 			$("button[value=events]").html(data + (data != 1 ? " Veranstaltungen" : " Veranstaltung"));
 		}
