@@ -445,6 +445,9 @@ func (app *MmrApp) eventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 	}
 
 	place := r.Param("place")
+	if place == "-" {
+		place = ""
+	}
 	query := r.Param("query")
 	radius, err := strconv.Atoi(r.Param("radius"))
 	if err != nil {
@@ -668,6 +671,9 @@ func (app *MmrApp) nlEventsPage(w traffic.ResponseWriter, r *traffic.Request) {
 
 	query := r.Param("query")
 	place := r.Param("place")
+	if place == "-" {
+		place = ""
+	}
 	radius, err := strconv.Atoi(r.Param("radius"))
 	if err != nil {
 		radius = 0
@@ -847,6 +853,9 @@ func (app *MmrApp) organizersPage(w traffic.ResponseWriter, r *traffic.Request) 
 	}
 
 	place := r.Param("place")
+	if place == "-" {
+		place = ""
+	}
 	dateIds := []int{FromNow}
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 
@@ -1672,6 +1681,9 @@ func (app *MmrApp) eventCountHandler(w traffic.ResponseWriter, r *traffic.Reques
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 	query := strings.Trim(r.Param("query"), " ")
 	place := app.locations.Normalize(strings.Trim(r.Param("place"), " "))
+	if place == "-" {
+		place = ""
+	}
 
 	result := func() *appResult {
 
@@ -1690,6 +1702,9 @@ func (app *MmrApp) organizerCountHandler(w traffic.ResponseWriter, r *traffic.Re
 
 	categoryIds := str2Int(strings.Split(r.Param("categoryIds"), ","))
 	place := app.locations.Normalize(strings.Trim(r.Param("place"), " "))
+	if place == "-" {
+		place = ""
+	}
 
 	result := func() *appResult {
 
@@ -1808,7 +1823,7 @@ func (app *MmrApp) Start() {
 	router.Get("/veranstaltung/:place/:targets/:categories/:id/:title", app.eventPage)
 
 	router.Get("/veranstalter/:place/:categoryIds/:categories/:page", app.organizersPage)
-	router.Get("/veranstalter/:categoryIds/:categories/:page", app.organizersPage)
+	router.Get("/veranstalter/:id/:title/:page", app.organizerPage)
 
 	router.Get("/sitemap.xml", app.sitemapPage)
 	router.Get("/impressum", func(w traffic.ResponseWriter, r *traffic.Request) { app.staticPage(w, "impressum.tpl", "Impressum") })

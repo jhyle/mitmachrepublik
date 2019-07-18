@@ -224,6 +224,10 @@ func encodePath(path string) string {
 
 func eventSearchUrl(place string, targetIds, categoryIds, dateIds []int, radius int) string {
 
+	if place == "" {
+		place = "-"
+	}
+
 	dateNames := make([]string, len(dateIds))
 	for i, id := range dateIds {
 		dateNames[i] = DateIdMap[id]
@@ -264,10 +268,15 @@ func targetSearchUrl(target int, place string) string {
 
 func organizerSearchUrl(place string, categoryIds []int) string {
 
+	if place == "" {
+		place = "-"
+	}
+
 	categoryNames := make([]string, len(categoryIds))
 	for i, id := range categoryIds {
 		categoryNames[i] = CategoryIdMap[id]
 	}
+
 	return place + "/" + strings.Join(int2Str(categoryIds), ",") + "/" + sanitizePath(strings.Join(categoryNames, "-")) + "/0"
 }
 
