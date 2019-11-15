@@ -39,6 +39,11 @@ type (
 		database Database
 	}
 
+	ObsoleteEventsService struct {
+		BasicService
+		database Database
+	}
+
 	UnusedImgService struct {
 		BasicService
 		database  Database
@@ -139,6 +144,37 @@ func (service *SessionService) Run() error {
 	err := service.database.RemoveOldSessions(time.Duration(24) * time.Hour)
 	if err != nil {
 		return errors.Wrap(err, "error deleting sessions older than 24 hours")
+	}
+
+	return nil
+}
+
+func NewObsoleteEventsService(hour int, email *EmailAccount, database Database) Service {
+
+	return &ObsoleteEventsService{NewBasicService("ObsoleteEventsService", hour, email), database}
+}
+
+func (service *ObsoleteEventsService) Start() {
+
+	service.start(service.Run)
+}
+
+func (service *ObsoleteEventsService) Run() error {
+
+	table := service.database.Table("event")
+
+	var events []*Event
+	err := table.Find(bson.M{"recurrency": bson.M{"$gt": 0}, "recurrencyend": time.Time{}}, &events)
+	if err != nil {
+		return errors.Wrap(err, "error loading obsolete events")
+	}
+
+	for _, event := range events {
+		event.RecurrencyEnd = event.Start.AddDate(1, 0, 0)
+		_, err := table.UpsertById(event.Id, event)
+		if err != nil {
+			return errors.Wrapf(err, "error storing obsolete event %s", event.Id.String())
+		}
 	}
 
 	return nil

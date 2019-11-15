@@ -180,8 +180,9 @@ func NewMmrApp(env string, host string, port int, tplDir, indexDir, imgServer, m
 		adminId = admin.GetId()
 	}
 
-	services := make([]Service, 0)
+	var services []Service
 	services = append(services, NewSessionService(3, emailAccount, database))
+	services = append(services, NewObsoleteEventsService(3, emailAccount, database))
 	services = append(services, NewScrapersService(3, emailAccount, events, adminId))
 	services = append(services, NewUnusedImgService(4, emailAccount, database, imgServer))
 	services = append(services, NewSendAlertsService(5, emailAccount, hostname, emailAccount, alerts))

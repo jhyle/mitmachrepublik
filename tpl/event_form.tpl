@@ -104,7 +104,7 @@
 			</div>
 			<div id="event-recurrencyEnd" class="form-group" style="{{if eq .event.Recurrency 0}}display: none{{end}}">
 				<div class="col-xs-7">
-					<span><input name="recurrencyEnd" type="text" id="event-RecurrencyEnd" class="form-control form-datetime" placeholder="Wiederholung endet" value="{{datetimeFormat .event.RecurrencyEnd}}"></span>
+					<span><input name="recurrencyEnd" type="text" id="event-RecurrencyEnd" class="form-control form-datetime" placeholder="Ende der Wiederholungen (1 Jahr wenn leer)" value="{{datetimeFormat .event.RecurrencyEnd}}"></span>
 				</div>
 			</div>
 			<hr>
