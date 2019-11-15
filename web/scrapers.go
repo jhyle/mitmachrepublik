@@ -2,9 +2,11 @@ package mmr
 
 import (
 	"bytes"
+	"fmt"
 	"html"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -24,41 +26,32 @@ type (
 )
 
 const (
-	UK_SOURCE      = "umweltkalender"
-	UK_LIST_REGEX  = "<li id=\"(\\d+)\" class=\"list_item\">"
-	UK_LIST_URL    = "http://www.umweltkalender-berlin.de/angebote/aktuell?p=1&arten[0]=MIMA&um_km=500&zeitraum=zz"
-	UK_DETAILS_URL = "http://www.umweltkalender-berlin.de/angebote/details/"
+	UK_SOURCE = "umweltkalender"
 
-	TAG_TITLE_REGEX     = "<title[^>]*>([^<]*)</title"
 	TAG_H1_REGEX        = "<h1[^>]*>(.*)</h1"
-	TAG_H2_REGEX        = "<h2[^>]*>(.*)</h2"
-	TAG_P_CLEAN_REGEX   = "<p[^>]*>(.*)</p>"
-	DATE_FROM_REGEX     = "(\\d+)\\.(\\d+)\\.(\\d+), (\\d+):(\\d+)"
-	DATE_FROM_TO_REGEX  = "(\\d+)\\.(\\d+)\\.(\\d+), (\\d+):(\\d+) - (\\d+):(\\d+)"
 	POSTCODE_CITY_REGEX = "(\\d{5})\\s+(.*)"
 	POSTCODE_REGEX      = "(\\d{5})"
 
-	UK_TARGETS_REGEX  = "<p><strong>Für:</strong>([^<]*)<"
-	UK_LOCATION_REGEX = "(?s)<p><strong>Ort / Start:</strong>([^<]*)<"
-	UK_DIV_MAIN_REGEX = "(?s)<div class=\"green_corners_main\">(.*)<!-- end: div green_corner_main -->"
+	umweltKalenderBaseUrl     = "https://www.umweltkalender-berlin.de"
+	umweltKalenderListUrl     = umweltKalenderBaseUrl + "/angebote/filter?ps=1"
+	umweltKalenderListRequest = `{"arten":["MIMA"],"ort":[],"zielgr":[],"sehb":[],"roll":[],"zeitraum":"zz","plain":"","um_km":"","um_plz":"","ab_tag":"","ab_monat":"","ab_jahr":""}`
 )
 
 var (
 	ANMELDUNG_ERFORDERLICH = []byte("ANMELDUNG ERFORDERLICH!")
 
-	uk_list       *regexp.Regexp = regexp.MustCompile(UK_LIST_REGEX)
-	tag_title     *regexp.Regexp = regexp.MustCompile(TAG_TITLE_REGEX)
 	tag_h1        *regexp.Regexp = regexp.MustCompile(TAG_H1_REGEX)
-	tag_h2        *regexp.Regexp = regexp.MustCompile(TAG_H2_REGEX)
-	tag_p_clean   *regexp.Regexp = regexp.MustCompile(TAG_P_CLEAN_REGEX)
-	date_from_to  *regexp.Regexp = regexp.MustCompile(DATE_FROM_TO_REGEX)
-	date_from     *regexp.Regexp = regexp.MustCompile(DATE_FROM_REGEX)
 	postcode_city *regexp.Regexp = regexp.MustCompile(POSTCODE_CITY_REGEX)
 	postcode      *regexp.Regexp = regexp.MustCompile(POSTCODE_REGEX)
-	uk_div_main   *regexp.Regexp = regexp.MustCompile(UK_DIV_MAIN_REGEX)
-	uk_targets    *regexp.Regexp = regexp.MustCompile(UK_TARGETS_REGEX)
-	uk_locations  *regexp.Regexp = regexp.MustCompile(UK_LOCATION_REGEX)
-	zero_time     time.Time      = time.Date(0, time.Month(1), 0, 0, 0, 0, 0, time.Local)
+
+	umweltKalenderDetailsLink      = regexp.MustCompile(`(?ms)grid-item teaser.*?href="([^\"]+)`)
+	umweltKalenderIdAndDateFromUrl = regexp.MustCompile(`/(\d+)\?dat=(\d{4})-(\d{2})-(\d{2})`)
+	umweltKalenderStartAndEnd      = regexp.MustCompile(`(?ms)date_detail.*?</div>(\d{2}):(\d{2}) - (\d{2}):(\d{2})`)
+	umweltKalenderDescription      = regexp.MustCompile(`(?ms)<div class="read-more-content">\s+(.*)</div>\s+<div class="accordeon_hl read-more-trigger">MEHR ANZEIGEN`)
+	umweltKalenderDescription2     = regexp.MustCompile(`(?ms)<hr class="js-hide-termine" />\s+(.*)\s+<hr />`)
+	umweltKalenderLocation         = regexp.MustCompile(`(?ms)<strong>Treffpunkt:</strong><br>\s+<div>([^<]+)</div>`)
+	umweltKalenderTargets          = regexp.MustCompile(`(?ms)<strong>Für:</strong><br>\s+<div>([^<]+)</div>`)
+	umweltKalenderLinks            = regexp.MustCompile(`<a href="(/angebote/details/\d+?dat=\d{4}-\d{2}-\d{2})"`)
 
 	importedTags       = []string{"div", "span", "hr", "p", "br", "b", "i", "strong", "em", "ol", "ul", "li", "table", "tbody", "tr", "td"}
 	importedAttributes = []string{"title"}
@@ -72,21 +65,6 @@ func NewScrapersService(hour int, email *EmailAccount, events *EventService, org
 func (service *ScrapersService) Start() {
 
 	service.start(service.Run)
-}
-
-func (service *ScrapersService) getWebPage(url string) ([]byte, error) {
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error getting url: %s", url)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error reading body of url: %s", url)
-	}
-
-	return body, nil
 }
 
 func (service *ScrapersService) saveScraped(event *Event) error {
@@ -115,166 +93,289 @@ func (service *ScrapersService) saveScraped(event *Event) error {
 	return nil
 }
 
-func (service *ScrapersService) makeDateTime(day, month, year, hour, minute string) (time.Time, error) {
+func (service *ScrapersService) loadUmweltKalenderListPage() ([]byte, error) {
 
-	iDay, err := strconv.Atoi(day)
+	request := url.Values{"filterJson": {umweltKalenderListRequest}}
+
+	response, err := http.PostForm(umweltKalenderListUrl, request)
 	if err != nil {
-		return zero_time, err
+		return nil, errors.Wrap(err, "failed to load Umweltkalender list page")
+	}
+	defer response.Body.Close()
+
+	page, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "error reading Umweltkalender list page")
 	}
 
-	iMonth, err := strconv.Atoi(month)
-	if err != nil {
-		return zero_time, err
-	}
+	return page, nil
 
-	iYear, err := strconv.Atoi(year)
-	if err != nil {
-		return zero_time, err
-	}
-
-	iHour, err := strconv.Atoi(hour)
-	if err != nil {
-		return zero_time, err
-	}
-
-	iMinute, err := strconv.Atoi(minute)
-	if err != nil {
-		return zero_time, err
-	}
-
-	return time.Date(iYear, time.Month(iMonth), iDay, iHour, iMinute, 0, 0, time.Local), nil
 }
 
-func (service *ScrapersService) scrapeUmweltKalenderEvent(id string) (*Event, error) {
+func (service *ScrapersService) getIdAndDateFromUmweltKalendarDetailsLink(path string) (bool, string, time.Time) {
 
-	var event Event
-	event.Source = UK_SOURCE
-	event.SourceId = id
-	event.Web = UK_DETAILS_URL + id
-
-	page, err := service.getWebPage(event.Web)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error scraping Umweltkalender page: %s", id)
+	match := umweltKalenderIdAndDateFromUrl.FindStringSubmatch(path)
+	if match == nil {
+		return false, "", time.Time{}
 	}
 
-	title := tag_title.FindSubmatch(page)
-	if title == nil {
-		return nil, errors.New("could not find title at Umweltkalender #" + id)
+	id := string(match[1])
+	year, _ := strconv.ParseUint(string(match[2]), 10, 32)
+	month, _ := strconv.ParseUint(string(match[3]), 10, 32)
+	day, _ := strconv.ParseUint(string(match[4]), 10, 32)
+	date := time.Date(int(year), time.Month(month), int(day), 0, 0, 0, 0, time.Local)
+
+	return true, id, date
+}
+
+func (service *ScrapersService) getStartAndEndFromUmweltKalenderPage(page []byte) (bool, time.Duration, time.Duration) {
+
+	match := umweltKalenderStartAndEnd.FindSubmatch(page)
+	if match == nil {
+		return false, 0, 0
 	}
 
-	var date [][]byte
-	if date_from_to.Match(title[1]) {
-		date = date_from_to.FindSubmatch(title[1])
-	} else if date_from.Match(title[1]) {
-		date = date_from.FindSubmatch(title[1])
-	} else {
-		return nil, errors.New("could not find date at Umweltkalender #" + id)
-	}
+	startHour, _ := strconv.ParseUint(string(match[1]), 10, 32)
+	startMinute, _ := strconv.ParseUint(string(match[2]), 10, 32)
+	start := time.Duration(startHour)*time.Hour + time.Duration(startMinute)*time.Minute
 
-	event.Start, err = service.makeDateTime(string(date[1]), string(date[2]), "20"+string(date[3]), string(date[4]), string(date[5]))
-	if err != nil {
-		return nil, errors.Wrapf(err, "error parsing start date at Umweltkalender page: %s", id)
-	}
+	endHour, _ := strconv.ParseUint(string(match[3]), 10, 32)
+	endMinute, _ := strconv.ParseUint(string(match[4]), 10, 32)
+	end := time.Duration(endHour)*time.Hour + time.Duration(endMinute)*time.Minute
 
-	if len(date) > 6 {
-		event.End, err = service.makeDateTime(string(date[1]), string(date[2]), "20"+string(date[3]), string(date[6]), string(date[7]))
-		if err != nil {
-			return nil, errors.Wrapf(err, "error parsing end date at Umweltkalender page: %s", id)
-		}
-	}
+	return true, start, end
+}
+
+func (service *ScrapersService) getTitleAndDescriptionFromUmweltKalenderPage(page []byte) (string, string, error) {
 
 	h1 := tag_h1.FindSubmatch(page)
-	if title == nil {
-		return nil, errors.New("could not find h1 at Umweltkalender #" + id)
+	if h1 == nil {
+		return "", "", errors.New("could not find title of Umweltkalender event")
 	}
-	event.Title = html.UnescapeString(string(h1[1]))
+	title := html.UnescapeString(string(h1[1]))
 
-	main := uk_div_main.FindSubmatch(page)
-	if main == nil {
-		return nil, errors.New("could not find main div at Umweltkalender #" + id)
-	}
-	paras := tag_p_clean.FindAll(main[1], -1)
-	for i := range paras {
-		event.Descr += string(paras[i])
+	description := umweltKalenderDescription.FindSubmatch(page)
+	if description == nil {
+		return "", "", errors.New("could not find description of Umweltkalender event")
 	}
 
-	event.Descr, err = sanitize.HTMLAllowing(event.Descr, importedTags, importedAttributes)
+	descrHTML, err := sanitize.HTMLAllowing(string(description[1]), importedTags, importedAttributes)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error sanitizing HTML of Umweltkalende page: %s", id)
+		return "", "", err
 	}
-	event.Descr = strings.Replace(event.Descr, "»»»", "", -1)
-	event.Descr += "<p class=\"small\">Text von der Veranstaltungswebseite übernommen</p>"
 
-	location := uk_locations.FindSubmatch(page)
-	if location == nil {
-		return nil, errors.New("could not find location at Umweltkalender #" + id)
+	description2 := umweltKalenderDescription2.FindSubmatch(page)
+	if description2 != nil {
+		descrHTML2, err := sanitize.HTMLAllowing(string(description2[1]), importedTags, importedAttributes)
+		if err != nil {
+			return "", "", err
+		}
+		descrHTML += "<p>" + descrHTML2 + "</p>"
 	}
+	descrHTML += "<p class=\"small\">Text von der Veranstaltungswebseite übernommen</p>"
+
+	return title, descrHTML, nil
+}
+
+func (service *ScrapersService) getAddressFromUmweltKalenderPage(page []byte) (Address, error) {
+
+	var address Address
+
+	location := umweltKalenderLocation.FindSubmatch(page)
+	if location == nil {
+		return address, errors.New("could not find address of Umweltkalender event")
+	}
+	line := html.UnescapeString(string(location[1]))
 
 	postcode_part := -1
-	address := bytes.Split(location[1], []byte(", "))
-	for i := range address {
-		if postcode.Match(address[i]) {
+	parts := strings.Split(line, ", ")
+	for i := range parts {
+		if postcode.MatchString(parts[i]) {
 			postcode_part = i
 			break
 		}
 	}
 	if postcode_part > 0 {
-		event.Addr.Street = strings.Trim(string(address[postcode_part-1]), " ")
+		address.Street = strings.TrimSpace(parts[postcode_part-1])
 	}
 	if postcode_part > -1 {
-		district := postcode_city.FindSubmatch(address[postcode_part])
+		district := postcode_city.FindStringSubmatch(parts[postcode_part])
 		if district != nil {
-			event.Addr.Pcode = string(district[1])
-			event.Addr.City = strings.Trim(string(district[2]), " ")
+			address.Pcode = district[1]
+			address.City = strings.TrimSpace(district[2])
 		} else {
-			pcode := postcode.FindSubmatch(address[postcode_part])
+			pcode := postcode.FindStringSubmatch(parts[postcode_part])
 			if pcode == nil {
-				return nil, errors.New("could not find postcode or city at Umweltkalender #" + id)
+				return address, errors.New("could not find postcode or city")
 			}
-			event.Addr.Pcode = string(pcode[1])
-			event.Addr.City = "Berlin"
+			address.Pcode = pcode[1]
+			address.City = "Berlin"
 		}
 	}
 
-	targets := uk_targets.FindSubmatch(page)
-	if main == nil {
-		return nil, errors.New("could not find targets at Umweltkalender #" + id)
-	}
-
-	event.Targets = make([]int, 0)
-	for _, target := range bytes.Split(targets[1], []byte(", ")) {
-		targetId, exists := TargetMap[strings.Trim(string(target), " ")]
-		if exists {
-			event.Targets = append(event.Targets, targetId)
-		}
-	}
-
-	event.Categories = []int{CategoryMap["Leute treffen"], CategoryMap["Umweltschutz"]}
-	event.Rsvp = bytes.Contains(page, ANMELDUNG_ERFORDERLICH)
-	return &event, nil
+	return address, nil
 }
 
-func (service *ScrapersService) scrapeUmweltKalender() []error {
+func (service *ScrapersService) getTargetsFromUmweltKalenderPage(page []byte) ([]int, error) {
 
-	page, err := service.getWebPage(UK_LIST_URL)
-	if err != nil {
-		return []error{errors.Wrapf(err, "error loading Umweltkalender event list at %s", UK_LIST_URL)}
+	var targetIds []int
+
+	targets := umweltKalenderTargets.FindSubmatch(page)
+	if targets == nil {
+		return nil, errors.New("could not find targets of Umweltkalender event")
+	}
+	line := html.UnescapeString(string(targets[1]))
+
+	for _, target := range strings.Split(line, ", ") {
+		if targetId, exists := TargetMap[strings.TrimSpace(target)]; exists {
+			targetIds = append(targetIds, targetId)
+		}
 	}
 
-	ids := uk_list.FindAllSubmatch(page, -1)
-	if ids == nil {
+	return targetIds, nil
+}
+
+func (service *ScrapersService) findRelatedUmweltKalenderEvents(page []byte) ([]string, error) {
+
+	var related []string
+
+	links := umweltKalenderLinks.FindAllSubmatch(page, -1)
+	if links == nil {
+		return nil, errors.New("could not find links of Umweltkalender event")
+	}
+
+	for _, link := range links {
+		related = append(related, string(link[1]))
+	}
+
+	return related, nil
+}
+
+func (service *ScrapersService) loadUmweltKalenderDetailsPage(path string) ([]byte, error) {
+
+	url := umweltKalenderBaseUrl + path
+
+	response, err := http.Get(url)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error loading url: %s", url)
+	}
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error reading body of url: %s", url)
+	}
+
+	return body, nil
+}
+
+func (service *ScrapersService) importUmweltKalenderEvent(id string, date time.Time, link string) ([]string, error) {
+
+	page, err := service.loadUmweltKalenderDetailsPage(link)
+	if err != nil {
+		return nil, err
+	}
+
+	hasTime, start, end := service.getStartAndEndFromUmweltKalenderPage(page)
+	if !hasTime {
+		return nil, nil
+	}
+	startDate := date.Add(start)
+	endDate := date.Add(end)
+
+	title, description, err := service.getTitleAndDescriptionFromUmweltKalenderPage(page)
+	if err != nil {
+		return nil, err
+	}
+
+	address, err := service.getAddressFromUmweltKalenderPage(page)
+	if err != nil {
+		return nil, err
+	}
+
+	targets, err := service.getTargetsFromUmweltKalenderPage(page)
+	if err != nil {
+		return nil, err
+	}
+
+	categories := []int{CategoryMap["Leute treffen"], CategoryMap["Umweltschutz"]}
+	rsvp := bytes.Contains(page, ANMELDUNG_ERFORDERLICH)
+
+	event := &Event{
+		Source:     UK_SOURCE,
+		SourceId:   fmt.Sprintf("%s#%d-%d-%d", id, date.Year(), date.Month(), date.Day()),
+		Start:      startDate,
+		End:        endDate,
+		Title:      title,
+		Descr:      description,
+		Addr:       address,
+		Web:        umweltKalenderBaseUrl + link,
+		Targets:    targets,
+		Categories: categories,
+		Rsvp:       rsvp,
+	}
+
+	err = service.saveScraped(event)
+	if err != nil {
+		return nil, err
+	}
+
+	related, err := service.findRelatedUmweltKalenderEvents(page)
+	if err != nil {
+		return nil, err
+	}
+
+	return related, nil
+}
+
+func (service *ScrapersService) scrapeUmweltKalender2() []error {
+
+	page, err := service.loadUmweltKalenderListPage()
+	if err != nil {
+		return []error{err}
+	}
+
+	detailsLinks := umweltKalenderDetailsLink.FindAllSubmatch(page, -1)
+	if detailsLinks == nil {
 		return []error{errors.New("no events found at Umweltkalender")}
 	}
 
-	errs := []error{}
-	for i := range ids {
-		event, err := service.scrapeUmweltKalenderEvent(string(ids[i][1]))
+	var errs []error
+	handled := map[string]bool{}
+
+	for i := range detailsLinks {
+
+		link := string(detailsLinks[i][1])
+		if handled[link] {
+			continue
+		}
+		handled[link] = true
+
+		hasDate, id, date := service.getIdAndDateFromUmweltKalendarDetailsLink(link)
+		if !hasDate {
+			continue
+		}
+
+		moreLinks, err := service.importUmweltKalenderEvent(id, date, link)
 		if err != nil {
-			errs = append(errs, errors.Wrapf(err, "error reading Umweltkalender event: %s", ids[i][1]))
-		} else {
-			err = service.saveScraped(event)
+			errs = append(errs, errors.Wrapf(err, "error importing %s", link))
+		}
+
+		for _, link := range moreLinks {
+
+			if handled[link] {
+				continue
+			}
+			handled[link] = true
+
+			hasDate, id, date := service.getIdAndDateFromUmweltKalendarDetailsLink(link)
+			if !hasDate {
+				continue
+			}
+
+			_, err = service.importUmweltKalenderEvent(id, date, link)
 			if err != nil {
-				errs = append(errs, errors.Wrapf(err, "error importing Umweltkalender event: %s %s", event.Source, event.SourceId))
+				errs = append(errs, errors.Wrapf(err, "error importing %s", link))
 			}
 		}
 	}
@@ -288,7 +389,7 @@ func (service *ScrapersService) Run() error {
 		return errors.New("no valid organizerId set, exiting")
 	}
 
-	errs := service.scrapeUmweltKalender()
+	errs := service.scrapeUmweltKalender2()
 	if len(errs) > 0 {
 		msg := ""
 		for _, err := range errs {
