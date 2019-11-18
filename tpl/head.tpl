@@ -25,7 +25,6 @@
 	{{end}}
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,700,600" rel="stylesheet" type="text/css">
 	<link href="/css/styles-19.css" rel="stylesheet">
-	<script data-ad-client="ca-pub-1722766931862733" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 </head>
 <body>
 	<div class="modal fade" id="login" tabindex="-2" role="dialog" aria-labelledby="login-dialog" aria-hidden="true">

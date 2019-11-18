@@ -240,10 +240,6 @@ func (service *ScrapersService) findRelatedUmweltKalenderEvents(page []byte) ([]
 	var related []string
 
 	links := umweltKalenderLinks.FindAllSubmatch(page, -1)
-	if links == nil {
-		return nil, errors.New("could not find links of Umweltkalender event")
-	}
-
 	for _, link := range links {
 		related = append(related, string(link[1]))
 	}
