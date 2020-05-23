@@ -111,8 +111,9 @@ func (events *EventService) Locations() ([]string, error) {
 }
 
 type SearchHit struct {
-	Name string `json:"name"`
-	Url  string `json:"url,omitempty"`
+	Name string    `json:"name"`
+	Url  string    `json:"url,omitempty"`
+	Date time.Time `json:"-"`
 }
 
 func (events *EventService) SearchText(organizerId bson.ObjectId, query string) ([]SearchHit, error) {
@@ -127,6 +128,7 @@ func (events *EventService) SearchText(organizerId bson.ObjectId, query string) 
 		return nil, errors.Wrapf(err, "error tokenizing full text query: %s", query)
 	}
 
+	now := time.Now()
 	for _, token := range tokenStream {
 		fullTextSearch := bleve.NewSearchRequestOptions(bleve.NewPrefixQuery(string(token.Term)), 1000, 0, false)
 		fullTextSearch.IncludeLocations = true
@@ -142,11 +144,15 @@ func (events *EventService) SearchText(organizerId bson.ObjectId, query string) 
 				if organizerId.Valid() && event.OrganizerId != organizerId {
 					continue
 				}
+				nextDate := event.NextDate(now)
+				if !organizerId.Valid() && nextDate.Before(now) {
+					continue
+				}
 				for field := range hit.Locations {
 					if field == "title" {
-						resultMap[event.Title] = SearchHit{Name: event.Title, Url: event.Url()}
+						resultMap[event.Title] = SearchHit{Name: event.Title, Date: nextDate, Url: event.Url()}
 					} else if field == "location" {
-						resultMap[event.Addr.Name] = SearchHit{Name: event.Addr.Name}
+						resultMap[event.Addr.Name] = SearchHit{Name: event.Addr.Name, Date: nextDate}
 					}
 				}
 			}
@@ -159,6 +165,10 @@ func (events *EventService) SearchText(organizerId bson.ObjectId, query string) 
 		result[i] = hit
 		i++
 	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Date.Before(result[j].Date)
+	})
 
 	return result, nil
 }
